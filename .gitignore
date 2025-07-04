@@ -1,0 +1,45 @@
+# Windows system junk
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Backup & temp
+*.bak
+*.tmp
+*.old
+*.log
+*.swp
+*.~*
+
+# Editor/project folders
+.vscode/
+.idea/
+*.suo
+*.user
+*.sln.docstates
+
+# Mac metadata (in case you ever sync cross-platform)
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Shell or PowerShell junk (if testing cross-scripting)
+*.ps1
+*.sh
+*.py
+*.exe
+
+# Git control files
+.gitattributes
+.gitignore
+
+# Optional - block script output dumps
+*.txt
+*.out
+*.dump
+
+# Optional - prevent personal readme notes
+README_LOCAL.md
+notes.md
+todo.txt
