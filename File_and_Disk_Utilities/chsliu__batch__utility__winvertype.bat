@@ -1,0 +1,4 @@
+slmgr -dli
+
+slmgr -xpr
+

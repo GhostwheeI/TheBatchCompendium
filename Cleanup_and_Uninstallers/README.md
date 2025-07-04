@@ -1,0 +1,160 @@
+# Cleanup and Uninstallers
+
+**Batch files for cleaning junk, uninstalling software, or removing traces.**
+
+- `Archive-projects__Batch-File-examples__files__Remove_Cbs_Logs.bat`
+- `Chainski__WindowsCleanerUtility__WindowsCleanerUtility.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__deletefile.bat`
+- `JaredCabot__OneDrive-Uninstaller__OneDrive Uninstaller v1.1.bat`
+- `JaredCabot__OneDrive-Uninstaller__OneDrive Uninstaller v1.2.bat`
+- `JaredCabot__OneDrive-Uninstaller__OneDrive Uninstaller v1.3.bat`
+- `JaredCabot__OneDrive-Uninstaller__OneDrive Uninstaller v1.4.bat`
+- `Laf111__CEMU-Batch-Framework__tools__compressAndUninstall.bat`
+- `Laf111__CEMU-Batch-Framework__tools__deleteAllInGameSavesBackup.bat`
+- `Laf111__CEMU-Batch-Framework__tools__deleteAllMySettings.bat`
+- `Laf111__CEMU-Batch-Framework__tools__deleteBatchFwGraphicPacks.bat`
+- `Laf111__CEMU-Batch-Framework__tools__deleteMyGpuCache.bat`
+- `Laf111__CEMU-Batch-Framework__tools__uninstall.bat`
+- `Laf111__CEMU-Batch-Framework__tools__wipeTracesOnHost.bat`
+- `Laf111__CEMU-Batch-Framework__uninstall.bat`
+- `Nickfost__Batch__Clean free space.bat`
+- `PX4__PX4-windows-toolchain__toolchain__scripts__symlinks-remove-backup.bat`
+- `TarikSeyceri__Windows-Cleaner.bat__Windows Cleaner.bat`
+- `andry81__contools__scripts__tools__ToolAdaptors__app__emule__delete_corrupted_pending_files_from_log.bat`
+- `andry81__contools__scripts__tools__cleanup__cleanup_file.bat`
+- `andry81__contools__scripts__tools__cleanup__cleanup_init_vars.bat`
+- `andry81__contools__scripts__tools__cleanup__cleanup_log.bat`
+- `andry81__contools__scripts__tools__exec__exec_terminal_cleanup.bat`
+- `andry81__contools__scripts__tools__std__xremove_file.bat`
+- `chsliu__batch__batch__rm__!n2cleanup.bat`
+- `chsliu__batch__batch__rm__!nascleanup.bat`
+- `chsliu__batch__batch__rm__!nascleanup2.bat`
+- `chsliu__batch__batch__rm__!pccleanup.bat`
+- `chsliu__batch__batch__rm__.delete.bat`
+- `chsliu__batch__batch__rm__.move2delete.bat`
+- `chsliu__batch__batch__rm__clean.bat`
+- `chsliu__batch__batch__utilityserver__removeservice.bat`
+- `chsliu__batch__cmder__vendor__conemu-maximus5__ConEmu__Addons__FarHereUninstall.cmd`
+- `chsliu__batch__taskschd__cleanup-HV2.bat`
+- `chsliu__batch__taskschd__cleanup-HV3.bat`
+- `chsliu__batch__taskschd__cleanup-HV4.bat`
+- `chsliu__batch__taskschd__cleanup-VMW7.bat`
+- `chsliu__batch__taskschd__cleanup-WS.bat`
+- `chsliu__batch__taskschd__sendemail.cleanup.bat`
+- `chsliu__batch__utility__clean.bat`
+- `chsliu__batch__utility__gwx.remove.bat`
+- `chsliu__batch__utility__rsync.removeservice.bat`
+- `daboynb__windows_scripts__adb_fastboot_drivers__adb_fastboot.bat`
+- `daboynb__windows_scripts__add_store_windows__add_store_windows_10_11.bat`
+- `daboynb__windows_scripts__add_user__add_user.bat`
+- `daboynb__windows_scripts__aio_debloater__debloater.bat`
+- `daboynb__windows_scripts__aio_toggler__aio.bat`
+- `daboynb__windows_scripts__clean_windows_update_files__clean_win_update.bat`
+- `daboynb__windows_scripts__delete_windows_defender_history__delete_defender_history.bat`
+- `daboynb__windows_scripts__download_iso__download_iso.bat`
+- `daboynb__windows_scripts__hyper-V_enable__hyper-V_enable.bat`
+- `daboynb__windows_scripts__kaspersky__kaspersky_trial_reset.bat`
+- `daboynb__windows_scripts__kaspersky__kaspersky_trial_reset_32_bit.bat`
+- `daboynb__windows_scripts__remove_edge_current__reinstall_edge.bat`
+- `daboynb__windows_scripts__remove_edge_current__remove_edge.bat`
+- `daboynb__windows_scripts__remove_onedrive__remove_onedrive.bat`
+- `daboynb__windows_scripts__remove_store_windows__remove_store_windows_10_11.bat`
+- `daboynb__windows_scripts__remove_windows_apps__remove_windows_apps_10.bat`
+- `daboynb__windows_scripts__remove_windows_apps__remove_windows_apps_11.bat`
+- `daboynb__windows_scripts__repo_downloader.bat`
+- `daboynb__windows_scripts__sfc_dism__sfc_dism.bat`
+- `daboynb__windows_scripts__win11_patcher__win11_custom_iso__create.bat`
+- `daboynb__windows_scripts__windows_11_section_manager__section_manager.bat`
+- `daboynb__windows_scripts__windows_custom_iso_maker__win10_custom_iso__create.bat`
+- `daboynb__windows_scripts__windows_custom_iso_maker__win11_custom_iso__create.bat`
+- `daboynb__windows_scripts__windows_defender_manager__defender.bat`
+- `daboynb__windows_scripts__windows_defender_manager__disable_defender.bat`
+- `daboynb__windows_scripts__windows_defender_manager__enable_defender.bat`
+- `daboynb__windows_scripts__winpe__hack.bat`
+- `daboynb__windows_scripts__winpe__sticky.bat`
+- `daboynb__windows_scripts__winpe__sticky_run.bat`
+- `daboynb__windows_scripts__winpe__winpe.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__folder_delete.bat`
+- `kodybrown__dos__Cleanup-Setup.bat`
+- `kodybrown__dos__Cleanup.bat`
+- `kodybrown__dos__cleanfree.bat`
+- `kodybrown__dos__cleantemp.bat`
+- `kodybrown__dos__sdelete_prep.bat`
+- `kodybrown__dos__sdelete_repeater.bat`
+- `leetfin__Windows10Tools__Scripts__3rd Party__Icon Cache Cleaner.bat`
+- `leetfin__Windows10Tools__Scripts__Uninstall OneDrive.bat`
+- `leetfin__Windows10Tools__adolfintel-Windows10-Privacy__Remove Cortana.bat`
+- `leetfin__Windows10Tools__adolfintel-Windows10-Privacy__Remove Edge.bat`
+- `leetfin__Windows10Tools__adolfintel-Windows10-Privacy__Remove Everything.bat`
+- `leetfin__Windows10Tools__adolfintel-Windows10-Privacy__Remove Music and TV.bat`
+- `leetfin__Windows10Tools__adolfintel-Windows10-Privacy__Remove Scheduled Tasks.bat`
+- `leetfin__Windows10Tools__adolfintel-Windows10-Privacy__Remove Sticky Notes.bat`
+- `leetfin__Windows10Tools__adolfintel-Windows10-Privacy__Remove Telemetry Etc.bat`
+- `leetfin__Windows10Tools__adolfintel-Windows10-Privacy__Remove XBox and GameDVR.bat`
+- `logicopslab__BatchScripting__003. Strings__07_Remove.bat`
+- `logicopslab__BatchScripting__003. Strings__08_RemoveAndReplace.bat`
+- `logicopslab__BatchScripting__003. Strings__09_RemoveAllSpaces.bat`
+- `logicopslab__BatchScripting__003. Strings__10_RemoveBothEnds.bat`
+- `logicopslab__BatchScripting__009. IO_FileOperations__03_DeleteFile.bat`
+- `logicopslab__BatchScripting__010. IO_FolderOperations__02_Deletion.bat`
+- `logicopslab__BatchScripting__011. Registry__03_Remove.bat`
+- `mitchv2020__QuestToolbox__QuestToolbox.bat`
+- `mitchv2020__QuestToolbox__Requirements__checkforupdates.bat`
+- `mitchv2020__QuestToolbox__Requirements__keepalive.bat`
+- `mitchv2020__QuestToolbox__Requirements__keepaliveReplay.bat`
+- `mitchv2020__QuestToolbox__Requirements__packages.bat`
+- `mitchv2020__QuestToolbox__Requirements__wiredalvr.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__deleteJS.bat`
+- `npocmaka__batch.scripts__math__removeLeadingZeroes.bat`
+- `rossy__mpv-install__mpv-uninstall.bat`
+- `shoober420__windows11-scripts__DeleteCache+Logs.bat`
+- `shoober420__windows11-scripts__DeleteFonts.bat`
+- `shoober420__windows11-scripts__DeleteWindowsAppDir.bat`
+- `shoober420__windows11-scripts__DeleteWindowsBackups.bat`
+- `shoober420__windows11-scripts__DeleteWindowsOLD.bat`
+- `shoober420__windows11-scripts__LaunchAddRemovePrograms.bat`
+- `shoober420__windows11-scripts__LaunchDiskCleanup.bat`
+- `shoober420__windows11-scripts__RemoveAADBrokerPlugin.bat`
+- `shoober420__windows11-scripts__RemoveActivateWindowsWatermark.bat`
+- `shoober420__windows11-scripts__RemoveAllWindowsApps.bat`
+- `shoober420__windows11-scripts__RemoveCapturePicker.bat`
+- `shoober420__windows11-scripts__RemoveCloudExperienceHost.bat`
+- `shoober420__windows11-scripts__RemoveContentDeliveryManager.bat`
+- `shoober420__windows11-scripts__RemoveCredDialogHost.bat`
+- `shoober420__windows11-scripts__RemoveFirewallRules.bat`
+- `shoober420__windows11-scripts__RemoveMicrosoftEdge.bat`
+- `shoober420__windows11-scripts__RemoveMicrosoftUIXamlCBS.bat`
+- `shoober420__windows11-scripts__RemoveNarratorQuickStart.bat`
+- `shoober420__windows11-scripts__RemoveNotepad.bat`
+- `shoober420__windows11-scripts__RemoveParentalControls.bat`
+- `shoober420__windows11-scripts__RemovePeopleExperienceHost.bat`
+- `shoober420__windows11-scripts__RemovePhoton.bat`
+- `shoober420__windows11-scripts__RemovePrintDialog.bat`
+- `shoober420__windows11-scripts__RemovePrintQueueActionCenter.bat`
+- `shoober420__windows11-scripts__RemoveRemoteDesktopConnection.bat`
+- `shoober420__windows11-scripts__RemoveSecurityHealthUI.bat`
+- `shoober420__windows11-scripts__RemoveShellExperienceHost.bat`
+- `shoober420__windows11-scripts__RemoveStartMenuExperienceHost.bat`
+- `shoober420__windows11-scripts__RemoveStore.bat`
+- `shoober420__windows11-scripts__RemoveWebView2.bat`
+- `shoober420__windows11-scripts__RemoveWebViewHost.bat`
+- `shoober420__windows11-scripts__RemoveWindowsAppRuntime.bat`
+- `shoober420__windows11-scripts__RemoveWindowsApps.bat`
+- `shoober420__windows11-scripts__RemoveWindowsApps2.bat`
+- `shoober420__windows11-scripts__RemoveWindowsClientCBS.bat`
+- `shoober420__windows11-scripts__RemoveWindowsFeatures.bat`
+- `shoober420__windows11-scripts__RemoveWindowsTerminal.bat`
+- `shoober420__windows11-scripts__RemoveXGpuEjectDialog.bat`
+- `shoober420__windows11-scripts__RemoveXboxGameCallableUI.bat`
+- `warengonzaga__wrn-cleaner__dist__wrn-cleaner-4.5.0.bat`
+- `warengonzaga__wrn-cleaner__src__core.bat`
+- `warengonzaga__wrn-cleaner__src__original.bat`
+- `warengonzaga__wrn-cleaner__wrn-cleaner-4.5.0.bat`
+- `wizz13150__PDQ_Repo__Scripts__OpenCMDHere__Remove_CMDAsAdmin.cmd`
+- `wizz13150__PDQ_Repo__Scripts__OpenCMDHere__Remove_CMDLocal.cmd`
+- `wizz13150__PDQ_Repo__Scripts__cleanup_orphaned_printers__Cleanup_Orphaned_Printers_execute.bat`
+- `wizz13150__PDQ_Repo__Scripts__tempfilecleanup__TempFileCleanup.bat`
+- `wizz13150__PDQ_Repo__Scripts__usb_device_cleanup__USBDriveCleanup.bat`
+- `wizz13150__PDQ_Repo__Uninstalls__remove_adobe_flash_player__adobe_flash_player_nuker.bat`
+- `wizz13150__PDQ_Repo__Uninstalls__remove_java_runtime__java_runtime_nuker.bat`
+- `wizz13150__PDQ_Repo__Uninstalls__remove_vnc_servers__remove_all_vnc_servers.bat`

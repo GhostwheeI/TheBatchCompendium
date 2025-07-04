@@ -1,0 +1,198 @@
+# All-in-One Suites
+
+**Batch suites that provide multiple maintenance or utility functions for Windows.**
+
+- `KnightDanila__BAT_FFMPEG__!DragAndDropTest.bat`
+- `KnightDanila__BAT_FFMPEG__!DragAndDropTestMulti.bat`
+- `KnightDanila__BAT_FFMPEG__!MP4-ToMKV-firstVersion.bat`
+- `KnightDanila__BAT_FFMPEG__!Video-SubGetByNum_v0.1a.bat`
+- `KnightDanila__BAT_FFMPEG__1.bat`
+- `KnightDanila__BAT_FFMPEG__AVI-ToMKV.bat`
+- `KnightDanila__BAT_FFMPEG__Audio-AudioGain.bat`
+- `KnightDanila__BAT_FFMPEG__Audio-CutAccurateAndRecode.bat`
+- `KnightDanila__BAT_FFMPEG__Audio-GetInfo.bat`
+- `KnightDanila__BAT_FFMPEG__Audio-ToAC3_AAC.bat`
+- `KnightDanila__BAT_FFMPEG__Audio-ToMP3.bat`
+- `KnightDanila__BAT_FFMPEG__Audio-ToMP3_RemoveSideData.bat`
+- `KnightDanila__BAT_FFMPEG__Audio-ToOGG.bat`
+- `KnightDanila__BAT_FFMPEG__CMD_Starter.bat`
+- `KnightDanila__BAT_FFMPEG__DND_CropBottom.bat`
+- `KnightDanila__BAT_FFMPEG__DND_Rotate.bat`
+- `KnightDanila__BAT_FFMPEG__DND_Zoom.bat`
+- `KnightDanila__BAT_FFMPEG__GitUpdate.bat`
+- `KnightDanila__BAT_FFMPEG__Icon_iOS_Generator.bat`
+- `KnightDanila__BAT_FFMPEG__MKV-ToAC3.bat`
+- `KnightDanila__BAT_FFMPEG__MKV-ToMP4.bat`
+- `KnightDanila__BAT_FFMPEG__MP3-ToWav.bat`
+- `KnightDanila__BAT_FFMPEG__MP4-ToMKV.bat`
+- `KnightDanila__BAT_FFMPEG__MP4_AddAudioAc3.bat`
+- `KnightDanila__BAT_FFMPEG__SYS_MakeResultsDir.bat`
+- `KnightDanila__BAT_FFMPEG__TS-ToMKV.bat`
+- `KnightDanila__BAT_FFMPEG__Update.bat`
+- `KnightDanila__BAT_FFMPEG__Version-of-convert-by-ImageMagick.bat`
+- `KnightDanila__BAT_FFMPEG__Version-of-ffmpeg.bat`
+- `KnightDanila__BAT_FFMPEG__Version-of-youtube-dl.bat`
+- `KnightDanila__BAT_FFMPEG__Video-AudioRemove.bat`
+- `KnightDanila__BAT_FFMPEG__Video-CutAccurateAndRecode.bat`
+- `KnightDanila__BAT_FFMPEG__Video-CutAccurateBeta.bat`
+- `KnightDanila__BAT_FFMPEG__Video-CutFast.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ERRORS.bat`
+- `KnightDanila__BAT_FFMPEG__Video-FrameFix.bat`
+- `KnightDanila__BAT_FFMPEG__Video-GetCodecINFO.bat`
+- `KnightDanila__BAT_FFMPEG__Video-MetadataChange.bat`
+- `KnightDanila__BAT_FFMPEG__Video-Repair.bat`
+- `KnightDanila__BAT_FFMPEG__Video-SpeedUp_x2.bat`
+- `KnightDanila__BAT_FFMPEG__Video-SpeedUp_x4_Beta.bat`
+- `KnightDanila__BAT_FFMPEG__Video-SubAdd.bat`
+- `KnightDanila__BAT_FFMPEG__Video-SubGet.bat`
+- `KnightDanila__BAT_FFMPEG__Video-SubGetByNum.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToAVI_MP4_MKV_Container.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToBMP.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_16Bit-Style.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_16Bit-Style_144p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_16Bit-Style_240p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_16Bit-Style_480p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_16Bit-Style_720p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_32ColorsStyle.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_32ColorsStyle_240p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_64ColorsStyle.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_64ColorsStyle_240p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_64ColorsStyle_720p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_FX_Boomerang.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_Fast.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_Fast_240p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_Fast_360p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_Fast_480p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_Fast_720p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_HD.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_HD_12fps.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_HD_240p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_HD_480p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_HD_720p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToGIF_Optimal_480p.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToJPG.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToMKV.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToMKV_x265.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToMOV.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToMP4_FPS-24-25-30-60.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToMP4_x264.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToMP4_x264_AAC.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToMP4_x264_AC3_48KHz.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToMP4_x264_AudioRemove.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToVideoAAC.bat`
+- `KnightDanila__BAT_FFMPEG__Video-ToWebM.bat`
+- `KnightDanila__BAT_FFMPEG__Video-Volume.bat`
+- `KnightDanila__BAT_FFMPEG__Video_Upscale_QHD.bat`
+- `KnightDanila__BAT_FFMPEG__WebM-WebP-ToGIF.bat`
+- `KnightDanila__BAT_FFMPEG__WebM-WebP-ToJPG.bat`
+- `KnightDanila__BAT_FFMPEG__WebM-WebP-ToPNG.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-MP3-192Kbps.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-MP3-192Kbps_Thumbnail.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-MP3-192Kbps_split-by-chapters.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-OGG-192Kbps.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-Thumbnail.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-Video-1080p-FPS30.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-Video-1080pOrMaxSize.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-Video-480p-FPS30.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-Video-720p-FPS30.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-Video-720p.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-Video-AboutFormats.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-Video-MP4-MaxSize.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-Video-MaxSize.bat`
+- `KnightDanila__BAT_FFMPEG__youtube-dl-Video-Sub.bat`
+- `atlantsecurity__windows-hardening-scripts__Windows-10-Hardening-script.cmd`
+- `atlantsecurity__windows-hardening-scripts__aws-workspaces-windows-hardening.cmd`
+- `atlantsecurity__windows-hardening-scripts__windows-server-2019-hardening-script.cmd`
+- `corpnewt__Batch-Scripts__BattleScript 1.0__BattleScript.bat`
+- `corpnewt__Batch-Scripts__BattleScript 1.0__LineCount.bat`
+- `corpnewt__Batch-Scripts__Launch Old Games__#Win7Start#.bat`
+- `corpnewt__Batch-Scripts__Network Interfaces.bat`
+- `corpnewt__Batch-Scripts__Network Shares.bat`
+- `corpnewt__Batch-Scripts__Random Numbers (Animated).bat`
+- `corpnewt__Batch-Scripts__Startup__InvisibleHelper.bat`
+- `corpnewt__Batch-Scripts__Startup__Startup.bat`
+- `corpnewt__Batch-Scripts__SymLink Creator.bat`
+- `corpnewt__Batch-Scripts__Timeout User.bat`
+- `corpnewt__Batch-Scripts__Win10 Tool.bat`
+- `ermannog__BatchScripts__AcrobatReader2017Classic__SlipStream-AcrobatReader2017-1701130105.cmd`
+- `ermannog__BatchScripts__AcrobatReader2017Classic__SlipStream-AcrobatReader2017-1701130106.cmd`
+- `ermannog__BatchScripts__AcrobatReader2017Classic__SlipStream-AcrobatReader2017-1701130113.cmd`
+- `ermannog__BatchScripts__AcrobatReader2017Classic__SlipStream-AcrobatReader2017-1701130138.cmd`
+- `ermannog__BatchScripts__AcrobatReader2017Classic__SlipStream-AcrobatReader2017-1701130142.cmd`
+- `ermannog__BatchScripts__AcrobatReader2017Classic__SlipStream-AcrobatReader2017-1701130144.cmd`
+- `ermannog__BatchScripts__AcrobatReader2017Classic__SlipStream-AcrobatReader2017-1701130148.cmd`
+- `ermannog__BatchScripts__AcrobatReader2017Classic__SlipStream-AcrobatReader2017-1701130156.cmd`
+- `ermannog__BatchScripts__AcrobatReader2017Classic__SlipStream-AcrobatReader2017-1701130171.cmd`
+- `ermannog__BatchScripts__AcrobatReader2017Classic__SlipStream-AcrobatReader2017-1701130175.cmd`
+- `ermannog__BatchScripts__AcrobatReader2020Classic__SlipStream-AcrobatReader2020-2000130020.cmd`
+- `ermannog__BatchScripts__AcrobatReader2020Classic__SlipStream-AcrobatReader2020-2000530574.cmd`
+- `ermannog__BatchScripts__AcrobatReaderDC__SlipStream-AcrobatReaderDC-1900820071.cmd`
+- `ermannog__BatchScripts__AcrobatReaderDC__SlipStream-AcrobatReaderDC-1900820081.cmd`
+- `ermannog__BatchScripts__AcrobatReaderDC__SlipStream-AcrobatReaderDC-1901020069.cmd`
+- `ermannog__BatchScripts__AcrobatReaderDC__SlipStream-AcrobatReaderDC-1901020099.cmd`
+- `ermannog__BatchScripts__AcrobatReaderDC__SlipStream-AcrobatReaderDC1901220034.cmd`
+- `ermannog__BatchScripts__AcrobatReaderDC__SlipStream-AcrobatReaderDC1901220036.cmd`
+- `ermannog__BatchScripts__AcrobatReaderDC__SlipStream-AcrobatReaderDC1902120061.cmd`
+- `ermannog__BatchScripts__AcrobatReaderDC__SlipStream-AcrobatReaderDC2000920074.cmd`
+- `ermannog__BatchScripts__AcrobatReaderDC__SlipStream-AcrobatReaderDC2100120145.cmd`
+- `ermannog__BatchScripts__Java__ExtractMsi-jre-8u181-windows-x64.cmd`
+- `ermannog__BatchScripts__Java__ExtractMsi-jre-8u181-windows-x86.cmd`
+- `ermannog__BatchScripts__Java__ExtractMsi-jre-8u221-windows-x64.cmd`
+- `ermannog__BatchScripts__Java__ExtractMsi-jre-8u221-windows-x86.cmd`
+- `ermannog__BatchScripts__Java__ExtractMsi-jre-8u231-windows-x64.cmd`
+- `ermannog__BatchScripts__Java__ExtractMsi-jre-8u231-windows-x86.cmd`
+- `ermannog__BatchScripts__Java__ExtractMsi-jre-8u261-windows-x64.cmd`
+- `ermannog__BatchScripts__Java__ExtractMsi-jre-8u261-windows-x86.cmd`
+- `ermannog__BatchScripts__M3U__Create Playlists Sample.cmd`
+- `ermannog__BatchScripts__M3U__Create m3u from directory.cmd`
+- `ermannog__BatchScripts__Network__ResetNetworkAdapters.cmd`
+- `ermannog__BatchScripts__Network__ResetNetworkConnection.cmd`
+- `ermannog__BatchScripts__Network__SetIEProxy.cmd`
+- `ermannog__BatchScripts__Operating System__AddCUToW10InstallWim.cmd`
+- `ermannog__BatchScripts__Operating System__InjectionUpdateToW10InstallWim.cmd`
+- `ermannog__BatchScripts__Operating System__LogUserSession.cmd`
+- `ermannog__BatchScripts__Operating System__ResetSystem.cmd`
+- `ermannog__BatchScripts__Operating System__StartStopScreensaver.cmd`
+- `ermannog__BatchScripts__Operating System__UpgradeToWin10.cmd`
+- `ermannog__BatchScripts__Printing__ClearPrintQueue.cmd`
+- `ermannog__BatchScripts__Security__Check-AdminRights.cmd`
+- `ermannog__BatchScripts__SendToVirusTotal__SendToVirusTotal.cmd`
+- `ermannog__BatchScripts__Storage__CreateFileDummy.cmd`
+- `ermannog__BatchScripts__WSUS__RestartWSUS.cmd`
+- `ermannog__BatchScripts__WindowsSession__LockWorkstation.cmd`
+- `ermannog__BatchScripts__WindowsUpdate__WUForce.cmd`
+- `ermannog__BatchScripts__WindowsUpdate__WURebuild.cmd`
+- `ermannog__BatchScripts__WindowsUpdate__WUReset.cmd`
+- `happy05dz__Batch-Script-Collection__Batch & Delphi__Delphi project cleaner.bat`
+- `happy05dz__Batch-Script-Collection__Batch & Python__Run python script .bat`
+- `happy05dz__Batch-Script-Collection__Batch Art__Earth ASCII Animation.bat`
+- `happy05dz__Batch-Script-Collection__Batch Art__Light effect.bat`
+- `happy05dz__Batch-Script-Collection__Batch Art__Matrix 1.bat`
+- `happy05dz__Batch-Script-Collection__Batch Art__TV no signal color bars.bat`
+- `happy05dz__Batch-Script-Collection__Batch Art__happy05 1.bat`
+- `happy05dz__Batch-Script-Collection__Batch Colors__Color.bat`
+- `happy05dz__Batch-Script-Collection__Batch Colors__ansi escape colors.bat`
+- `happy05dz__Batch-Script-Collection__Close a program.bat`
+- `happy05dz__Batch-Script-Collection__Date & time.bat`
+- `happy05dz__Batch-Script-Collection__Hello World &Title.bat`
+- `happy05dz__Batch-Script-Collection__Hello World.bat`
+- `happy05dz__Batch-Script-Collection__Login 1.bat`
+- `happy05dz__Batch-Script-Collection__Mode cols & lines.bat`
+- `happy05dz__Batch-Script-Collection__Network__Check connection.bat`
+- `happy05dz__Batch-Script-Collection__Network__Check port.bat`
+- `happy05dz__Batch-Script-Collection__Network__FTP load.bat`
+- `happy05dz__Batch-Script-Collection__Network__IP config.bat`
+- `happy05dz__Batch-Script-Collection__Network__Netstat.bat`
+- `happy05dz__Batch-Script-Collection__Progress bar 1.bat`
+- `happy05dz__Batch-Script-Collection__Run a program.bat`
+- `happy05dz__Batch-Script-Collection__Shutdown cancle.bat`
+- `happy05dz__Batch-Script-Collection__Shutdown.bat`
+- `happy05dz__Batch-Script-Collection__System__Check disk.bat`
+- `happy05dz__Batch-Script-Collection__System__Gpresult.bat`
+- `happy05dz__Batch-Script-Collection__System__System info.bat`
+- `happy05dz__Batch-Script-Collection__System__Task list.bat`
+- `massgravel__Microsoft-Activation-Scripts__MAS__All-In-One-Version-KL__MAS_AIO.cmd`
+- `tinboye__Steam_workshop_scripts__download_arma3server.bat`
+- `tinboye__Steam_workshop_scripts__download_bulk_mods.bat`
+- `tinboye__Steam_workshop_scripts__download_singlemod.bat`
+- `virusfreak7__Windows11-activator-script-__Microsoft Activation Tool.cmd`

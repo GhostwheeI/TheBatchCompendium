@@ -1,0 +1,1061 @@
+# Network and Internet
+
+**Networking, Wi-Fi, DNS, ping, Internet tools.**
+
+- `AndrewHazelden__MultiMesh-Scripting__multiMeshScripting__convertMeshes.bat`
+- `AndrewHazelden__MultiMesh-Scripting__multiMeshScripting__runMLXScript.bat`
+- `Archive-projects__Batch-File-examples__files__PINGNAME.BAT`
+- `Archive-projects__Batch-File-examples__files__PINGNUM.BAT`
+- `AveYo__MediaCreationTool.bat__MediaCreationTool.bat`
+- `AveYo__MediaCreationTool.bat__bypass11__Quick_11_iso_esd_wim_TPM_toggle.bat`
+- `AveYo__MediaCreationTool.bat__bypass11__auto.cmd`
+- `AveYo__MediaCreationTool.bat__bypass11__windows_update_refresh.bat`
+- `C0nw0nk__qBittorrent__qbt.cmd`
+- `CoolDotty__NeverWake__NeverWake.bat`
+- `CoolDotty__NeverWake__Test.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__Worm.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__addfilesusers.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__autoexecute.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__changepassword.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__changetime.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__closeprograms.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__crazymouse.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__disableadmin.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__disablekeyboard.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__disabletaskmaneger.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__disablewin.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__disconnect.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__killcomputer.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__killprocess.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__message.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__messageloop.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__openprogramloop.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__openprogramsoftware.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__openwebsite.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__openwebsiteloop.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__rainbowmatrix.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__restart.bat`
+- `Da2dalus__FunBatchCode-MalicousAndNonMalicous__turnoff.bat`
+- `Deadshot0x7__Wifipassword__WifiPasswordFInder.bat`
+- `FoxP__PNG-to-ICO__png_to_ico.bat`
+- `HiiARA__SoPI__Software Post Install.cmd`
+- `K3V1991__ADBKit__Open CMD.bat`
+- `Laf111__CEMU-Batch-Framework__createExecutables.bat`
+- `Laf111__CEMU-Batch-Framework__createShortcuts.bat`
+- `Laf111__CEMU-Batch-Framework__setup.bat`
+- `Laf111__CEMU-Batch-Framework__tools__backupAllInGameSaves.bat`
+- `Laf111__CEMU-Batch-Framework__tools__backupInGameSaves.bat`
+- `Laf111__CEMU-Batch-Framework__tools__buildExtraGraphicPacks.bat`
+- `Laf111__CEMU-Batch-Framework__tools__completeLastGraphicPacks.bat`
+- `Laf111__CEMU-Batch-Framework__tools__completeV2GraphicPacks.bat`
+- `Laf111__CEMU-Batch-Framework__tools__completeV4GraphicPacks.bat`
+- `Laf111__CEMU-Batch-Framework__tools__convertIconsForAllGames.bat`
+- `Laf111__CEMU-Batch-Framework__tools__convertWiiuFiles.bat`
+- `Laf111__CEMU-Batch-Framework__tools__copyMlc01DataForAllGames.bat`
+- `Laf111__CEMU-Batch-Framework__tools__createCapGraphicPacks.bat`
+- `Laf111__CEMU-Batch-Framework__tools__createExecutables.bat`
+- `Laf111__CEMU-Batch-Framework__tools__createExtraGraphicPacks.bat`
+- `Laf111__CEMU-Batch-Framework__tools__createGameGraphicPacks.bat`
+- `Laf111__CEMU-Batch-Framework__tools__createLastGraphicPacks.bat`
+- `Laf111__CEMU-Batch-Framework__tools__createOneV2GraphicPack.bat`
+- `Laf111__CEMU-Batch-Framework__tools__createShortcuts.bat`
+- `Laf111__CEMU-Batch-Framework__tools__createV2GraphicPacks.bat`
+- `Laf111__CEMU-Batch-Framework__tools__createV4GraphicPacks.bat`
+- `Laf111__CEMU-Batch-Framework__tools__createWiiuSDcard.bat`
+- `Laf111__CEMU-Batch-Framework__tools__detectAndRenameInvalidPath.bat`
+- `Laf111__CEMU-Batch-Framework__tools__displayGamesStats.bat`
+- `Laf111__CEMU-Batch-Framework__tools__displayProgressBar.bat`
+- `Laf111__CEMU-Batch-Framework__tools__downloadGames.bat`
+- `Laf111__CEMU-Batch-Framework__tools__downloadTitleId.bat`
+- `Laf111__CEMU-Batch-Framework__tools__dumpGamesFromWiiu.bat`
+- `Laf111__CEMU-Batch-Framework__tools__exportAllToCemu.bat`
+- `Laf111__CEMU-Batch-Framework__tools__exportSavesToWiiu.bat`
+- `Laf111__CEMU-Batch-Framework__tools__exportUserGamesStatsToCemu.bat`
+- `Laf111__CEMU-Batch-Framework__tools__fixBatFiles.bat`
+- `Laf111__CEMU-Batch-Framework__tools__fixBrokenShortcuts.bat`
+- `Laf111__CEMU-Batch-Framework__tools__forceGraphicPackUpdate.bat`
+- `Laf111__CEMU-Batch-Framework__tools__ftpReplaceFolders.bat`
+- `Laf111__CEMU-Batch-Framework__tools__ftpSetWiiuFirmwareUpdateMode.bat`
+- `Laf111__CEMU-Batch-Framework__tools__ftpSyncFolders.bat`
+- `Laf111__CEMU-Batch-Framework__tools__getDllOrExeVersion.bat`
+- `Laf111__CEMU-Batch-Framework__tools__getMyShaderCachesSize.bat`
+- `Laf111__CEMU-Batch-Framework__tools__getTitleDataFromLibrary.bat`
+- `Laf111__CEMU-Batch-Framework__tools__getWiiuOnlineFiles.bat`
+- `Laf111__CEMU-Batch-Framework__tools__importGames.bat`
+- `Laf111__CEMU-Batch-Framework__tools__importModsForAllGames.bat`
+- `Laf111__CEMU-Batch-Framework__tools__importSaves.bat`
+- `Laf111__CEMU-Batch-Framework__tools__importTransferableCache.bat`
+- `Laf111__CEMU-Batch-Framework__tools__importWiiuSaves.bat`
+- `Laf111__CEMU-Batch-Framework__tools__initProgressBar.bat`
+- `Laf111__CEMU-Batch-Framework__tools__injectGamesToWiiu.bat`
+- `Laf111__CEMU-Batch-Framework__tools__instanciateResX2gp.bat`
+- `Laf111__CEMU-Batch-Framework__tools__killBatchFw.bat`
+- `Laf111__CEMU-Batch-Framework__tools__launchGame.bat`
+- `Laf111__CEMU-Batch-Framework__tools__launchThirdPartySoftware.bat`
+- `Laf111__CEMU-Batch-Framework__tools__monitorBatchFw.bat`
+- `Laf111__CEMU-Batch-Framework__tools__moveMlc01DataForAllGames.bat`
+- `Laf111__CEMU-Batch-Framework__tools__multiply.bat`
+- `Laf111__CEMU-Batch-Framework__tools__progressBar.bat`
+- `Laf111__CEMU-Batch-Framework__tools__restoreBfwDefaultSettings.bat`
+- `Laf111__CEMU-Batch-Framework__tools__restoreMlc01DataForAllGames.bat`
+- `Laf111__CEMU-Batch-Framework__tools__restoreTransShadersForAllGames.bat`
+- `Laf111__CEMU-Batch-Framework__tools__restoreUserSavesOfAllGames.bat`
+- `Laf111__CEMU-Batch-Framework__tools__scanWiiU.bat`
+- `Laf111__CEMU-Batch-Framework__tools__setExtraSavesSlots.bat`
+- `Laf111__CEMU-Batch-Framework__tools__setWiiuAccountToUsers.bat`
+- `Laf111__CEMU-Batch-Framework__tools__setup.bat`
+- `Laf111__CEMU-Batch-Framework__tools__stopThirdPartySoftware.bat`
+- `Laf111__CEMU-Batch-Framework__tools__syncGamesFolder.bat`
+- `Laf111__CEMU-Batch-Framework__tools__updateBatchFw.bat`
+- `Laf111__CEMU-Batch-Framework__tools__updateGameStats.bat`
+- `Laf111__CEMU-Batch-Framework__tools__updateGames.bat`
+- `Laf111__CEMU-Batch-Framework__tools__updateGamesGraphicPacks.bat`
+- `Laf111__CEMU-Batch-Framework__tools__updateGraphicPacksFolder.bat`
+- `Laf111__CEMU-Batch-Framework__tools__validateExtraGraphicPacksCreation.bat`
+- `Laf111__CEMU-Batch-Framework__tools__wizardFirstSaving.bat`
+- `LintangWisesa__Microsoft_Office_2016_Activator__Activator.cmd`
+- `MansourM__ez-dns-changer.bat__ez-dns-changer.bat`
+- `ManuelGil__Script-Reset-Windows-Update-Tool__ResetWUEng.cmd`
+- `ManzDev__video-converter-scripts__conversor a aac (solo audio).bat`
+- `ManzDev__video-converter-scripts__conversor a ac3 (solo audio).bat`
+- `ManzDev__video-converter-scripts__conversor a flac (solo audio).bat`
+- `ManzDev__video-converter-scripts__conversor a flash (flv).bat`
+- `ManzDev__video-converter-scripts__conversor a gif.bat`
+- `ManzDev__video-converter-scripts__conversor a mkv (x264 - vorbis).bat`
+- `ManzDev__video-converter-scripts__conversor a mkv-HEVC (x265 - vorbis).bat`
+- `ManzDev__video-converter-scripts__conversor a mov (instagram).bat`
+- `ManzDev__video-converter-scripts__conversor a mov (x264 - aac).bat`
+- `ManzDev__video-converter-scripts__conversor a mp3 (solo audio).bat`
+- `ManzDev__video-converter-scripts__conversor a mp4 (compatible navegadores).bat`
+- `ManzDev__video-converter-scripts__conversor a mp4.bat`
+- `ManzDev__video-converter-scripts__conversor a mpeg.bat`
+- `ManzDev__video-converter-scripts__conversor a ogg (solo audio).bat`
+- `ManzDev__video-converter-scripts__conversor a ogg (theora -vorbis).bat`
+- `ManzDev__video-converter-scripts__conversor a ogv (theora - flac).bat`
+- `ManzDev__video-converter-scripts__conversor a opus (solo audio).bat`
+- `ManzDev__video-converter-scripts__conversor a real audio (solo audio).bat`
+- `ManzDev__video-converter-scripts__conversor a real media video (rv10 - ac3).bat`
+- `ManzDev__video-converter-scripts__conversor a real media video (rv20 - ac3).bat`
+- `ManzDev__video-converter-scripts__conversor a wav (solo audio).bat`
+- `ManzDev__video-converter-scripts__conversor a webm (vp8 - vorbis).bat`
+- `ManzDev__video-converter-scripts__conversor a webm (vp8 - vorbis, compatible navegadores).bat`
+- `ManzDev__video-converter-scripts__conversor a webm (vp9 - vorbis).bat`
+- `ManzDev__video-converter-scripts__conversor a webm (vp9 - vorbis, compatible navegadores).bat`
+- `ManzDev__video-converter-scripts__conversor a wma (solo audio).bat`
+- `ManzDev__video-converter-scripts__conversor a wmv (wmv - wma).bat`
+- `ManzDev__video-converter-scripts__conversor a wv (solo audio).bat`
+- `ManzDev__video-converter-scripts__conversor a xvid (xvid - mp3).bat`
+- `ManzDev__video-converter-scripts__conversor a xvid (xvid - vorbis).bat`
+- `ManzDev__video-converter-scripts__rotar video derecha.bat`
+- `ManzDev__video-converter-scripts__rotar video izquierda.bat`
+- `Moodkiller__SendTo-rclone-GDrive__rclone-GDrive.bat`
+- `NabiKAZ__video2gif__video2gif.bat`
+- `Nickfost__Batch__Exponential Multiplication.bat`
+- `Nickfost__Batch__ping.cmd`
+- `PAXANDDOS__ForzaHorizonFix__ForzaHorizon4.bat`
+- `PAXANDDOS__ForzaHorizonFix__ForzaHorizon4_light.bat`
+- `PAXANDDOS__ForzaHorizonFix__ForzaHorizon5.bat`
+- `PAXANDDOS__ForzaHorizonFix__ForzaHorizon5_light.bat`
+- `PX4__PX4-windows-toolchain__toolchain__scripts__clone-px4-build-sitl.bat`
+- `PX4__PX4-windows-toolchain__toolchain__scripts__clone-px4-run-sitl.bat`
+- `PX4__PX4-windows-toolchain__toolchain__scripts__install-all-components.bat`
+- `PX4__PX4-windows-toolchain__toolchain__scripts__setup-environment.bat`
+- `PX4__PX4-windows-toolchain__toolchain__scripts__symlinks-backup-before-install.bat`
+- `PX4__PX4-windows-toolchain__toolchain__scripts__symlinks-restore-after-install.bat`
+- `PassingTheKnowledge__Batchography__ChangeMACAddressBatch.bat`
+- `PassingTheKnowledge__Batchography__CmdInit.bat`
+- `PassingTheKnowledge__Batchography__DetectWinLanguage.bat`
+- `PassingTheKnowledge__Batchography__WifiPasswordReveal-exp.bat`
+- `PassingTheKnowledge__Batchography__WifiPasswordReveal.bat`
+- `PassingTheKnowledge__Batchography__WifiPasswordReveal_FR.bat`
+- `PassingTheKnowledge__Batchography__annotated-code-sample.bat`
+- `PassingTheKnowledge__Batchography__args-1.bat`
+- `PassingTheKnowledge__Batchography__args-all.bat`
+- `PassingTheKnowledge__Batchography__args-enum1.bat`
+- `PassingTheKnowledge__Batchography__args-enum2.bat`
+- `PassingTheKnowledge__Batchography__args-modifiers-0.bat`
+- `PassingTheKnowledge__Batchography__args-modifiers.bat`
+- `PassingTheKnowledge__Batchography__array-1d-funcs.bat`
+- `PassingTheKnowledge__Batchography__array-1d.bat`
+- `PassingTheKnowledge__Batchography__array-2d.bat`
+- `PassingTheKnowledge__Batchography__array-assoc-1.bat`
+- `PassingTheKnowledge__Batchography__array-assoc-2.bat`
+- `PassingTheKnowledge__Batchography__ask-user-2.bat`
+- `PassingTheKnowledge__Batchography__ask-user.bat`
+- `PassingTheKnowledge__Batchography__autopy.bat`
+- `PassingTheKnowledge__Batchography__batch-compel.bat`
+- `PassingTheKnowledge__Batchography__batch-cpp.bat`
+- `PassingTheKnowledge__Batchography__batch-ftp.bat`
+- `PassingTheKnowledge__Batchography__batch-jscript.bat`
+- `PassingTheKnowledge__Batchography__batch-perl-end.bat`
+- `PassingTheKnowledge__Batchography__batch-perl.bat`
+- `PassingTheKnowledge__Batchography__batch-powershell-1.bat`
+- `PassingTheKnowledge__Batchography__batch-powershell.bat`
+- `PassingTheKnowledge__Batchography__batch-python.bat`
+- `PassingTheKnowledge__Batchography__call-label-prototype.bat`
+- `PassingTheKnowledge__Batchography__call-script0.bat`
+- `PassingTheKnowledge__Batchography__call-script1.bat`
+- `PassingTheKnowledge__Batchography__change-str-case.bat`
+- `PassingTheKnowledge__Batchography__coding-style.bat`
+- `PassingTheKnowledge__Batchography__comments.bat`
+- `PassingTheKnowledge__Batchography__compound-1.bat`
+- `PassingTheKnowledge__Batchography__compound-2.bat`
+- `PassingTheKnowledge__Batchography__compound-3.bat`
+- `PassingTheKnowledge__Batchography__console-color.bat`
+- `PassingTheKnowledge__Batchography__console-editor.bat`
+- `PassingTheKnowledge__Batchography__contains-str-1.bat`
+- `PassingTheKnowledge__Batchography__count-gotoif.bat`
+- `PassingTheKnowledge__Batchography__debug-1.bat`
+- `PassingTheKnowledge__Batchography__debug-2.bat`
+- `PassingTheKnowledge__Batchography__debug-3.bat`
+- `PassingTheKnowledge__Batchography__debug-4.bat`
+- `PassingTheKnowledge__Batchography__debug-5.bat`
+- `PassingTheKnowledge__Batchography__deve-test1.bat`
+- `PassingTheKnowledge__Batchography__deve-test3.bat`
+- `PassingTheKnowledge__Batchography__ds-sets-1.bat`
+- `PassingTheKnowledge__Batchography__ds-sets-2.bat`
+- `PassingTheKnowledge__Batchography__ds-stacks.bat`
+- `PassingTheKnowledge__Batchography__echo-test.bat`
+- `PassingTheKnowledge__Batchography__env-expand-2.bat`
+- `PassingTheKnowledge__Batchography__env-export-and-fail.bat`
+- `PassingTheKnowledge__Batchography__env-export-and.bat`
+- `PassingTheKnowledge__Batchography__env-export-compound-simple.bat`
+- `PassingTheKnowledge__Batchography__env-export-compound.bat`
+- `PassingTheKnowledge__Batchography__env-export-exitcode.bat`
+- `PassingTheKnowledge__Batchography__env-export-for.bat`
+- `PassingTheKnowledge__Batchography__env-export-temp-files.bat`
+- `PassingTheKnowledge__Batchography__env-group-naming.bat`
+- `PassingTheKnowledge__Batchography__env-local-nested.bat`
+- `PassingTheKnowledge__Batchography__err-clr.bat`
+- `PassingTheKnowledge__Batchography__err-test.bat`
+- `PassingTheKnowledge__Batchography__escape-syms.bat`
+- `PassingTheKnowledge__Batchography__eve-test1.bat`
+- `PassingTheKnowledge__Batchography__eve-test2.bat`
+- `PassingTheKnowledge__Batchography__eve-test3.bat`
+- `PassingTheKnowledge__Batchography__expr-1.bat`
+- `PassingTheKnowledge__Batchography__extract-embedded-bin.bat`
+- `PassingTheKnowledge__Batchography__extract-embedded-files.bat`
+- `PassingTheKnowledge__Batchography__fib.bat`
+- `PassingTheKnowledge__Batchography__findstr-extract-between-markers.bat`
+- `PassingTheKnowledge__Batchography__findstr-substr.bat`
+- `PassingTheKnowledge__Batchography__for-command-output-time.bat`
+- `PassingTheKnowledge__Batchography__for-count.bat`
+- `PassingTheKnowledge__Batchography__for-each-char-1.bat`
+- `PassingTheKnowledge__Batchography__for-each-char-2.bat`
+- `PassingTheKnowledge__Batchography__for-enum-dirs.bat`
+- `PassingTheKnowledge__Batchography__for-enum-recursive.bat`
+- `PassingTheKnowledge__Batchography__for-file-lines-delims.bat`
+- `PassingTheKnowledge__Batchography__for-file-lines-eol.bat`
+- `PassingTheKnowledge__Batchography__for-file-lines-no-options.bat`
+- `PassingTheKnowledge__Batchography__for-file-lines-token.bat`
+- `PassingTheKnowledge__Batchography__for-file-lines-usebackq.bat`
+- `PassingTheKnowledge__Batchography__for-files-set-2.bat`
+- `PassingTheKnowledge__Batchography__for-files-set-3.bat`
+- `PassingTheKnowledge__Batchography__for-files-set.bat`
+- `PassingTheKnowledge__Batchography__for-nest-sum-csv.bat`
+- `PassingTheKnowledge__Batchography__for-string-token1.bat`
+- `PassingTheKnowledge__Batchography__func-add.bat`
+- `PassingTheKnowledge__Batchography__func-call-fatal.bat`
+- `PassingTheKnowledge__Batchography__func-call-invalid.bat`
+- `PassingTheKnowledge__Batchography__func-call-resilient.bat`
+- `PassingTheKnowledge__Batchography__func-call.bat`
+- `PassingTheKnowledge__Batchography__func-label-conventions.bat`
+- `PassingTheKnowledge__Batchography__funcs-1.bat`
+- `PassingTheKnowledge__Batchography__get-fattr.bat`
+- `PassingTheKnowledge__Batchography__get-fsize.bat`
+- `PassingTheKnowledge__Batchography__get-ftime-secs.bat`
+- `PassingTheKnowledge__Batchography__get-ftime.bat`
+- `PassingTheKnowledge__Batchography__get-two-randoms.bat`
+- `PassingTheKnowledge__Batchography__get-win-ver.bat`
+- `PassingTheKnowledge__Batchography__goto-eof.bat`
+- `PassingTheKnowledge__Batchography__goto-label-resilient-2.bat`
+- `PassingTheKnowledge__Batchography__goto-label-resilient-findstr.bat`
+- `PassingTheKnowledge__Batchography__goto-label-resilient.bat`
+- `PassingTheKnowledge__Batchography__goto-label.bat`
+- `PassingTheKnowledge__Batchography__hangman.bat`
+- `PassingTheKnowledge__Batchography__if-ex.bat`
+- `PassingTheKnowledge__Batchography__io-redir-compound.bat`
+- `PassingTheKnowledge__Batchography__io-redir.bat`
+- `PassingTheKnowledge__Batchography__is-admin-1.bat`
+- `PassingTheKnowledge__Batchography__is-admin-2.bat`
+- `PassingTheKnowledge__Batchography__is-admin-3.bat`
+- `PassingTheKnowledge__Batchography__join-tokens.bat`
+- `PassingTheKnowledge__Batchography__lib-batch.bat`
+- `PassingTheKnowledge__Batchography__load-save-states.bat`
+- `PassingTheKnowledge__Batchography__localvars.bat`
+- `PassingTheKnowledge__Batchography__long-command.bat`
+- `PassingTheKnowledge__Batchography__menu-dynamic.bat`
+- `PassingTheKnowledge__Batchography__menu-simple.bat`
+- `PassingTheKnowledge__Batchography__not-so-evil-batch.bat`
+- `PassingTheKnowledge__Batchography__ord2chr.bat`
+- `PassingTheKnowledge__Batchography__pack-tracked.bat`
+- `PassingTheKnowledge__Batchography__parse-args.bat`
+- `PassingTheKnowledge__Batchography__parse-ini.bat`
+- `PassingTheKnowledge__Batchography__pipe-1.bat`
+- `PassingTheKnowledge__Batchography__resumable-script.bat`
+- `PassingTheKnowledge__Batchography__shift-compound.bat`
+- `PassingTheKnowledge__Batchography__str-len-2.bat`
+- `PassingTheKnowledge__Batchography__str-len-fast.bat`
+- `PassingTheKnowledge__Batchography__str-len.bat`
+- `PassingTheKnowledge__Batchography__str-substitute-asterisk.bat`
+- `PassingTheKnowledge__Batchography__str-substitute-var.bat`
+- `PassingTheKnowledge__Batchography__str-substitute.bat`
+- `PassingTheKnowledge__Batchography__str-substring.bat`
+- `PassingTheKnowledge__Batchography__strcat-1.bat`
+- `PassingTheKnowledge__Batchography__strcat-2.bat`
+- `PassingTheKnowledge__Batchography__switch-case.bat`
+- `PassingTheKnowledge__Batchography__test-lib.bat`
+- `PassingTheKnowledge__Batchography__transform-me-1.bat`
+- `PassingTheKnowledge__Batchography__use-lib.bat`
+- `PassingTheKnowledge__Batchography__use-script0.bat`
+- `PassingTheKnowledge__Batchography__use-script1.bat`
+- `PassingTheKnowledge__Batchography__useful_scripts__autobat.bat`
+- `PassingTheKnowledge__Batchography__useful_scripts__autodot.bat`
+- `PassingTheKnowledge__Batchography__useful_scripts__autolua.bat`
+- `PassingTheKnowledge__Batchography__useful_scripts__autopy.bat`
+- `PassingTheKnowledge__Batchography__useful_scripts__autox.bat`
+- `PassingTheKnowledge__Batchography__useful_scripts__exec_strings.bat`
+- `PassingTheKnowledge__Batchography__watch-dir.bat`
+- `Scrut1ny__Windows-Debloating-Script__Extra__debloat(OBSOLETE).bat`
+- `Serede__mkvtoolnix-batch__mkvtoolnix-batch.bat`
+- `Shicoder__Meshlab-MLXScriptBatchProcessing__scripts__windows__Scripts__convertMeshes.bat`
+- `Shicoder__Meshlab-MLXScriptBatchProcessing__scripts__windows__Scripts__runMLXScript.bat`
+- `Takaovi__BatchStealer__file.bat`
+- `TarikSeyceri__Windows-10-Update-Disabler.bat__Windows 10 Update Disabler.bat`
+- `TarikSeyceri__Windows-10-Update-Disabler.bat__Windows 10 Update Enabler.bat`
+- `TerryHuangHD__Windows10-VersionSwitcher__Switch.bat`
+- `ZephrFish__WindowsHardeningScript__Harden.cmd`
+- `acgbfull__IBM_Appscan_Batch_Scan_Script__ibm_appscan_batch_scan_script.bat`
+- `akhilnathe__winactivate__winactivate.cmd`
+- `aliounebfam__vscode_projects_launcher__scripts__windows__vscode_projects_launcher.bat`
+- `azmatt__windowsEnum__windowsEnum.bat`
+- `cavo789__tools_winscp__030-scripts__download_recursive__winscp.bat`
+- `cavo789__tools_winscp__030-scripts__synchronize__winscp_Synchronize.bat`
+- `cavo789__tools_winscp__concat-md.cmd`
+- `chsliu__batch__batch__alias__longping.cmd`
+- `chsliu__batch__batch__alias__ping.cmd`
+- `chsliu__batch__batch__alias__ping2.cmd`
+- `chsliu__batch__batch__iperf-2.0.5-3-win32__HV.bat`
+- `chsliu__batch__batch__iperf-2.0.5-3-win32__HV2.bat`
+- `chsliu__batch__batch__iperf-2.0.5-3-win32__HV3.bat`
+- `chsliu__batch__batch__iperf-2.0.5-3-win32__HV4.bat`
+- `chsliu__batch__batch__iperf-2.0.5-3-win32__MACMINI.bat`
+- `chsliu__batch__batch__iperf-2.0.5-3-win32__MACMINI_dual.bat`
+- `chsliu__batch__batch__iperf-2.0.5-3-win32__NB19.bat`
+- `chsliu__batch__batch__iperf-2.0.5-3-win32__PVE5.bat`
+- `chsliu__batch__batch__iperf-2.0.5-3-win32__PVE6.bat`
+- `chsliu__batch__batch__iperf-2.0.5-3-win32__pve6.bat`
+- `chsliu__batch__batch__iperf-2.0.5-3-win32__server.bat`
+- `chsliu__batch__batch__iperf-2.0.5-3-win32__serverIPv6.bat`
+- `chsliu__batch__batch__networkutil__mailaboutn2.bat`
+- `chsliu__batch__batch__networkutil__mailaboutn3.bat`
+- `chsliu__batch__batch__networkutil__mailaboutwhs.bat`
+- `chsliu__batch__batch__networkutil__pinggoodview.bat`
+- `chsliu__batch__batch__networkutil__src__backup.bat`
+- `chsliu__batch__batch__networkutil__src__restore.bat`
+- `chsliu__batch__batch__networkutil__src__setup.bat`
+- `chsliu__batch__batch__newserver__enablepowershellscript.bat`
+- `chsliu__batch__batch__ssh__dns.goodview.com.tw.bat`
+- `chsliu__batch__batch__ssh__sitahome.ddns.net.bat`
+- `chsliu__batch__batch__ssh__taipeihomeg2.bat`
+- `chsliu__batch__batch__vagrant__hyperv2box.zip.bat`
+- `chsliu__batch__batch__vagrant__virtualbox2box.zip.bat`
+- `chsliu__batch__batch__ziparchive___config.cmd`
+- `chsliu__batch__batch__ziparchive__update.archive.bat`
+- `chsliu__batch__cmder__vendor__conemu-maximus5__ConEmu__Scripts__git-log.cmd`
+- `chsliu__batch__util__showmyip.cmd`
+- `chsliu__batch__utility__fixpip.bat`
+- `chsliu__batch__utility__getip.bat`
+- `chsliu__batch__utility__listownership.bat`
+- `chsliu__batch__utility__pinggateway.bat`
+- `chsliu__batch__utility__pinghinet.bat`
+- `chsliu__batch__utility__pip.bat`
+- `chsliu__batch__utility__reset.rdpclip.bat`
+- `chsliu__batch__utility__runipconfig.bat`
+- `chsliu__batch__utility__wifi.hotspot.bat`
+- `chsliu__batch__utility__wifi.password.bat`
+- `danielj0nes__Activate-Windows10-Pro-Script__script.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__add2virtualenv.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__cd-.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__cdproject.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__cdsitepackages.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__cdvirtualenv.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__lssitepackages.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__lsvirtualenv.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__mkproject.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__mkvirtualenv.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__rmvirtualenv.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__setprojectdir.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__toggleglobalsitepackages.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__virtualenvwrapper.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__vwenv.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__whereis.bat`
+- `davidmarble__virtualenvwrapper-win__scripts__workon.bat`
+- `ddashizzle__snapraid_made_simple__snapraid_simple.bat`
+- `dend__windows-dev-box__scripts__bloat.bat`
+- `dend__windows-dev-box__scripts__customization.bat`
+- `dend__windows-dev-box__scripts__edge-privacy.bat`
+- `dend__windows-dev-box__scripts__privacy.bat`
+- `dend__windows-dev-box__scripts__security.bat`
+- `diogo-fernan__ir-rescue__win__ir-rescue-update-tools-v0.9.bat`
+- `diogo-fernan__ir-rescue__win__ir-rescue-win-v1.4.4.bat`
+- `eppic__ytBATCH__bin__AudioDL.bat`
+- `eppic__ytBATCH__bin__AutoUpdate.bat`
+- `eppic__ytBATCH__bin__DefaultConfig.bat`
+- `eppic__ytBATCH__bin__FileDownloader.bat`
+- `eppic__ytBATCH__bin__Installer.bat`
+- `eppic__ytBATCH__bin__Launcher.bat`
+- `eppic__ytBATCH__bin__ListDL.bat`
+- `eppic__ytBATCH__bin__MainMenu.bat`
+- `eppic__ytBATCH__bin__Preferences.bat`
+- `eppic__ytBATCH__bin__Queue.bat`
+- `eppic__ytBATCH__bin__Updater.bat`
+- `eppic__ytBATCH__bin__UrlHandler.bat`
+- `eppic__ytBATCH__bin__VideoDL.bat`
+- `eppic__ytBATCH__ytBATCH.bat`
+- `jersonmartinez__ShellScriptBatch__Scripts__DelayTime__Delay Time.bat`
+- `jersonmartinez__ShellScriptBatch__Scripts__HostedNetwork__CreateNetwork.bat`
+- `jersonmartinez__ShellScriptBatch__Scripts__WindowsActivator__WindowsActivator.bat`
+- `jonstephens85__instantngp-batch__install_requirements.bat`
+- `jonstephens85__instantngp-batch__nerf_photos.bat`
+- `jonstephens85__instantngp-batch__nerf_video.bat`
+- `jpalbert__webcam-settings-dialog-windows__launch.bat`
+- `jpalbert__webcam-settings-dialog-windows__webcamdialog.bat`
+- `jpalbert__webcam-settings-dialog-windows__whatismycam.bat`
+- `kezoponk__DDoS.bat__DDoS.bat`
+- `kkkgo__KMS_VL_ALL__$OEM$__$$__Setup__Scripts__setupcomplete.cmd`
+- `kkkgo__KMS_VL_ALL__Activate.cmd`
+- `kkkgo__KMS_VL_ALL__AutoRenewal-Setup.cmd`
+- `kodybrown__dos__''.bat`
+- `kodybrown__dos__'.bat`
+- `kodybrown__dos__ReplaceInFile.bat`
+- `kodybrown__dos__alias.bat`
+- `kodybrown__dos__bc.bat`
+- `kodybrown__dos__bcscript.bat`
+- `kodybrown__dos__bigtext.cmd`
+- `kodybrown__dos__c.bat`
+- `kodybrown__dos__cdor.bat`
+- `kodybrown__dos__count.cmd`
+- `kodybrown__dos__cp.bat`
+- `kodybrown__dos__dc.bat`
+- `kodybrown__dos__dd.bat`
+- `kodybrown__dos__de.bat`
+- `kodybrown__dos__decrypt.bat`
+- `kodybrown__dos__diskmgmt.bat`
+- `kodybrown__dos__doserrors.bat`
+- `kodybrown__dos__ds.bat`
+- `kodybrown__dos__dx.bat`
+- `kodybrown__dos__edit.bat`
+- `kodybrown__dos__edpath.bat`
+- `kodybrown__dos__elevate.cmd`
+- `kodybrown__dos__emptybin.bat`
+- `kodybrown__dos__encrypt.bat`
+- `kodybrown__dos__exit_dos.bat`
+- `kodybrown__dos__ga.bat`
+- `kodybrown__dos__gb.bat`
+- `kodybrown__dos__gc.bat`
+- `kodybrown__dos__gd.bat`
+- `kodybrown__dos__gdt.bat`
+- `kodybrown__dos__get.bat`
+- `kodybrown__dos__gh.bat`
+- `kodybrown__dos__gi.bat`
+- `kodybrown__dos__git.bat`
+- `kodybrown__dos__gitpatch.bat`
+- `kodybrown__dos__gl.bat`
+- `kodybrown__dos__gm.bat`
+- `kodybrown__dos__gp.bat`
+- `kodybrown__dos__gs.bat`
+- `kodybrown__dos__guid.cmd`
+- `kodybrown__dos__gz.bat`
+- `kodybrown__dos__hibernate.cmd`
+- `kodybrown__dos__hide.bat`
+- `kodybrown__dos__hist.bat`
+- `kodybrown__dos__history.bat`
+- `kodybrown__dos__iiskill.bat`
+- `kodybrown__dos__iisrestart.bat`
+- `kodybrown__dos__iisstart.bat`
+- `kodybrown__dos__iisstop.bat`
+- `kodybrown__dos__install-java.bat`
+- `kodybrown__dos__killdead.bat`
+- `kodybrown__dos__killwebdev.bat`
+- `kodybrown__dos__la.bat`
+- `kodybrown__dos__ll.bat`
+- `kodybrown__dos__lla.bat`
+- `kodybrown__dos__lls.bat`
+- `kodybrown__dos__ls.bat`
+- `kodybrown__dos__mv.bat`
+- `kodybrown__dos__n.bat`
+- `kodybrown__dos__notepad.bat`
+- `kodybrown__dos__np.bat`
+- `kodybrown__dos__nu.bat`
+- `kodybrown__dos__open.bat`
+- `kodybrown__dos__pathx.bat`
+- `kodybrown__dos__pdf2jpg.bat`
+- `kodybrown__dos__pwd.bat`
+- `kodybrown__dos__reboot.cmd`
+- `kodybrown__dos__rm.bat`
+- `kodybrown__dos__sa.bat`
+- `kodybrown__dos__sb.bat`
+- `kodybrown__dos__screensaver.bat`
+- `kodybrown__dos__sd.bat`
+- `kodybrown__dos__sdel.bat`
+- `kodybrown__dos__sdel1.bat`
+- `kodybrown__dos__sdel5.bat`
+- `kodybrown__dos__sdel8.bat`
+- `kodybrown__dos__set_ipaddr_envar.bat`
+- `kodybrown__dos__setdatevars.cmd`
+- `kodybrown__dos__settimevars.cmd`
+- `kodybrown__dos__shutdown.cmd`
+- `kodybrown__dos__si.bat`
+- `kodybrown__dos__so.bat`
+- `kodybrown__dos__ss+.bat`
+- `kodybrown__dos__ss.bat`
+- `kodybrown__dos__start_dos.bat`
+- `kodybrown__dos__su.old.bat`
+- `kodybrown__dos__subl.bat`
+- `kodybrown__dos__sublime.bat`
+- `kodybrown__dos__sudo.old.bat`
+- `kodybrown__dos__svn.bat`
+- `kodybrown__dos__unhide.bat`
+- `kodybrown__dos__va.bat`
+- `kodybrown__dos__vh.bat`
+- `kodybrown__dos__vr.bat`
+- `kodybrown__dos__vs.bat`
+- `kodybrown__dos__vssh.bat`
+- `kodybrown__dos__vu.bat`
+- `kodybrown__dos__wget+.bat`
+- `leetfin__Windows10Tools__Scripts__3rd Party__Disable Content Delivery Manager.bat`
+- `leetfin__Windows10Tools__Scripts__3rd Party__Enable NTFS Long File Paths.bat`
+- `leetfin__Windows10Tools__Scripts__3rd Party__Kill Skype Host.bat`
+- `leetfin__Windows10Tools__Scripts__3rd Party__Lockscreen Image Downloader.bat`
+- `leetfin__Windows10Tools__Scripts__Create Restore Point.bat`
+- `leetfin__Windows10Tools__Scripts__Disable Firewall.bat`
+- `leetfin__Windows10Tools__Scripts__Disallow Telemetry.bat`
+- `leetfin__Windows10Tools__Scripts__Enable Firewall.bat`
+- `leetfin__Windows10Tools__Scripts__Fix File Security.bat`
+- `leetfin__Windows10Tools__Scripts__Never Shutdown.bat`
+- `leetfin__Windows10Tools__Scripts__Repair Windows.bat`
+- `leetfin__Windows10Tools__Scripts__Search Bar Fix.bat`
+- `leetfin__Windows10Tools__Scripts__Some Settings Are Managed Fix.bat`
+- `leetfin__Windows10Tools__Scripts__Stop Windows Update.bat`
+- `leetfin__Windows10Tools__WIPs__Debloatx.bat`
+- `leetfin__Windows10Tools__WIPs__EVERYTHING.bat`
+- `leetfin__Windows10Tools__WIPs__FullDebloat.bat`
+- `leetfin__Windows10Tools__adolfintel-Windows10-Privacy__No Forced Updates.bat`
+- `leetfin__Windows10Tools__adolfintel-Windows10-Privacy__No Windows Tips.bat`
+- `logicopslab__BatchScripting__001. Starters__01_First.bat`
+- `logicopslab__BatchScripting__001. Starters__02_MoreCopy.bat`
+- `logicopslab__BatchScripting__001. Starters__03_Move.bat`
+- `logicopslab__BatchScripting__001. Starters__04_WithEcho.bat`
+- `logicopslab__BatchScripting__001. Starters__05_WithoutEcho.bat`
+- `logicopslab__BatchScripting__002. Variables__01_Vars.bat`
+- `logicopslab__BatchScripting__002. Variables__02_GVLV.bat`
+- `logicopslab__BatchScripting__003. Strings__01_String.bat`
+- `logicopslab__BatchScripting__003. Strings__02_Interpolation.bat`
+- `logicopslab__BatchScripting__003. Strings__03_Concat.bat`
+- `logicopslab__BatchScripting__003. Strings__04_LeftString.bat`
+- `logicopslab__BatchScripting__003. Strings__05_RightString.bat`
+- `logicopslab__BatchScripting__003. Strings__06_MidString.bat`
+- `logicopslab__BatchScripting__003. Strings__11_toInt.bat`
+- `logicopslab__BatchScripting__004. DecisionMaking__01_if.bat`
+- `logicopslab__BatchScripting__004. DecisionMaking__02_if_else.bat`
+- `logicopslab__BatchScripting__004. DecisionMaking__03_if_nested.bat`
+- `logicopslab__BatchScripting__004. DecisionMaking__04_GoTo.bat`
+- `logicopslab__BatchScripting__005. Operators__01_arithmetic.bat`
+- `logicopslab__BatchScripting__005. Operators__02_relational.bat`
+- `logicopslab__BatchScripting__005. Operators__03_logical.bat`
+- `logicopslab__BatchScripting__005. Operators__04_assignment.bat`
+- `logicopslab__BatchScripting__005. Operators__05_bitwise.bat`
+- `logicopslab__BatchScripting__006. Loops__01_ForLoop.bat`
+- `logicopslab__BatchScripting__006. Loops__02_ForLoopReverse.bat`
+- `logicopslab__BatchScripting__007. Arrays__01_FirstArray.bat`
+- `logicopslab__BatchScripting__007. Arrays__02_AccessingElements.bat`
+- `logicopslab__BatchScripting__007. Arrays__03_ModifyElements.bat`
+- `logicopslab__BatchScripting__007. Arrays__04_Iteration.bat`
+- `logicopslab__BatchScripting__007. Arrays__05_Length.bat`
+- `logicopslab__BatchScripting__008. Functions__01_CreateFunction.bat`
+- `logicopslab__BatchScripting__008. Functions__02_ParamFunctions.bat`
+- `logicopslab__BatchScripting__008. Functions__03_ReturnValueFunction.bat`
+- `logicopslab__BatchScripting__008. Functions__04_LV_in_Function.bat`
+- `logicopslab__BatchScripting__009. IO_FileOperations__01_Creation.bat`
+- `logicopslab__BatchScripting__009. IO_FileOperations__02_ReadAFile.bat`
+- `logicopslab__BatchScripting__009. IO_FileOperations__04_Rename.bat`
+- `logicopslab__BatchScripting__010. IO_FolderOperations__01_Creation.bat`
+- `logicopslab__BatchScripting__010. IO_FolderOperations__03_FolderRename.bat`
+- `logicopslab__BatchScripting__010. IO_FolderOperations__04_MoveFolder.bat`
+- `logicopslab__BatchScripting__011. Registry__01_Read.bat`
+- `logicopslab__BatchScripting__011. Registry__02_Add.bat`
+- `logicopslab__BatchScripting__011. Registry__04_Copy.bat`
+- `logicopslab__BatchScripting__011. Registry__05_Compare.bat`
+- `logicopslab__BatchScripting__012. ProcessAndLogs__01_Operations.bat`
+- `logicopslab__BatchScripting__013. Interview__01_Fibonacci.bat`
+- `logicopslab__BatchScripting__013. Interview__02_StringOperations.bat`
+- `logicopslab__BatchScripting__013. Interview__03_ForLoopReverse.bat`
+- `logicopslab__BatchScripting__013. Interview__04_ArrayLength.bat`
+- `lstprjct__IDM-Activation-Script__IAS.cmd`
+- `m2nlight__WindowsServerToWindowsDesktop__Windows Server To Windows Desktop.bat`
+- `massgravel__Microsoft-Activation-Scripts__MAS__Separate-Files-Version__Activators__HWID_Activation.cmd`
+- `massgravel__Microsoft-Activation-Scripts__MAS__Separate-Files-Version__Activators__KMS38_Activation.cmd`
+- `massgravel__Microsoft-Activation-Scripts__MAS__Separate-Files-Version__Activators__Ohook_Activation_AIO.cmd`
+- `massgravel__Microsoft-Activation-Scripts__MAS__Separate-Files-Version__Activators__Online_KMS_Activation.cmd`
+- `massgravel__Microsoft-Activation-Scripts__MAS__Separate-Files-Version__Activators__TSforge_Activation.cmd`
+- `massgravel__Microsoft-Activation-Scripts__MAS__Separate-Files-Version__Change_Office_Edition.cmd`
+- `massgravel__Microsoft-Activation-Scripts__MAS__Separate-Files-Version__Change_Windows_Edition.cmd`
+- `massgravel__Microsoft-Activation-Scripts__MAS__Separate-Files-Version__Extract_OEM_Folder.cmd`
+- `massgravel__Microsoft-Activation-Scripts__MAS__Separate-Files-Version__Troubleshoot.cmd`
+- `n00mkrad__ffmpeg-batch-utils__ExtractSingleFrameFromVideo.bat`
+- `n00mkrad__ffmpeg-batch-utils__ExtractSingleFrameFromVideoHDR.bat`
+- `n00mkrad__ffmpeg-batch-utils__FramesToAPNG.bat`
+- `n00mkrad__ffmpeg-batch-utils__FramesToVideo.bat`
+- `n00mkrad__ffmpeg-batch-utils__GetFPS.bat`
+- `n00mkrad__ffmpeg-batch-utils__Loop.bat`
+- `n00mkrad__ffmpeg-batch-utils__SplitIntoFrames.bat`
+- `n00mkrad__ffmpeg-batch-utils__VideoToFrames.bat`
+- `npocmaka__batch.scripts__DateAndTime__DateParts.bat`
+- `npocmaka__batch.scripts__DateAndTime__W32DOW.bat`
+- `npocmaka__batch.scripts__DateAndTime__W32tmSleep.bat`
+- `npocmaka__batch.scripts__DateAndTime__getTime.bat`
+- `npocmaka__batch.scripts__DateAndTime__sleeptp.bat`
+- `npocmaka__batch.scripts__Java__getJavaVersion.bat`
+- `npocmaka__batch.scripts__Java__javaDetect.bat`
+- `npocmaka__batch.scripts__Java__javaExtInstaller.bat`
+- `npocmaka__batch.scripts__Java__javaHybrid.bat`
+- `npocmaka__batch.scripts__ProcessesUtils__StartPID.bat`
+- `npocmaka__batch.scripts__ProcessesUtils__startHidden.bat`
+- `npocmaka__batch.scripts__dataStructures__binaryTree.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__bugs__EOFbreaker.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__bugs__FORbreaker.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__bugs__callCrasher.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__bugs__callbrackets.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__bugs__forCrasher.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__bugs__ifCrasher.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__bugs__ifDefined.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__bugs__pipeIf.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__bugs__remCrasher.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__FirmwareType.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__anonymous.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__boolKeys.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__callArgs.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__callcolons.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__defaultJumpDir.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__emptyTokens.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__fileRedirection.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__findEscapeQuote.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__forL.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__negativeGOTO.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__splitCommand.bat`
+- `npocmaka__batch.scripts__discovers_and_bugs__discovers__typeList.bat`
+- `npocmaka__batch.scripts__fileUtils__SHA512.bat`
+- `npocmaka__batch.scripts__fileUtils__dirTimes.bat`
+- `npocmaka__batch.scripts__fileUtils__encodingDetect.bat`
+- `npocmaka__batch.scripts__fileUtils__file2hex.bat`
+- `npocmaka__batch.scripts__fileUtils__fileModifiedTime.bat`
+- `npocmaka__batch.scripts__fileUtils__fileTimes.bat`
+- `npocmaka__batch.scripts__fileUtils__fileassembler.bat`
+- `npocmaka__batch.scripts__fileUtils__firstLines.bat`
+- `npocmaka__batch.scripts__fileUtils__firstLinesP.bat`
+- `npocmaka__batch.scripts__fileUtils__folderOwner.bat`
+- `npocmaka__batch.scripts__fileUtils__listFS.bat`
+- `npocmaka__batch.scripts__fileUtils__md2.bat`
+- `npocmaka__batch.scripts__fileUtils__md4.bat`
+- `npocmaka__batch.scripts__fileUtils__md5.bat`
+- `npocmaka__batch.scripts__fileUtils__progressCopy.bat`
+- `npocmaka__batch.scripts__fileUtils__sha1.bat`
+- `npocmaka__batch.scripts__fileUtils__sha256.bat`
+- `npocmaka__batch.scripts__fileUtils__sha384.bat`
+- `npocmaka__batch.scripts__fileUtils__splitBin.bat`
+- `npocmaka__batch.scripts__fileUtils__tailHead.bat`
+- `npocmaka__batch.scripts__fileUtils__wmicVersion.bat`
+- `npocmaka__batch.scripts__hybrids__.net__FileTimeFilerJS.bat`
+- `npocmaka__batch.scripts__hybrids__.net__ProcessStartJS.bat`
+- `npocmaka__batch.scripts__hybrids__.net__SystemTrayNotification.bat`
+- `npocmaka__batch.scripts__hybrids__.net__WebClientDownload.bat`
+- `npocmaka__batch.scripts__hybrids__.net__bat2exe.bat`
+- `npocmaka__batch.scripts__hybrids__.net__c__getPixelColor.bat`
+- `npocmaka__batch.scripts__hybrids__.net__c__listWindows.bat`
+- `npocmaka__batch.scripts__hybrids__.net__c__mouse.bat`
+- `npocmaka__batch.scripts__hybrids__.net__c__mouseSniffer.bat`
+- `npocmaka__batch.scripts__hybrids__.net__c__quickEdit.bat`
+- `npocmaka__batch.scripts__hybrids__.net__c__screenCapture.bat`
+- `npocmaka__batch.scripts__hybrids__.net__c__taskbarHidder.bat`
+- `npocmaka__batch.scripts__hybrids__.net__c__windowMode.bat`
+- `npocmaka__batch.scripts__hybrids__.net__colorInput.bat`
+- `npocmaka__batch.scripts__hybrids__.net__coloroutput.bat`
+- `npocmaka__batch.scripts__hybrids__.net__dirTimesNET.bat`
+- `npocmaka__batch.scripts__hybrids__.net__fileTimesNET.bat`
+- `npocmaka__batch.scripts__hybrids__.net__getCmdPID.bat`
+- `npocmaka__batch.scripts__hybrids__.net__gzipJS.bat`
+- `npocmaka__batch.scripts__hybrids__.net__keyStates.bat`
+- `npocmaka__batch.scripts__hybrids__.net__keyreader.bat`
+- `npocmaka__batch.scripts__hybrids__.net__listEncodings.bat`
+- `npocmaka__batch.scripts__hybrids__.net__passHidder.bat`
+- `npocmaka__batch.scripts__hybrids__.net__powershell__enterNumber.bat`
+- `npocmaka__batch.scripts__hybrids__.net__selectFolder.bat`
+- `npocmaka__batch.scripts__hybrids__.net__setPrio.bat`
+- `npocmaka__batch.scripts__hybrids__.net__split.net.bat`
+- `npocmaka__batch.scripts__hybrids__.net__systemSounds.bat`
+- `npocmaka__batch.scripts__hybrids__.net__waitMS.bat`
+- `npocmaka__batch.scripts__hybrids__iexpress__OKPopup.bat`
+- `npocmaka__batch.scripts__hybrids__iexpress__bat2exeIEXP.bat`
+- `npocmaka__batch.scripts__hybrids__iexpress__hidder.bat`
+- `npocmaka__batch.scripts__hybrids__iexpress__iexpYNButton.bat`
+- `npocmaka__batch.scripts__hybrids__iexpress__licenseAgreement.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__FileTimeFilterJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__ShellRunJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__UIautoLogin.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__WinHTTPDownloadJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__XMLHTTPDownloadJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__base64.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__calcjs.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__dirTimesJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__edit.json.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__ejectjs.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__enterNumberJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__fileTImesJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__focusOn.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__freememjs.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__getInnerText.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__guid.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__imageProcessing__convImg.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__imageProcessing__crop.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__imageProcessing__rotateFlip.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__imageProcessing__scale.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__imageProcessing__shRotate.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__imageProcessing__stamp.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__imageProcessing__tiff.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__jsonextractor.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__jspopup.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__julian.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__listVerbs.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__mediarunner.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__oneDriveSync.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__pdfPageCounter.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__phisycalDrives.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__pinnerJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__ppt2pdf.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__printJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__replacer.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__sendKeys.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__shellCopy.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__shortcutJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__slowTypeJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__splitjs.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__spplayer.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__toHexJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__toHtmlEnt.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__unHexJS.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__uuid.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__winhttpjs.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__write.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__xpath.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__xpath0.1.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__yesnopopup.bat`
+- `npocmaka__batch.scripts__hybrids__jscript__zipjs.bat`
+- `npocmaka__batch.scripts__hybrids__makecab__cabSplitter.bat`
+- `npocmaka__batch.scripts__hybrids__makecab__cabdir.bat`
+- `npocmaka__batch.scripts__hybrids__makecab__fileinf.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__OpticalDrivesCount.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__atob.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__btoa.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__freeMem.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__printClip.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__say.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__soundPlayer.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__start.bckgrnd.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__ui.extensions__buttons.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__ui.extensions__choose.button.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__ui.extensions__countdown.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__ui.extensions__passwordSubmiter.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__ui.extensions__radioButtons.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__ui.extensions__userInput.bat`
+- `npocmaka__batch.scripts__hybrids__mshta__weekNumber.bat`
+- `npocmaka__batch.scripts__hybrids__wsh__EjectCD.bat`
+- `npocmaka__batch.scripts__hybrids__wsh__vbexecutor.bat`
+- `npocmaka__batch.scripts__hybrids__wsh__win32process.bat`
+- `npocmaka__batch.scripts__math__isInteger.bat`
+- `npocmaka__batch.scripts__network__bitsDownloader.bat`
+- `npocmaka__batch.scripts__other__ArrayListPOC.bat`
+- `npocmaka__batch.scripts__other__beeper.bat`
+- `npocmaka__batch.scripts__other__continueEnter.bat`
+- `npocmaka__batch.scripts__other__listBrosers.bat`
+- `npocmaka__batch.scripts__other__listBrowsers.bat`
+- `npocmaka__batch.scripts__other__officeVersion.bat`
+- `npocmaka__batch.scripts__other__pushdCounter.bat`
+- `npocmaka__batch.scripts__other__pushdCounterTmpF.bat`
+- `npocmaka__batch.scripts__other__setlocalLevelCounter.bat`
+- `npocmaka__batch.scripts__printing__printCHM.bat`
+- `npocmaka__batch.scripts__stringutils__countOfSubstrings.bat`
+- `npocmaka__batch.scripts__stringutils__endsWith.bat`
+- `npocmaka__batch.scripts__stringutils__indexOf.bat`
+- `npocmaka__batch.scripts__stringutils__lastIndexOf.bat`
+- `npocmaka__batch.scripts__stringutils__reverse.bat`
+- `npocmaka__batch.scripts__stringutils__split.bat`
+- `npocmaka__batch.scripts__stringutils__startsWith.bat`
+- `npocmaka__batch.scripts__stringutils__stringToHex.bat`
+- `npocmaka__batch.scripts__stringutils__toLowerCase.bat`
+- `npocmaka__batch.scripts__stringutils__toUpperCase.bat`
+- `npocmaka__batch.scripts__system__chkPermissions.bat`
+- `npocmaka__batch.scripts__system__netVersions.bat`
+- `npocmaka__batch.scripts__system__screenres.bat`
+- `peterjc123__pytorch-scripts__.github__azure-pipelines-scripts__7z_install.bat`
+- `peterjc123__pytorch-scripts__.github__azure-pipelines-scripts__conda_install.bat`
+- `peterjc123__pytorch-scripts__.github__azure-pipelines-scripts__env_fix.bat`
+- `peterjc123__pytorch-scripts__.github__azure-pipelines-scripts__mkl_install.bat`
+- `peterjc123__pytorch-scripts__.github__azure-pipelines-scripts__sccache_debug.bat`
+- `peterjc123__pytorch-scripts__.github__azure-pipelines-scripts__sccache_setup.bat`
+- `peterjc123__pytorch-scripts__.github__azure-pipelines-scripts__sccache_update.bat`
+- `peterjc123__pytorch-scripts__auto.bat`
+- `peterjc123__pytorch-scripts__caffe2_builders__v140__auto.bat`
+- `peterjc123__pytorch-scripts__caffe2_builders__v140__download_deps.bat`
+- `peterjc123__pytorch-scripts__caffe2_builders__v140__msbuild.bat`
+- `peterjc123__pytorch-scripts__caffe2_builders__v141__auto.bat`
+- `peterjc123__pytorch-scripts__caffe2_builders__v141__msbuild.bat`
+- `peterjc123__pytorch-scripts__cpu.bat`
+- `peterjc123__pytorch-scripts__cuda100.bat`
+- `peterjc123__pytorch-scripts__cuda80.bat`
+- `peterjc123__pytorch-scripts__cuda90.bat`
+- `peterjc123__pytorch-scripts__cuda91.bat`
+- `peterjc123__pytorch-scripts__cuda92.bat`
+- `peterjc123__pytorch-scripts__internal__clone.bat`
+- `peterjc123__pytorch-scripts__internal__setup.bat`
+- `prestonsn__windows-10-activation-script__script__actvatr.bat`
+- `rossy__mpv-install__mpv-install.bat`
+- `shoober420__windows11-scripts__AMDAdrenalinSettingsHQ.bat`
+- `shoober420__windows11-scripts__AMDAdrenalinSettingsPERF.bat`
+- `shoober420__windows11-scripts__AboveNormalPriority.bat`
+- `shoober420__windows11-scripts__AccentColor.bat`
+- `shoober420__windows11-scripts__AdminCmdPrompt.bat`
+- `shoober420__windows11-scripts__Advanced_Install.bat`
+- `shoober420__windows11-scripts__BlockRazerSynapse.bat`
+- `shoober420__windows11-scripts__ComputerName.bat`
+- `shoober420__windows11-scripts__DHCPConnection.bat`
+- `shoober420__windows11-scripts__DWM_ExclusiveModeFramerateAveragingPeriodMs.bat`
+- `shoober420__windows11-scripts__Date+TimeHide.bat`
+- `shoober420__windows11-scripts__Date+TimeShow.bat`
+- `shoober420__windows11-scripts__Decrypt+OSCompression.bat`
+- `shoober420__windows11-scripts__Defrag+TRIM.bat`
+- `shoober420__windows11-scripts__DeviceManager.bat`
+- `shoober420__windows11-scripts__DisableAMDGPU_DalDramClockChangeLatencyNs.bat`
+- `shoober420__windows11-scripts__DisableAMDHDAudioService.bat`
+- `shoober420__windows11-scripts__DisableActivateWindows.bat`
+- `shoober420__windows11-scripts__DisableAppX.bat`
+- `shoober420__windows11-scripts__DisableApplicationFrameHost.bat`
+- `shoober420__windows11-scripts__DisableBitLocker.bat`
+- `shoober420__windows11-scripts__DisableBluetooth.bat`
+- `shoober420__windows11-scripts__DisableCOM+EventSystem.bat`
+- `shoober420__windows11-scripts__DisableCPUMitigations.bat`
+- `shoober420__windows11-scripts__DisableCldFlt.bat`
+- `shoober420__windows11-scripts__DisableClearPageFileAtShutdown.bat`
+- `shoober420__windows11-scripts__DisableCommonLogFileSystem.bat`
+- `shoober420__windows11-scripts__DisableComponents.bat`
+- `shoober420__windows11-scripts__DisableDHCP.bat`
+- `shoober420__windows11-scripts__DisableDNSClient.bat`
+- `shoober420__windows11-scripts__DisableDistributeTimers.bat`
+- `shoober420__windows11-scripts__DisableDriverSignatureEnforcement.bat`
+- `shoober420__windows11-scripts__DisableEdge.bat`
+- `shoober420__windows11-scripts__DisableEventTraceSessions.bat`
+- `shoober420__windows11-scripts__DisableGPUPreemption.bat`
+- `shoober420__windows11-scripts__DisableHDR.bat`
+- `shoober420__windows11-scripts__DisableHighPrecisionEventTimer.bat`
+- `shoober420__windows11-scripts__DisableIPHelper.bat`
+- `shoober420__windows11-scripts__DisableIntelDSA.bat`
+- `shoober420__windows11-scripts__DisableIntelPPM.bat`
+- `shoober420__windows11-scripts__DisableLanmanServer.bat`
+- `shoober420__windows11-scripts__DisableLanmanWorkstation.bat`
+- `shoober420__windows11-scripts__DisableLowQosTimerResolution.bat`
+- `shoober420__windows11-scripts__DisableMIDI2.0.bat`
+- `shoober420__windows11-scripts__DisableMaintenanceServices.bat`
+- `shoober420__windows11-scripts__DisableMicrophone.bat`
+- `shoober420__windows11-scripts__DisableNLA.bat`
+- `shoober420__windows11-scripts__DisableNVIDIAContainer.bat`
+- `shoober420__windows11-scripts__DisableNetBIOSHelper.bat`
+- `shoober420__windows11-scripts__DisableNetworkSetupService.bat`
+- `shoober420__windows11-scripts__DisableNull.bat`
+- `shoober420__windows11-scripts__DisableOverlays.bat`
+- `shoober420__windows11-scripts__DisablePCW.bat`
+- `shoober420__windows11-scripts__DisablePDC.bat`
+- `shoober420__windows11-scripts__DisablePageFile.bat`
+- `shoober420__windows11-scripts__DisablePerProcessSystemDPI.bat`
+- `shoober420__windows11-scripts__DisablePowerShell.bat`
+- `shoober420__windows11-scripts__DisablePrefetcher.bat`
+- `shoober420__windows11-scripts__DisableSAM.bat`
+- `shoober420__windows11-scripts__DisableSENS.bat`
+- `shoober420__windows11-scripts__DisableSGRMBroker.bat`
+- `shoober420__windows11-scripts__DisableSSDPDiscovery.bat`
+- `shoober420__windows11-scripts__DisableSSL+LegacyTLS.bat`
+- `shoober420__windows11-scripts__DisableScheduledTasks.bat`
+- `shoober420__windows11-scripts__DisableSearchHost.bat`
+- `shoober420__windows11-scripts__DisableSerializeTimerExpiration.bat`
+- `shoober420__windows11-scripts__DisableServicesAMD.bat`
+- `shoober420__windows11-scripts__DisableServicesIntel.bat`
+- `shoober420__windows11-scripts__DisableServicesInternet.bat`
+- `shoober420__windows11-scripts__DisableServicesWindows.bat`
+- `shoober420__windows11-scripts__DisableShellExperienceHost.bat`
+- `shoober420__windows11-scripts__DisableShellInfrastructureHost.bat`
+- `shoober420__windows11-scripts__DisableStartMenu.bat`
+- `shoober420__windows11-scripts__DisableStateRepository.bat`
+- `shoober420__windows11-scripts__DisableStore.bat`
+- `shoober420__windows11-scripts__DisableSysMain.bat`
+- `shoober420__windows11-scripts__DisableTLS1.2.bat`
+- `shoober420__windows11-scripts__DisableTPM+SecureBoot.bat`
+- `shoober420__windows11-scripts__DisableTaskScheduler.bat`
+- `shoober420__windows11-scripts__DisableThemes.bat`
+- `shoober420__windows11-scripts__DisableThreadDpcEnable.bat`
+- `shoober420__windows11-scripts__DisableTouchPad.bat`
+- `shoober420__windows11-scripts__DisableTrustedInstaller.bat`
+- `shoober420__windows11-scripts__DisableUAC.bat`
+- `shoober420__windows11-scripts__DisableUI.bat`
+- `shoober420__windows11-scripts__DisableUPnPDeviceHost.bat`
+- `shoober420__windows11-scripts__DisableVSS.bat`
+- `shoober420__windows11-scripts__DisableVolumeShadowCopy.bat`
+- `shoober420__windows11-scripts__DisableWLAN_AutoConfig.bat`
+- `shoober420__windows11-scripts__DisableWMI.bat`
+- `shoober420__windows11-scripts__DisableWebAccountManager.bat`
+- `shoober420__windows11-scripts__DisableWebThreatDefense.bat`
+- `shoober420__windows11-scripts__DisableWinHTTP.bat`
+- `shoober420__windows11-scripts__DisableWindowsConnectionManager.bat`
+- `shoober420__windows11-scripts__DisableWindowsDefender.bat`
+- `shoober420__windows11-scripts__DisableWindowsFirewall.bat`
+- `shoober420__windows11-scripts__DisableWindowsSearch.bat`
+- `shoober420__windows11-scripts__DisableWindowsSecurityCenter.bat`
+- `shoober420__windows11-scripts__DisableWindowsUpdate.bat`
+- `shoober420__windows11-scripts__DisableWindowsWatermark.bat`
+- `shoober420__windows11-scripts__EnableAMDGPU_DalDramClockChangeLatencyNs.bat`
+- `shoober420__windows11-scripts__EnableAMDHDAudioService.bat`
+- `shoober420__windows11-scripts__EnableActivateWindows.bat`
+- `shoober420__windows11-scripts__EnableAppX.bat`
+- `shoober420__windows11-scripts__EnableApplicationFrameHost.bat`
+- `shoober420__windows11-scripts__EnableBluetooth.bat`
+- `shoober420__windows11-scripts__EnableCOM+EventSystem.bat`
+- `shoober420__windows11-scripts__EnableCPUMitigations.bat`
+- `shoober420__windows11-scripts__EnableCldFlt.bat`
+- `shoober420__windows11-scripts__EnableClearPageFileAtShutdown.bat`
+- `shoober420__windows11-scripts__EnableCommonLogFileSystem.bat`
+- `shoober420__windows11-scripts__EnableComponents.bat`
+- `shoober420__windows11-scripts__EnableDHCP.bat`
+- `shoober420__windows11-scripts__EnableDNSClient.bat`
+- `shoober420__windows11-scripts__EnableDistributeTimers.bat`
+- `shoober420__windows11-scripts__EnableEdge.bat`
+- `shoober420__windows11-scripts__EnableEssentialServices.bat`
+- `shoober420__windows11-scripts__EnableGPUPreemption.bat`
+- `shoober420__windows11-scripts__EnableHDR.bat`
+- `shoober420__windows11-scripts__EnableIntelDSA.bat`
+- `shoober420__windows11-scripts__EnableIntelPPM.bat`
+- `shoober420__windows11-scripts__EnableLanmanServer.bat`
+- `shoober420__windows11-scripts__EnableLowQosTimerResolution.bat`
+- `shoober420__windows11-scripts__EnableMIDI2.0.bat`
+- `shoober420__windows11-scripts__EnableMaintenanceServices.bat`
+- `shoober420__windows11-scripts__EnableMicrophone.bat`
+- `shoober420__windows11-scripts__EnableNLA.bat`
+- `shoober420__windows11-scripts__EnableNetworkSetupService.bat`
+- `shoober420__windows11-scripts__EnableNull.bat`
+- `shoober420__windows11-scripts__EnableOverlays.bat`
+- `shoober420__windows11-scripts__EnablePCW.bat`
+- `shoober420__windows11-scripts__EnablePDC.bat`
+- `shoober420__windows11-scripts__EnablePerProcessSystemDPI.bat`
+- `shoober420__windows11-scripts__EnablePowerShell.bat`
+- `shoober420__windows11-scripts__EnablePrefetcher.bat`
+- `shoober420__windows11-scripts__EnableSAM.bat`
+- `shoober420__windows11-scripts__EnableSENS.bat`
+- `shoober420__windows11-scripts__EnableSGRMBroker.bat`
+- `shoober420__windows11-scripts__EnableSearchHost.bat`
+- `shoober420__windows11-scripts__EnableSerializeTimerExpiration.bat`
+- `shoober420__windows11-scripts__EnableShellExperienceHost.bat`
+- `shoober420__windows11-scripts__EnableShellInfrastructureHost.bat`
+- `shoober420__windows11-scripts__EnableStartMenu.bat`
+- `shoober420__windows11-scripts__EnableStateRepository.bat`
+- `shoober420__windows11-scripts__EnableStore.bat`
+- `shoober420__windows11-scripts__EnableSysMain.bat`
+- `shoober420__windows11-scripts__EnableTLS1.2.bat`
+- `shoober420__windows11-scripts__EnableTaskScheduler.bat`
+- `shoober420__windows11-scripts__EnableThemes.bat`
+- `shoober420__windows11-scripts__EnableThreadDpcEnable.bat`
+- `shoober420__windows11-scripts__EnableTouchPad.bat`
+- `shoober420__windows11-scripts__EnableTrustedInstaller.bat`
+- `shoober420__windows11-scripts__EnableUAC.bat`
+- `shoober420__windows11-scripts__EnableUI.bat`
+- `shoober420__windows11-scripts__EnableVSS.bat`
+- `shoober420__windows11-scripts__EnableVolumeShadowCopy.bat`
+- `shoober420__windows11-scripts__EnableWLAN_AutoConfig.bat`
+- `shoober420__windows11-scripts__EnableWMI.bat`
+- `shoober420__windows11-scripts__EnableWebAccountManager.bat`
+- `shoober420__windows11-scripts__EnableWebThreatDefense.bat`
+- `shoober420__windows11-scripts__EnableWinHTTP.bat`
+- `shoober420__windows11-scripts__EnableWindowsConnectionManager.bat`
+- `shoober420__windows11-scripts__EnableWindowsFirewall.bat`
+- `shoober420__windows11-scripts__EnableWindowsSearch.bat`
+- `shoober420__windows11-scripts__EnableWindowsSecurityCenter.bat`
+- `shoober420__windows11-scripts__EnableWindowsUpdate.bat`
+- `shoober420__windows11-scripts__EnableWindowsWatermark.bat`
+- `shoober420__windows11-scripts__EnableWinget.bat`
+- `shoober420__windows11-scripts__Expert_Install.bat`
+- `shoober420__windows11-scripts__HighPriority.bat`
+- `shoober420__windows11-scripts__InstallChocolatey.bat`
+- `shoober420__windows11-scripts__InstallChromeCanary.bat`
+- `shoober420__windows11-scripts__InstallMicrosoftUIXamlCBS.bat`
+- `shoober420__windows11-scripts__InstallNotepad++.bat`
+- `shoober420__windows11-scripts__InstallPowerShell.bat`
+- `shoober420__windows11-scripts__InstallScoop.bat`
+- `shoober420__windows11-scripts__InstallStore.bat`
+- `shoober420__windows11-scripts__InstallVim.bat`
+- `shoober420__windows11-scripts__InstallWMIC.bat`
+- `shoober420__windows11-scripts__InstallWinget.bat`
+- `shoober420__windows11-scripts__InternetSettings.bat`
+- `shoober420__windows11-scripts__LaunchAMDAdrenalin.bat`
+- `shoober420__windows11-scripts__LaunchControlPanel.bat`
+- `shoober420__windows11-scripts__LaunchDXDiag.bat`
+- `shoober420__windows11-scripts__LaunchDeviceManager.bat`
+- `shoober420__windows11-scripts__LaunchFileExplorerOptions.bat`
+- `shoober420__windows11-scripts__LaunchMouseProperties.bat`
+- `shoober420__windows11-scripts__LaunchMultimediaProperties.bat`
+- `shoober420__windows11-scripts__LaunchNVControlPanel.bat`
+- `shoober420__windows11-scripts__LaunchNotificationAreaIcons.bat`
+- `shoober420__windows11-scripts__LaunchStore.bat`
+- `shoober420__windows11-scripts__LaunchSystemConfiguration.bat`
+- `shoober420__windows11-scripts__LaunchSystemProperties.bat`
+- `shoober420__windows11-scripts__MTU.bat`
+- `shoober420__windows11-scripts__Minimal_Install.bat`
+- `shoober420__windows11-scripts__MouseAccelFix.bat`
+- `shoober420__windows11-scripts__NICProperties.bat`
+- `shoober420__windows11-scripts__NVProfileInspector.bat`
+- `shoober420__windows11-scripts__PowerPlanExtraOptions.bat`
+- `shoober420__windows11-scripts__PowerPlanUltra.bat`
+- `shoober420__windows11-scripts__ProductKey.bat`
+- `shoober420__windows11-scripts__RefreshRate.bat`
+- `shoober420__windows11-scripts__ResetNetwork.bat`
+- `shoober420__windows11-scripts__RestartExplorer.bat`
+- `shoober420__windows11-scripts__SecuritySettings.bat`
+- `shoober420__windows11-scripts__Security_AntiCheat.bat`
+- `shoober420__windows11-scripts__SetACL.bat`
+- `shoober420__windows11-scripts__SetTimerResolution.bat`
+- `shoober420__windows11-scripts__ShowFileExtensions.bat`
+- `shoober420__windows11-scripts__Standard_Install.bat`
+- `shoober420__windows11-scripts__StartGraphicsPerfSvc.bat`
+- `shoober420__windows11-scripts__StartUpBATs.bat`
+- `shoober420__windows11-scripts__StaticIPConnection.bat`
+- `shoober420__windows11-scripts__Steam.bat`
+- `shoober420__windows11-scripts__TCP_AutoTuning.bat`
+- `shoober420__windows11-scripts__TaskbarChevronHide.bat`
+- `shoober420__windows11-scripts__TaskbarChevronShow.bat`
+- `shoober420__windows11-scripts__TaskbarHide.bat`
+- `shoober420__windows11-scripts__TaskbarShow.bat`
+- `shoober420__windows11-scripts__TestModeOff.bat`
+- `shoober420__windows11-scripts__TestModeOn.bat`
+- `shoober420__windows11-scripts__Theme.bat`
+- `shoober420__windows11-scripts__ThreadQuantum.bat`
+- `shoober420__windows11-scripts__UseLargePages.bat`
+- `shoober420__windows11-scripts__VCRedist.bat`
+- `shoober420__windows11-scripts__WallpaperSolidColor.bat`
+- `shoober420__windows11-scripts__WindowsFix.bat`
+- `shoober420__windows11-scripts__WindowsUpdateFix.bat`
+- `shoober420__windows11-scripts__WingetUpdateApps.bat`
+- `shoober420__windows11-scripts__run.bat`
+- `shoober420__windows11-scripts__wing3t.bat`
+- `swagkarna__Defeat-Defender-V1.2.0__Defeat-Defender.bat`
+- `swagkarna__Defeat-Defender-V1.2.0__Enable Smart Screen.bat`
+- `swagkarna__Defeat-Defender-V1.2.0__run.bat`
+- `userdocs__LFTP4WIN__LFTP4WIN-installer.cmd`
+- `warengonzaga__wifi-passview__dist__wifi-passview-v5.0.0-sohee.bat`
+- `warengonzaga__wifi-passview__src__core.bat`
+- `warengonzaga__wifi-passview__wifi-passview-v5.0.0-sohee.bat`
+- `wureset-tools__script-wureset__wureset.bat`
