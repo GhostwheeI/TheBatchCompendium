@@ -1,0 +1,128 @@
+name,url,description,stars
+Espionage724/Windows,https://github.com/Espionage724/Windows,Various batch files for Windows,218
+Archive-projects/Batch-File-examples,https://github.com/Archive-projects/Batch-File-examples,:shell: Various batch files (descriptions are in the read me file),66
+LintangWisesa/Microsoft_Office_2016_Activator,https://github.com/LintangWisesa/Microsoft_Office_2016_Activator,A simple batch file to activate Microsoft Office 2016,128
+Nickfost/Batch,https://github.com/Nickfost/Batch,All my batch files... ,11
+chsliu/batch,https://github.com/chsliu/batch,Batch files for Windows,24
+prestonsn/windows-10-activation-script,https://github.com/prestonsn/windows-10-activation-script,A Windows batch file that tries Windows activation keys found around the internet. ,186
+azmatt/windowsEnum,https://github.com/azmatt/windowsEnum,Batch file to help automate Windows enumeration for privilege escalation,89
+vegardit/cygwin-portable-installer,https://github.com/vegardit/cygwin-portable-installer,Windows batch file to perform unattended installations of a portable Cygwin environment.,199
+edinsuta/youtube-dl-batch,https://github.com/edinsuta/youtube-dl-batch,Simple batch files for simplifying basic usage of https://github.com/rg3/youtube-dl Windows .exe releases,72
+scottgriv/batch-useful_bat_files,https://github.com/scottgriv/batch-useful_bat_files,"⚙️ 🛠️ A collection of useful Windows Batch files. Tools include: folder backups, event logging, scheduled task management, FTP transfer, file movement, network status, search and replace text, emailing, etc.",21
+EbolaMan-YT/PsExec,https://github.com/EbolaMan-YT/PsExec,PsExec batch file but better,52
+KnightDanila/BAT_FFMPEG,https://github.com/KnightDanila/BAT_FFMPEG,"Batch script files for FFMPEG (Microsoft Windows and DOS, OS/2 :unicorn:)",132
+Zusier/Zusiers-optimization-Batch,https://github.com/Zusier/Zusiers-optimization-Batch,"The open source batch file that gives efforts to boost system performance, latency, and stability. ",117
+rossy/mpv-install,https://github.com/rossy/mpv-install,Sets up file associations for mpv on Windows,457
+jonstephens85/instantngp-batch,https://github.com/jonstephens85/instantngp-batch,Batch files to quickly prepare images and train a NeRF using Instant-NGP. This project only works for Instant-NGP Binaries on Windows.,120
+matej137/OutlookRemover,https://github.com/matej137/OutlookRemover,a little batch file that permanently removes the Outlook (New) app from Windows 10/11,235
+tinboye/Steam_workshop_scripts,https://github.com/tinboye/Steam_workshop_scripts,Arma 3 Steam Workshop Batch Files,15
+kodybrown/dos,https://github.com/kodybrown/dos,Some of my batch files and scripts,22
+slathrop/git-scripts-win,https://github.com/slathrop/git-scripts-win,Git Shell Scripts for Windows (Batch Files),19
+moom825/batch-extention-spoofer,https://github.com/moom825/batch-extention-spoofer,spoof an extension of any file by using U+202E Unicode character,17
+repnz/shellcode2exe,https://github.com/repnz/shellcode2exe,Batch script to compile a binary shellcode blob into an exe file,86
+rootjunky/Motorola-XML-To-Batch-Script,https://github.com/rootjunky/Motorola-XML-To-Batch-Script,This tool covers Motorola XML files to batch files for flashing firmware to Motorola Android Phones,16
+prashantmi/Rar-Password-Cracker,https://github.com/prashantmi/Rar-Password-Cracker,It's A Batch Code To Cracke RAR Encrypted Floders And Files,14
+conan513/TrinityBuilder,https://github.com/conan513/TrinityBuilder,This is the server builder batch file for TrinityBuilder package. ,12
+FoxP/PNG-to-ICO,https://github.com/FoxP/PNG-to-ICO,"KISS batch script to easily convert PNG, GIF, BMP, SVG or JPG images to multi-resolution ICO files using ImageMagick.",232
+Laf111/CEMU-Batch-Framework,https://github.com/Laf111/CEMU-Batch-Framework,CEMU's BatchFw is batch files framework over CEMU (Wii-U emulator),27
+Honguito98/enctool-batch,https://github.com/Honguito98/enctool-batch,Development tool for text protection within batch files.,14
+mitchv2020/QuestToolbox,https://github.com/mitchv2020/QuestToolbox,A batch file full of useful tools to use for Quest 1 and 2!,75
+NabiKAZ/video2gif,https://github.com/NabiKAZ/video2gif, A batch script for convert video to GIF files by FFmpeg.exe on Windows,65
+DannyDorito/DayZ-Startup-and-Restart-Script,https://github.com/DannyDorito/DayZ-Startup-and-Restart-Script,Batch file for all your DayZ Server startup needs!,26
+massgravel/Microsoft-Activation-Scripts,https://github.com/massgravel/Microsoft-Activation-Scripts,"Open-source Windows and Office activator featuring HWID, Ohook, TSforge, KMS38, and Online KMS activation methods, along with advanced troubleshooting.",140376
+awesome-windows11/windows11,https://github.com/awesome-windows11/windows11,"🌎 Windows 11 Settings, Tweaks, Scripts",2723
+AveYo/MediaCreationTool.bat,https://github.com/AveYo/MediaCreationTool.bat,Universal MCT wrapper script for all Windows 10/11 versions from 1507 to 21H2!,9647
+frizb/Windows-Privilege-Escalation,https://github.com/frizb/Windows-Privilege-Escalation,Windows Privilege Escalation Techniques and Scripts,890
+lstprjct/IDM-Activation-Script,https://github.com/lstprjct/IDM-Activation-Script,IDM Activation & Trail Reset Script,13173
+atlantsecurity/windows-hardening-scripts,https://github.com/atlantsecurity/windows-hardening-scripts,Windows 10/11 hardening scripts,253
+swagkarna/Defeat-Defender-V1.2.0,https://github.com/swagkarna/Defeat-Defender-V1.2.0,Powerful batch script to dismantle complete windows defender protection and even bypass tamper protection ..Disable Windows-Defender Permanently....Hack windows. POC,1545
+prestonsn/windows-10-activation-script,https://github.com/prestonsn/windows-10-activation-script,A Windows batch file that tries Windows activation keys found around the internet. ,186
+peterjc123/pytorch-scripts,https://github.com/peterjc123/pytorch-scripts,A few Windows specific scripts for PyTorch,412
+gladiatx0r/Powerless,https://github.com/gladiatx0r/Powerless,Windows privilege escalation (enumeration) script designed with OSCP labs (legacy Windows) in mind,478
+ZephrFish/WindowsHardeningScript,https://github.com/ZephrFish/WindowsHardeningScript,Some settings stolen from multiple scripts @ZephrFish,121
+ManuelGil/Script-Reset-Windows-Update-Tool,https://github.com/ManuelGil/Script-Reset-Windows-Update-Tool,This script reset the Windows Update Components.,196
+Yamato-Security/EnableWindowsLogSettings,https://github.com/Yamato-Security/EnableWindowsLogSettings,Documentation and scripts to properly enable Windows event logs.,619
+m2nlight/WindowsServerToWindowsDesktop,https://github.com/m2nlight/WindowsServerToWindowsDesktop,"A bat script to auto config Windows Server 2016 to ""Windows Desktop""",125
+shoober420/windows11-scripts,https://github.com/shoober420/windows11-scripts,Windows 11 Scripts,158
+davidmarble/virtualenvwrapper-win,https://github.com/davidmarble/virtualenvwrapper-win,Port of Doug Hellmann's virtualenvwrapper to Windows batch scripts,460
+akhilnathe/winactivate,https://github.com/akhilnathe/winactivate,Easy-to-use Windows HWID/KMS38 Activation Script.,78
+virusfreak7/Windows11-activator-script-,https://github.com/virusfreak7/Windows11-activator-script-,Windows 11 Activator,81
+wureset-tools/script-wureset,https://github.com/wureset-tools/script-wureset,This script reset the Windows Update Components.,159
+daboynb/windows_scripts,https://github.com/daboynb/windows_scripts,some scripts for windows,95
+diogo-fernan/ir-rescue,https://github.com/diogo-fernan/ir-rescue,A Windows Batch script and a Unix Bash script to comprehensively collect host forensic data during incident response.,483
+warengonzaga/wifi-passview,https://github.com/warengonzaga/wifi-passview,An open source batch script based WiFi Passview for Windows!,316
+Jisll/windows11,https://github.com/Jisll/windows11,"🪐 Perfect Windows 11: A Portal to Windows 11 Settings, Optimizations, and Scripts",248
+kkkgo/KMS_VL_ALL,https://github.com/kkkgo/KMS_VL_ALL,🔑KMS_VL_ALL - Smart Activation Script,3006
+TerryHuangHD/Windows10-VersionSwitcher,https://github.com/TerryHuangHD/Windows10-VersionSwitcher,"A simple script to switch Windows 10 & Windows 11 version, supports Home & Pro & Education & Enterprise x Retail & VL.",156
+PX4/PX4-windows-toolchain,https://github.com/PX4/PX4-windows-toolchain,Repo containing all scripts to install and use the PX4 Toolchain for Windows.,33
+jpalbert/webcam-settings-dialog-windows,https://github.com/jpalbert/webcam-settings-dialog-windows,This is a small script to launch the webcam settings dialog from Windows directly.,292
+ManzDev/video-converter-scripts,https://github.com/ManzDev/video-converter-scripts,Video converter scripts for Windows to multiple formats (with ffmpeg),89
+JaredCabot/OneDrive-Uninstaller,https://github.com/JaredCabot/OneDrive-Uninstaller,Batch script to completely uninstall OneDrive in Windows 10,150
+danielj0nes/Activate-Windows10-Pro-Script,https://github.com/danielj0nes/Activate-Windows10-Pro-Script,Batch script to activate Windows 10 Pro for free (requires an unlicensed installation of Windows 10).,50
+npocmaka/batch.scripts,https://github.com/npocmaka/batch.scripts,batch script utils and examples by npocmaka - ,1114
+AveYo/MediaCreationTool.bat,https://github.com/AveYo/MediaCreationTool.bat,Universal MCT wrapper script for all Windows 10/11 versions from 1507 to 21H2!,9647
+KnightDanila/BAT_FFMPEG,https://github.com/KnightDanila/BAT_FFMPEG,"Batch script files for FFMPEG (Microsoft Windows and DOS, OS/2 :unicorn:)",132
+PassingTheKnowledge/Batchography,https://github.com/PassingTheKnowledge/Batchography,Scripts and snippets from the Batchography book,123
+geekcomputers/Batch,https://github.com/geekcomputers/Batch,Some basic batch scripts,77
+logicopslab/BatchScripting,https://github.com/logicopslab/BatchScripting,Snippets of the basic course from Batch Scripting tutorial,11
+happy05dz/Batch-Script-Collection,https://github.com/happy05dz/Batch-Script-Collection,"Collection of Batch scripts, examples and some details for various commands are considered.",132
+m2nlight/WindowsServerToWindowsDesktop,https://github.com/m2nlight/WindowsServerToWindowsDesktop,"A bat script to auto config Windows Server 2016 to ""Windows Desktop""",125
+DannyDorito/ARMA-3-Startup-and-Restart-Script,https://github.com/DannyDorito/ARMA-3-Startup-and-Restart-Script,.bat file for all your ARMA 3 Server startup needs!,14
+Serede/mkvtoolnix-batch,https://github.com/Serede/mkvtoolnix-batch,Windows Batch script to automate batch processing using mkvtoolnix.,106
+ermannog/BatchScripts,https://github.com/ermannog/BatchScripts,Windows Batch scripts,16
+TarikSeyceri/Windows-10-Update-Disabler.bat,https://github.com/TarikSeyceri/Windows-10-Update-Disabler.bat,An executable cmd batch script that 100% Disables Windows 10 Update.,73
+Octanium91/NFS_Heat_CPU_Load_FIX,https://github.com/Octanium91/NFS_Heat_CPU_Load_FIX,"Need for Speed Heat, CPU 90-100% load fix (script, windows)",233
+TarikSeyceri/Windows-Cleaner.bat,https://github.com/TarikSeyceri/Windows-Cleaner.bat,An executable cmd batch script that Cleans Windows from unneeded temporary files.,25
+Takaovi/BatchStealer,https://github.com/Takaovi/BatchStealer,"A batch script for taking information. A bit overdeveloped, and kind of useless.",41
+describe19/check-video,https://github.com/describe19/check-video,Windows .bat script that checks video file integrity using ffmpeg,25
+Shicoder/Meshlab-MLXScriptBatchProcessing,https://github.com/Shicoder/Meshlab-MLXScriptBatchProcessing,Batch Processing MLX scripts(批量处理meshlab的脚本),37
+rootjunky/Motorola-XML-To-Batch-Script,https://github.com/rootjunky/Motorola-XML-To-Batch-Script,This tool covers Motorola XML files to batch files for flashing firmware to Motorola Android Phones,16
+Batlez/Batlez-Tweaks,https://github.com/Batlez/Batlez-Tweaks,"Batlez Tweaks is a batch tweaking script that optimizes your system to provide the best gaming experience possible. It is free and open-source, and works on Windows 10 & 11!",129
+jersonmartinez/ShellScriptBatch,https://github.com/jersonmartinez/ShellScriptBatch,Digging into the little-traveled land of Shell Script Batch,14
+K3V1991/ADBKit,https://github.com/K3V1991/ADBKit,Pure ADB (Android Debug Bridge) with Batch Script to easily open a CMD Window,96
+corpnewt/Batch-Scripts,https://github.com/corpnewt/Batch-Scripts,A collection of batch scripts I've written over the years.,12
+buananetpbun/Run-Command-Window-Batch-Script,https://github.com/buananetpbun/Run-Command-Window-Batch-Script,"Run Command: A Complete List for Windows 7,8 and 10 ",13
+MansourM/ez-dns-changer.bat,https://github.com/MansourM/ez-dns-changer.bat,"Easy (EZ) DNS changer, A simple windows batch script file to change windows dns servers",31
+JonnyBanana/BatchMan-e-Robby,https://github.com/JonnyBanana/BatchMan-e-Robby,"BatchMan & Robby is Simple Script Written in Batch just for fun, only works on Windows XP systems or lower (on w10 it can work if the autorun function is enabled in advance) Once downloaded, you have to burn it to CD or DVD as a data disc THE CD starts immediately whit autorun function and crash the system.. Normally it is not detected by any antivirus",17
+Da2dalus/FunBatchCode-MalicousAndNonMalicous,https://github.com/Da2dalus/FunBatchCode-MalicousAndNonMalicous,Handy batch scripts (Malicous and not malicous),15
+eppic/ytBATCH,https://github.com/eppic/ytBATCH,An easy to use Batch Script for downloading Audio and Video using yt-dlp.,43
+AndrewHazelden/MultiMesh-Scripting,https://github.com/AndrewHazelden/MultiMesh-Scripting,MultiMesh Scripting is a set of Windows BAT scripts that help simply the process of running meshlabserver MLX scripts and batch processing a folder of 3D scene files.,30
+acgbfull/IBM_Appscan_Batch_Scan_Script,https://github.com/acgbfull/IBM_Appscan_Batch_Scan_Script,IBM AppScan批量扫描脚本,15
+BingLingGroup/run-udp2raw-batch,https://github.com/BingLingGroup/run-udp2raw-batch,"udp2raw, tinyportmapper, kcptun, udpspeeder windows batch scripts.",14
+kezoponk/DDoS.bat,https://github.com/kezoponk/DDoS.bat,DDoS utility written in cmd,13
+andry81/contools,https://github.com/andry81/contools,"A wide range of scripts for Windows interpreter (cmd.exe) and other interpreters such as bash shell (.sh), visual basic (.vbs), python (.py) and so on. Plus some set of standalone console utilities and tools aside other utilities and tools from cygwin, msys and mingw. • :page_with_curl: https://github.com/andry81-stats/contools--gh-stats",13
+buxh/ZER0-Batch-Optimizer,https://github.com/buxh/ZER0-Batch-Optimizer,"Easy to use, user friendly, simple batch optimizer made for windows 10 version 1909",16
+eddex/aseprite-windows-docker-build,https://github.com/eddex/aseprite-windows-docker-build,Build Aseprite executable for Windows using Docker :space_invader::whale2:,229
+ImGuiNET/ImGui.NET-nativebuild,https://github.com/ImGuiNET/ImGui.NET-nativebuild,Windows/macOS/Linux/iOS/Android build automation for cimgui. Used to package up ImGui.NET.,34
+userdocs/LFTP4WIN,https://github.com/userdocs/LFTP4WIN,lftp for Windows - Windows task scheduler automation with push notifications via WinSCP custom commands.,85
+leetfin/Windows10Tools,https://github.com/leetfin/Windows10Tools,Tools for Windows 10,71
+dend/windows-dev-box,https://github.com/dend/windows-dev-box,💻 Scripts and relevant configuration to set up my Windows development box.,47
+Chainski/WindowsCleanerUtility,https://github.com/Chainski/WindowsCleanerUtility,A minimal windows batch script that cleans your PC from temporary files.,44
+Moodkiller/SendTo-rclone-GDrive,https://github.com/Moodkiller/SendTo-rclone-GDrive,Right click on a folder / file and send it to your preconfigured rclone (GDrive) remote in Windows,28
+yaldabaoth444/asphalt_legends_unite_windows_bot,https://github.com/yaldabaoth444/asphalt_legends_unite_windows_bot,Asphalt 9 bot for windows,11
+cgartlab/Software_Install_Script,https://github.com/cgartlab/Software_Install_Script,"This is a commonly used software batch installation script for my own use, based on the Winget Package Manager. ",25
+bongochong/CWP-Utilities,https://github.com/bongochong/CWP-Utilities,"Combined Windows Privacy Utilities | Hosts file updater, block list manager, and more. Open source tools for Windows users, to help ensure privacy & security. Block ads, spyware domains, and other malicious activity/traffic, all through a simple interface.",77
+Deadshot0x7/Wifipassword,https://github.com/Deadshot0x7/Wifipassword,"This Windows Script will help to find the Wi-Fi Password, which connected to your system earlier.",13
+C0nw0nk/qBittorrent,https://github.com/C0nw0nk/qBittorrent,qBittorrent Windows Automatic batch file command line script to check torrent for seeders if it has no seeders it will delete the torrent automatically .cmd .bat batch file command line cli cmd,28
+cavo789/tools_winscp,https://github.com/cavo789/tools_winscp,Tips and tricks and small scripts for automation of the WinSCP FTP client (Windows).,16
+fr0st-iwnl/WinConfigs,https://github.com/fr0st-iwnl/WinConfigs,⚙️ \\ A script to simplify Windows setup by automating software installation and system tweaks. [❗Check README❗],29
+CoolDotty/NeverWake,https://github.com/CoolDotty/NeverWake,Stop windows from randomly waking up your laptop,10
+HiiARA/SoPI,https://github.com/HiiARA/SoPI,SoPI (Software Post Install) Software para descargar/instalar después de una instalación de Windows 7/10/11),10
+ardyan69/wa,https://github.com/ardyan69/wa,Whatsapp Blasting with TagUI,13
+wizz13150/PDQ_Repo,https://github.com/wizz13150/PDQ_Repo,"PDQ Deploy Scripts, Tools, Utilities ... For IT daily Administration",85
+aliounebfam/vscode_projects_launcher,https://github.com/aliounebfam/vscode_projects_launcher,Scripts pour démarrer plusieurs projets VSCode à partir d'un répertoire principal. | Scripts to launch multiple VSCode projects from a main directory.,12
+ancel1x/Ancels-Performance-Batch,https://github.com/ancel1x/Ancels-Performance-Batch,Open Source Tweaker made to improve system performance and lower system latency.,239
+Batlez/Batlez-Tweaks,https://github.com/Batlez/Batlez-Tweaks,"Batlez Tweaks is a batch tweaking script that optimizes your system to provide the best gaming experience possible. It is free and open-source, and works on Windows 10 & 11!",129
+tcja/Windows-10-tweaks,https://github.com/tcja/Windows-10-tweaks,This repo contains multiple scripts to optimize windows 10,50
+warengonzaga/wrn-cleaner,https://github.com/warengonzaga/wrn-cleaner,A free maintenance tool that can automatically or manually clean up your Windows machine in a simple and reliable way. 😉💻🧹,99
+ddashizzle/snapraid_made_simple,https://github.com/ddashizzle/snapraid_made_simple,Batch script to simply maintenance and notification of SnapRAID for Windows 10 and adjacent versions.  ,10
+AhmetHan/EDR_Tester,https://github.com/AhmetHan/EDR_Tester,This batch script file wants to check your EDR systems detection and response capabilities in a more noisy way!,11
+fr0st-iwnl/WinConfigs,https://github.com/fr0st-iwnl/WinConfigs,⚙️ \\ A script to simplify Windows setup by automating software installation and system tweaks. [❗Check README❗],29
+Ec-25/FixIt,https://github.com/Ec-25/FixIt,A simple Script capable of optimizing and repairing almost any error that may occur on your Windows computer,84
+NARCOTIC/Windows-Optimizer,https://github.com/NARCOTIC/Windows-Optimizer,Windows-Optimizer is a batch program. This program is Optimizing and Defragmenting All Connected Storage Drives & Fixing File System Errors.,24
+PAXANDDOS/ForzaHorizonFix,https://github.com/PAXANDDOS/ForzaHorizonFix,A simple fix for Forza Horizon 4 and Forza Horizon 5 crashes,35
+t4rra/hotspot-helper,https://github.com/t4rra/hotspot-helper,Fixes the lag spikes caused by windows hotspot when using wireless Virtual Reality streaming apps.,31
+n00mkrad/ffmpeg-batch-utils,https://github.com/n00mkrad/ffmpeg-batch-utils,Useful batch scripts for videos. Originally made as a toolbox for use with upscaling neural networks.,12
+szybnev/TTL-Changer,https://github.com/szybnev/TTL-Changer,Script to change TTL on Windows,13
+Scrut1ny/Windows-Debloating-Script,https://github.com/Scrut1ny/Windows-Debloating-Script,"Ultimate Windows tweaking guide for best performance, privacy, & security!",42
+Batlez/Batlez-Tweaks,https://github.com/Batlez/Batlez-Tweaks,"Batlez Tweaks is a batch tweaking script that optimizes your system to provide the best gaming experience possible. It is free and open-source, and works on Windows 10 & 11!",129
