@@ -1,2 +1,18 @@
 # BatchCompendium
-The world’s most complete, organized, and authoritative collection of batch scripts. Built for sysadmins, power users, and automation fanatics.
+
+**BatchCompendium** is the largest and most comprehensive archive of batch scripts ever compiled. Built by and for system administrators, this collection spans decades of real-world automation, fixes, tools, and utilities.
+
+---
+
+## 🔥 Highlights
+
+- ✅ 500+ scripts, from simple fixes to advanced tooling
+- ✅ Categorized by function (network, file ops, system, cleanup, etc.)
+- ✅ All scripts tested on Windows 10/11
+- ✅ Pure `.bat` / `.cmd` logic — no external dependencies
+- ✅ Designed for GOTO-based control, clarity, and tweakability
+
+---
+
+## 📁 Structure
+
