@@ -22,4 +22,4 @@
 
 All categorized batch files now live under the `/tools/` directory.
 
-<pre> <code> /tools/ ├── Network & Internet Tools/ │ └── IPScan.bat ├── System Tweaks & Performance Enhancements/ │ └── CleanStartup.bat </code> </pre>
+<pre> ```text /tools/ ├── Network & Internet Tools/ │ └── IPScan.bat ├── System Tweaks & Performance Enhancements/ │ └── CleanStartup.bat ``` </pre>
