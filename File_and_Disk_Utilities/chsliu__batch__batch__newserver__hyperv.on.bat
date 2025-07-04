@@ -1,1 +1,0 @@
-bcdedit /set hypervisorlaunchtype Auto

@@ -1,4 +1,0 @@
-slmgr -dli
-
-slmgr -xpr
-

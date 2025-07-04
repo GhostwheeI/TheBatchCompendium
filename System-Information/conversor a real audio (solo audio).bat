@@ -1,1 +1,0 @@
-"%~dp0ffmpeg.exe" -i "%1" -vn -acodec real_144 "%1.ra"

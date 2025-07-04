@@ -1,1 +1,0 @@
-Reg import "\\sccm2012\e$\SCCM_Repository\Software\Scripts\OpenCMDHere\Win10\Add_CMDAsAdmin_win10.reg"

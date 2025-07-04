@@ -1,1 +1,0 @@
-runas /noprofile /user:Administrator '%*'

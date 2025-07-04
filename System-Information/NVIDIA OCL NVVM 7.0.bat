@@ -1,1 +1,0 @@
-setx "NVCL_USE_NVVM70_COMPILER" "1" /M

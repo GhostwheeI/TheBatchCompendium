@@ -1,1 +1,0 @@
-"%~dp0ffmpeg.exe" -i "%1" -pix_fmt yuv420p -vcodec h264 -acodec aac -strict -2 "%1.mp4"
