@@ -20,3 +20,12 @@
 
 ## 📁 Structure
 
+All categorized batch files now live under the `/tools/` directory.
+
+Example:
+/tools/
+├── Network & Internet Tools/
+│ └── IPScan.bat
+├── System Tweaks & Performance Enhancements/
+│ └── CleanStartup.bat
+
