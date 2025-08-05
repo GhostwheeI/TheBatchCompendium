@@ -1,0 +1,4 @@
+git
+nodejs
+fastfetch
+ntop

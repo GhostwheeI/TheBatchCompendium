@@ -1,0 +1,68 @@
+﻿# 排除檔案
+- *.iso
+- *.o
+- *.obj
+- .DS_Store
+- Thumbs.db
+- desktop.ini
+- ehthumbs_vista.db
+- swapfile.sys
+
+# 排除目錄
+- $RECYCLE.BIN/
+- $Recycle.Bin/
+- .SyncArchive/
+- .SyncTrash/
+- 1FS/
+- 2NTFS/
+- 3GS/
+- 4WHS/
+- AMD/
+- ATI Stream/
+- Adobe/
+- Apple Computer/
+- BTSync/
+- BlueStacks/
+- Cache/
+- Client Computer Backups/
+- Company/
+- Config.Msi/
+- DEL/
+- Dropbox/
+- FOUND*/
+- Google Drive/
+- GoogleChromePortable/
+- GoogleEarth/
+- Hyper-V/
+- Junkyard/
+- Microsoft/
+- NetBackup/
+- Notepad++Portable/
+- PCDr/
+- Package Cache/
+- PerfLogs/
+- RECYCLED/
+- SkyDriveTemp/
+- System Volume Information/
+- TEMP/
+- Temp/
+- VMware/
+- Virtual Machines/
+- Windows.old/
+- Windows/
+- admin/
+- cache/
+- del/
+- log/
+- recycle/
+- 暫存區/
+- 網管區/
+
+# 包含檔案
++ *.*
+
+# 包含目錄
++ */
+
+# 禁止傳輸其他
+- *

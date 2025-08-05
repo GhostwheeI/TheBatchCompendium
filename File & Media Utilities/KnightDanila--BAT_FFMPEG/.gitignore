@@ -1,0 +1,12 @@
+# Ignore all files. But .gitignore file is not ignore
+*
+!*.exe
+!*.bat
+!.gitignore
+!*.conf
+!index.html
+
+# Allow the app folder itself
+!Apps/
+# Allow all files and subfolders inside app
+!Apps/**

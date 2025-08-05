@@ -1,0 +1,75 @@
+#%% version: 1
+
+# FORMAT:
+#   [<attributes>] <variable>[:<class_name>]=<value>
+#   [<attributes>] <variable>[:[<param0>][:[<param1>]]]=<value>
+#
+# <attributes>:           Variable space separated attributes: once | export | upath
+# <variable>:             Variable name corresponding to the regex: [_a-zA-Z][_a-zA-Z0-9]*
+# <class_name>:           Builtin class variant names: OSWIN | OSUNIX | BAT | SH
+#   OSWIN:                Apply on Windows system including cygwin/mingw/msys subsystems.
+#   OSUNIX:               Apply on Unix/Linux systems excluding cygwin/mingw/msys subsystems.
+#   BAT:                  Apply on Windows system when this file has loaded from the Windows batch script loader.
+#   SH:                   Apply on any system when this file has loaded from the Bash shell script loader.
+#
+# <param0>, <param1>:     Custom variable parameters.
+#                         Example:
+#                           <Param0>=OSWINXP
+#                           <Param1>=OS32
+#
+#                           Loads besides the builtin variable classes, these:
+#                           A:OSWINXP=...
+#                           B:OSWINXP:OS32=...
+#                           C::OS32=...
+#
+# <value>:                Value with substitution support: `%<variable>%`
+#                         Can start by the `"` quote character, but two quotes does remove only when exist on both ends of a value.
+#
+
+upath CMAKE_SHELL:BAT                           =%COMSPEC%
+upath CMAKE_SHELL:SH                            =%SHELL%
+
+upath CMAKE_PROJECT_ROOT                        ="%TACKLELIB_PROJECT_ROOT%"
+
+upath CONTOOLS_BASH_ROOT                        ="%CONTOOLS_ROOT%/bash"
+upath CONTOOLS_BUILD_TOOLS_ROOT                 ="%CONTOOLS_ROOT%/build"
+upath CONTOOLS_CMAKE_ROOT                       ="%CONTOOLS_ROOT%/cmake"
+upath CONTOOLS_SQLITE_TOOLS_ROOT                ="%CONTOOLS_ROOT%/sqlite"
+upath CONTOOLS_TESTLIB_ROOT                     ="%CONTOOLS_ROOT%/testlib"
+upath CONTOOLS_VARS_ROOT                        ="%CONTOOLS_ROOT%/vars"
+upath CONTOOLS_XML_TOOLS_ROOT                   ="%CONTOOLS_ROOT%/xml"
+upath CONTOOLS_WMI_ROOT                         ="%CONTOOLS_ROOT%/wmi"
+
+upath CONTOOLS_TOOL_ADAPTORS_ROOT               ="%CONTOOLS_ROOT%/ToolAdaptors"
+
+upath CONTOOLS_7ZIP_ROOT                        ="%CONTOOLS_PROJECT_EXTERNALS_ROOT%/7zip"
+
+upath CONTOOLS_MSYS2_ROOT                       ="%CONTOOLS_PROJECT_EXTERNALS_ROOT%/msys2"
+upath CONTOOLS_MSYS2_USR_ROOT                   ="%CONTOOLS_MSYS2_ROOT%/win7"
+upath CONTOOLS_MSYS2_USR_ROOT:OSWINXP           ="%CONTOOLS_MSYS2_ROOT%/winxp"
+
+upath CONTOOLS_HASHDEEP_ROOT                    ="%CONTOOLS_PROJECT_EXTERNALS_ROOT%/hashdeep"
+upath CONTOOLS_SQLITE_ROOT                      ="%CONTOOLS_PROJECT_EXTERNALS_ROOT%/sqlite"
+upath CONTOOLS_SPMILLER_CONSOLE_TOOLBOX_ROOT    ="%CONTOOLS_PROJECT_EXTERNALS_ROOT%/stevemiller-console-toolbox"
+upath CONTOOLS_SYSINTERNALS_ROOT                ="%CONTOOLS_PROJECT_EXTERNALS_ROOT%/sysinternals"
+upath CONTOOLS_WKHTMLTOX_ROOT                   ="%CONTOOLS_PROJECT_EXTERNALS_ROOT%/wkhtmltox"
+upath CONTOOLS_XMLSTARLET_ROOT                  ="%CONTOOLS_PROJECT_EXTERNALS_ROOT%/xmlstarlet"
+
+upath CMAKE_PROJECT_INPUT_CONFIG_ROOT           ="%TACKLELIB_PROJECT_INPUT_CONFIG_ROOT%/cmake"
+upath CMAKE_PROJECT_OUTPUT_CONFIG_ROOT          ="%TACKLELIB_PROJECT_OUTPUT_CONFIG_ROOT%/cmake"
+
+upath CMAKE_CONFIG_VARS_SYSTEM_FILE_IN          ="%CMAKE_PROJECT_INPUT_CONFIG_ROOT%/config.system.vars.in"
+upath CMAKE_CONFIG_VARS_SYSTEM_FILE             ="%CMAKE_PROJECT_OUTPUT_CONFIG_ROOT%/config.system.vars"
+
+upath CMAKE_CONFIG_VARS_USER_0_FILE_IN          ="%CMAKE_PROJECT_INPUT_CONFIG_ROOT%/config.0.vars.in"
+upath CMAKE_CONFIG_VARS_USER_0_FILE             ="%CMAKE_PROJECT_OUTPUT_CONFIG_ROOT%/config.0.vars"
+
+# CAUTION:
+#
+#   * Is required for `set_vars_from_locked_file_pair.bat` script which does called from `cmake/set_vars_from_files.bat` script
+#     to be able to create variables with UTF-8 values.
+#   * Windows XP must not use UTF code page.
+#
+once CHCP                                       =65001
+CHCP:OSWINXP                                    =437
+OEMCP:OSWINXP                                   =437

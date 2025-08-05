@@ -1,0 +1,124 @@
+=========================================================
+INSTALL-UPDATE-USE : 
+=========================================================
+
+---------------------------------------------------------
+INSTALL : 
+---------------------------------------------------------
+
+    Extract the archive's contain in your loadiine's games folder, then go in _BatchFW_Install and launch Setup.bat
+    
+    On the first install, you can display this documentation and the BatchFW_readme.txt file is build.
+    Then setup.bat will run in SILENT mode. 
+    
+    When answering questions in setup.bat, a log file for your current host is created under _BatchFW_Install.
+    Never delete this file! It contains your host's settings (fullscreen mode, desired aspect ratio, GLCache path...)
+    
+    During the setup, you'll define an ouput (shortcut or executables) folder for all the CEMU's installs to use but also: 
+        - check and update _BatchFW_Graphic_Packs folder;
+        - browse to a folder containing mods for your games so they will be copied under each game's folder;
+        - if you want to run CEMU in fullscreen or in windowed mode;
+        - if you let BatchFw completes your graphic packs (GFX) presets (V3) or create intermediates packs (V2);
+        - your desired display aspect ratios (only if you has chosen the previous option);
+        - the number of users to create (each user uses his own saves when launching his shortcut);
+        - to define an ordered list of third party software (DS4windows, CemuGyro, SepeedHack...) to launch before CEMU in 
+          the order defined after checking if the program is not already running;
+        - use externals mlc01 paths to copy/move saves, updates and DLC under each game's folder;
+        - use your CEMU's mlc01 subfolder as well;
+    
+    Once the setup is finished, the output folder is opened in a windows explorer. 
+    It contains:
+        - shortcuts to BatchFw logs, readmes and tools ;
+        - a CEMU folder that contains a subfolder for each version registered containing:
+            * a shorctut for editing the log of this version (log of the last launch);
+            * a shortcut to the script that deletes your settings for this version and each games (selected);
+            * a gameProfiles sufolder containing shortcuts to edit example.ini and the profile files of your games
+          and also a shortcut to delete settings for all your games and for all versions of CEMU you have registered.    
+    
+    Note: this folder contains only links or useless data and can be deleted to be fully recreated).
+    
+    
+    RECOMMENDATIONS: 
+    
+    To be fully functional BatchFw needs that you register the last(s) version(s) of CEMU you used to play your games.            
+    If you're using more the one version of CEMU (on version per game for example) register all installations and select 
+    the games to associated with those versions.
+             
+    If you're using one version of CEMU per player (and handle differents saves this way) : register this version for one user
+    and use the shortcut "Wii-U Games\BatchFW\Tools\Games's saves\Import Saves" to import saves for other users afterward.    
+    
+---------------------------------------------------------
+UPDATE : 
+---------------------------------------------------------
+
+    BatchFW comes with an auto-updater
+
+---------------------------------------------------------
+USE : 
+---------------------------------------------------------
+    
+    You don't need to manually open CEMU UI to play your game anymore. 
+    Once you have collected all the settings (on the first launch of a game) for all versions of CEMU you play on, use the shortcuts 
+    on your desktop (Or your shortcuts folder).
+
+    You want to create shortcuts to all your games for versions of CEMU using the ones created after the installation on your desktop?:
+
+        "Wii-U Games\BatchFW\Create CEMU's shortcuts for selected games.lnk" for a single CEMU version;
+        "Wii-U Games\BatchFW\Set BatchFw settings and register CEMU installs.lnk" for more than one version (call setup.bat 
+        in silent mode);
+
+    You want to :
+        - change the way how Cemu is launched?: delete the shortcuts and re-create them;
+        - delete your settings for version X.Y.Z or you want to recreate them?: use "Wii-U Games\CEMU\cemu_X.Y.Z\Delete my cemu_X.Y.Z's settings.lnk";
+        - add a game?: 
+            * use "Wii-U Games\Import Games with updates and DLC.lnk" to browse to a folder that contains games, updates and DLC
+              BatchFW will ties all new games in your games folder with installing their updates and DLC in each game's folder
+            * once new games copied in your games folder, create shortcuts for those games
+        - remove a game from your library?: simply delete its created shortcut (BatchFw's broken shortcuts appear as the others ones, but without icon);
+
+    With BatchFw, to backup fully a game (saves + update + DLC + transferable cache + controller settings...) just compress your game's folder
+        
+    Since V11, "how to" informations are displayed in the console when creating shortcuts.
+    
+    BatchFW come with an embeded graphic pack folder (_BatchFW_Graphic_Packs) created during setup.bat
+    It checks for a graphic packs update availability (on eSlashiee repository) and update its packs  
+    Only graphic packs of the games you use are kept in _BatchFW_Graphic_Packs and in CEMU UI only the one for the game launched are displayed
+    
+    There's a specific documentation detailling graphic packs handling in BatchFW.
+    
+    Your open GLCache is backuped under %USERPROFILE%\AppData\Roaming OR local\%GPU_VENDOR%\_BatchFW_CemuGLCache per game,for all your game and 
+    for all GPU users.
+    
+    If you run an NVIDIA GPU, you can choose to disable automatically the precompiled cache for all your games (batchFw will patch CemuHook 
+    files and CEMU's game profile)
+    So you go only with your GPU cache, saving space on your device by not duplicating the compiled shaders cache and making it compatible 
+    with all version of CEMU.
+    This cache is valid unless you update your display's drivers : no need to fully recompile each cache for each game on each CEMU's version
+    like when using the precompiled shader cache)
+    When you update your drivers, batchFW will automically detect the new cache to backup and remove the old one.
+
+    Disabling precompiled cache is not proposed to AMD's GPU because of their 64Mo size cache limitation. But the GLCache is even backuped.
+    
+    If you run an iGPU (Intel graphics), you will be asked to use the -noLegacy CEMU's option (-Legacy if CemuW 1.15)
+
+    AUTOMATIC_IMPORT : 
+    
+    This process is enabled by default.
+    If any settings are already saved for a game, BatchFw will try to use them avoiding you to collect settings from scratch.
+    It begins with the newer versions down to the the last ones.
+    One or two checks are done (depending on the couple of versions checked) to decide if the import of the source is valid or not : 
+    - bin files size check: if source file's size is striclty lower than target's one => invalid import
+    - if bin files check is OK, check if all criticals nodes (settings ones only) in xml target file exist in source file, if not => invalid import
+      
+    In addition, on last versions of CEMU, its auto-updater handle the settings.xml file upgrade.
+
+    WARNING : Do not delete log files created under ./logs 
+    If you need to reset BatchFw to default, use the shortcut "Wii-U Games\BatchFW\Reset BatchFw.lnk"
+    
+    
+---------------------------------------------------------
+UNINSTALL : 
+---------------------------------------------------------
+
+    Launch uninstall.bat from your desktop : "Wii-U Games\BatchFW\Uninstall BatchFW"
+
