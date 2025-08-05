@@ -25,28 +25,89 @@ This repo unifies **hundreds of one-off scripts**, plus **entire toolkits from r
 
 ## 🗂 Project Structure
 
-Scripts and imported toolkits are organized by purpose:
+Scripts and imported toolkits are organized by purpose with **3,000+ batch files** across these categories:
 
 ```
 TheBatchCompendium/
-├── All-In-One/                        # General-purpose or multipurpose scripts
-├── Automation & Installers/          # Deployment helpers and setup routines
-├── Cleanup & Maintenance/            # Disk, cache, and service cleanup tools
-├── File & Media Utilities/           # File search, rename, sort, and media ops
-├── Hardware & Network Tweaks/        # NIC, ping, IP configs, device fixes
-├── Other & Uncategorized/            # One-off tools that don't fit elsewhere
-├── Privacy & Debloating/             # Debloaters, telemetry blockers, hardening
-├── Scripting Libraries & Examples/   # Reusable routines and educational snippets
-├── Security & Diagnostics/           # AV checks, system status, forensic helpers
-├── System Optimization & Tweaks/     # Performance and OS settings
-├── Update & Activation Utilities/    # Activation, licensing, and Windows Update
-└── z.repo_support/                   # Instructions, logs, metadata
+├── All-In-One/ (55 .bat/.cmd files, 232 total)          # General-purpose & multipurpose scripts
+│   ├── DannyDorito--ARMA-3-Startup-and-Restart-Script/  # Game server automation
+│   ├── DannyDorito--DayZ-Startup-and-Restart-Script/    # DayZ server management
+│   ├── Jisll--windows11/                                # Windows 11 tweaks collection
+│   ├── Takaovi--BatchStealer/                          # System information gatherer
+│   ├── diogo-fernan--ir-rescue/                        # Incident response toolkit
+│   ├── frizb--Windows-Privilege-Escalation/            # Security testing scripts
+│   ├── massgravel--Microsoft-Activation-Scripts/       # Windows/Office activation
+│   └── [... 4 more projects]
+│
+├── Automation & Installers/ (5 .bat/.cmd files, 34 total)  # Deployment & setup routines
+│   ├── Shicoder--Meshlab-MLXScriptBatchProcessing/     # 3D model batch processing
+│   └── cgartlab--Software_Install_Script/              # Automated software installs
+│
+├── Cleanup & Maintenance/ (1,383 .bat/.cmd files, 3,922 total)  # Disk, cache & service cleanup
+│   ├── AveYo--MediaCreationTool.bat/                   # Windows Media Creation Tool
+│   ├── Chainski--WindowsCleanerUtility/                # Comprehensive system cleaner
+│   ├── Kerbalnut--Batch-Tools-SysAdmin/                # System admin toolkit
+│   ├── ManuelGil--Script-Reset-Windows-Update-Tool/    # Windows Update repair
+│   ├── Scrut1ny--Windows-Debloating-Script/            # Windows debloating tools
+│   ├── TarikSeyceri--Windows-10-Update-Disabler.bat/   # Update control scripts
+│   ├── TheCraZyDuDee--Windows-Gaming-Optimization-Script/ # Gaming optimization
+│   ├── ZephrFish--WindowsHardeningScript/               # Security hardening
+│   ├── warengonzaga--wrn-cleaner/                      # System cleaner utility
+│   └── [... 33+ more projects]
+│
+├── File & Media Utilities/ (1,240 .bat/.cmd files, 2,384 total)  # File ops & media processing
+│   ├── AndrewHazelden--MultiMesh-Scripting/            # 3D mesh batch processing
+│   ├── C0nw0nk--qBittorrent/                           # BitTorrent automation
+│   ├── FoxP--PNG-to-ICO/                               # Image format conversion
+│   ├── JaredCabot--OneDrive-Uninstaller/               # OneDrive removal tool
+│   ├── K3V1991--ADBKit/                                # Android Debug Bridge tools
+│   ├── KnightDanila--BAT_FFMPEG/                       # FFmpeg batch operations
+│   ├── ManzDev--video-converter-scripts/               # Video conversion tools
+│   ├── NabiKAZ--video2gif/                             # Video to GIF conversion
+│   ├── Serede--mkvtoolnix-batch/                       # MKV video processing
+│   ├── rossy--mpv-install/                             # MPV media player installer
+│   ├── swagkarna--Defeat-Defender-V1.2.0/              # Windows Defender bypass
+│   ├── warengonzaga--wifi-passview/                    # WiFi password viewer
+│   └── [... 42+ more projects]
+│
+├── Hardware & Network Tweaks/ (51 .bat/.cmd files, 75 total)  # NIC, ping, IP configs, device fixes
+│   ├── Deadshot0x7--Wifipassword/                      # WiFi password extraction
+│   ├── Octanium91--NFS_Heat_CPU_Load_FIX/              # Game performance fix
+│   └── ermannog--BatchScripts/                         # Various hardware scripts
+│
+├── Other & Uncategorized/ (259 .bat/.cmd files, 306 total)  # One-off tools that don't fit elsewhere
+│   ├── Da2dalus--FunBatchCode-MalicousAndNonMalicous/  # Educational batch examples
+│   ├── EbolaMan-YT--PsExec/                            # PsExec utilities
+│   ├── corpnewt--Batch-Scripts/                        # Mixed utility scripts
+│   ├── geekcomputers--Batch/                           # General batch collection
+│   └── [... 3+ more projects]
+│
+├── Privacy & Debloating/ (0 .bat/.cmd files, 1 total)      # Debloaters, telemetry blockers, hardening
+│   └── [Currently contains only README]
+│
+├── Scripting Libraries & Examples/ (56 .bat/.cmd files, 60 total)  # Reusable routines & educational snippets
+│   └── logicopslab--BatchScripting/                    # Comprehensive batch examples
+│
+├── Security & Diagnostics/ (3 .bat/.cmd files, 11 total)   # AV checks, system status, forensic helpers
+│   └── atlantsecurity--windows-hardening-scripts/      # Windows security hardening
+│
+├── System Optimization & Tweaks/ (1 .bat/.cmd file, 5 total)  # Performance and OS settings
+│   └── UnLovedCookie--CoutX/                           # System optimization tools
+│
+├── Update & Activation Utilities/ (5 .bat/.cmd files, 17 total)  # Activation, licensing & Windows Update
+│   ├── akhilnathe--winactivate/                        # Windows activation script
+│   ├── danielj0nes--Activate-Windows10-Pro-Script/     # Windows 10 Pro activation
+│   └── virusfreak7--Windows11-activator-script-/       # Windows 11 activation
+│
+└── z.repo_support/ (0 .bat/.cmd files, 2 total)           # Instructions, logs, metadata
+    └── scripts/                                         # Repository maintenance scripts
 ```
 
-Each folder may contain:
-- 🧾 Single-purpose `.bat` scripts
-- 📦 Full script-based repositories (flattened for GitHub browsing)
-- 🔧 `.txt` files describing usage (where needed)
+### What's Inside Each Category:
+- 🧾 **Single-purpose `.bat` scripts** - Ready-to-run utilities
+- 📦 **Full repositories** - Complete projects flattened for easy browsing  
+- 🔧 **Documentation** - READMEs and usage instructions where available
+- ⚡ **3,057 total batch/cmd files** across all categories
 
 ---
 
