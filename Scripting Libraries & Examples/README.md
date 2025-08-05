@@ -5,4 +5,4 @@ A collection of reusable batch snippets, function templates, and example scripts
 ## Included Repositories:
 
 - [logicopslab--BatchScripting](logicopslab--BatchScripting.Name)
-- **logicopslab--BatchScripting** - Snippets of the basic course from Batch Scripting tutorial
+- **logicopslab--BatchScripting** - [Open](./logicopslab--BatchScripting)

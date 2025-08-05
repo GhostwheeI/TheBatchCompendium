@@ -21,10 +21,10 @@ Miscellaneous or unclassified scripts that do not cleanly fit into the defined c
 - [matej137--OutlookRemover](matej137--OutlookRemover.Name)
 - [Nickfost--Batch](Nickfost--Batch.Name)
 - [npocmaka--batch.scripts](npocmaka--batch.scripts.Name)
-- **corpnewt--Batch-Scripts** - A collection of batch scripts I've written over the years.
-- **Da2dalus--FunBatchCode-MalicousAndNonMalicous** - Handy batch scripts (Malicous and not malicous)
-- **EbolaMan-YT--PsExec** - 
-- **geekcomputers--Batch** - 
-- **matej137--OutlookRemover** - 
-- **Nickfost--Batch** - 
-- **npocmaka--batch.scripts** - batch.scripts
+- **corpnewt--Batch-Scripts** - [Open](./corpnewt--Batch-Scripts)
+- **Da2dalus--FunBatchCode-MalicousAndNonMalicous** - [Open](./Da2dalus--FunBatchCode-MalicousAndNonMalicous)
+- **EbolaMan-YT--PsExec** - [Open](./EbolaMan-YT--PsExec)
+- **geekcomputers--Batch** - [Open](./geekcomputers--Batch)
+- **matej137--OutlookRemover** - [Open](./matej137--OutlookRemover)
+- **Nickfost--Batch** - [Open](./Nickfost--Batch)
+- **npocmaka--batch.scripts** - [Open](./npocmaka--batch.scripts)

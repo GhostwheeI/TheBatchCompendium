@@ -29,14 +29,14 @@ This category includes multi-tool batch script suites that combine system utilit
 - [repnz--shellcode2exe](repnz--shellcode2exe.Name)
 - [Takaovi--BatchStealer](Takaovi--BatchStealer.Name)
 - [tinboye--Steam_workshop_scripts](tinboye--Steam_workshop_scripts.Name)
-- **aliounebfam--vscode_projects_launcher** - - Français (Version actuelle)
-- **DannyDorito--ARMA-3-Startup-and-Restart-Script** - Originally created for the Exile Mod, but can be used for any ARMA 3 Server
-- **DannyDorito--DayZ-Startup-and-Restart-Script** - The best script for creating a DayZ server, a .bat file for **all** your DayZ Server startup needs!
-- **diogo-fernan--ir-rescue** - ***
-- **frizb--Windows-Privilege-Escalation** - Here is my step-by-step windows privlege escalation methodology. This guide assumes you are starting with a very limited shell like a webshell, netcat reverse shell or a remote telnet connection.
-- **Jisll--windows11** - <h1 align="center">
-- **jonstephens85--instantngp-batch** - Instant NGP Batch Readme:
-- **massgravel--Microsoft-Activation-Scripts** - <p align="center"><img src="https://massgrave.dev/img/logo_small.png" alt="MAS Logo"></p>
-- **repnz--shellcode2exe** - Compile a binary shellcode blob into an exe file
-- **Takaovi--BatchStealer** - My attempt at making a stealer with batch, it sucks. The script will not be updated anymore. If something, a new one would be made, this time properly. Treat the current BatchStealer as POC, not as a finished product/malware.
-- **tinboye--Steam_workshop_scripts** - This is a collection of windows batch files
+- **aliounebfam--vscode_projects_launcher** - [Open](./aliounebfam--vscode_projects_launcher)
+- **DannyDorito--ARMA-3-Startup-and-Restart-Script** - [Open](./DannyDorito--ARMA-3-Startup-and-Restart-Script)
+- **DannyDorito--DayZ-Startup-and-Restart-Script** - [Open](./DannyDorito--DayZ-Startup-and-Restart-Script)
+- **diogo-fernan--ir-rescue** - [Open](./diogo-fernan--ir-rescue)
+- **frizb--Windows-Privilege-Escalation** - [Open](./frizb--Windows-Privilege-Escalation)
+- **Jisll--windows11** - [Open](./Jisll--windows11)
+- **jonstephens85--instantngp-batch** - [Open](./jonstephens85--instantngp-batch)
+- **massgravel--Microsoft-Activation-Scripts** - [Open](./massgravel--Microsoft-Activation-Scripts)
+- **repnz--shellcode2exe** - [Open](./repnz--shellcode2exe)
+- **Takaovi--BatchStealer** - [Open](./Takaovi--BatchStealer)
+- **tinboye--Steam_workshop_scripts** - [Open](./tinboye--Steam_workshop_scripts)
