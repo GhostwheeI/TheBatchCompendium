@@ -1,1 +1,0 @@
-@start "diskmgmt" diskmgmt.msc

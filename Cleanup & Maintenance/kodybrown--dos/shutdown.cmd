@@ -1,1 +1,0 @@
-@shutdown.exe /p /f

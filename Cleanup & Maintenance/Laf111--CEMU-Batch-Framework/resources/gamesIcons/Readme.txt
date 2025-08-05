@@ -1,1 +1,0 @@
-Here will be placed icons converted from jpg box art of the games (when meta/iconTex.tga is missing)

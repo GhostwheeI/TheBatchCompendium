@@ -1,1 +1,0 @@
-@set BEGIN_TIME=%TIME%

@@ -1,1 +1,0 @@
-runBot.bat -f SE.scm

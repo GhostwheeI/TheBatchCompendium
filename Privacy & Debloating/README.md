@@ -1,3 +1,0 @@
-# Privacy & Debloating
-
-## Included Repositories:

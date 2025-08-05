@@ -1,3 +1,0 @@
-cmd.exe
-/c
-echo %?22%%?25%APPDATA%?25%%?22% & pause
