@@ -1,4 +1,7 @@
 # Scripting Libraries & Examples
 
-## Included Repositories:
-- **logicopslab--BatchScripting** ??? [Snippets of the basic course from Batch Scripting tutorial](./logicopslab--BatchScripting)
+## Detailed Index
+
+- logicopslab--BatchScripting: Batch scripting tutorial snippets.
+
+Refer to the subfolder for more details and usage instructions.
