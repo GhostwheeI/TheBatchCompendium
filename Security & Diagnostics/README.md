@@ -1,3 +1,8 @@
 # Security & Diagnostics
 
-Diagnose, defend, and detect. Forensics tools, integrity checks, and system hardening in batch form. Perfect for admins and security researchers who want fast, scriptable answers.
+Covers scripts for malware scanning, security diagnostics, and forensic or incident response tooling.
+
+## Included Repositories:
+
+- [atlantsecurity--windows-hardening-scripts](atlantsecurity--windows-hardening-scripts.Name)
+- **atlantsecurity--windows-hardening-scripts** - <img src="https://github.com/atlantsecurity/windows-hardening-scripts/blob/main/windows-hardening-scripts.png?raw=true" />

@@ -1,3 +1,8 @@
 # Scripting Libraries & Examples
 
-Batch wisdom for the ages. Reference packs, sample scripts, and educational utilities for anyone looking to learn or extend the art of Windows batch scripting.
+A collection of reusable batch snippets, function templates, and example scripts useful for learning or integration.
+
+## Included Repositories:
+
+- [logicopslab--BatchScripting](logicopslab--BatchScripting.Name)
+- **logicopslab--BatchScripting** - Snippets of the basic course from Batch Scripting tutorial

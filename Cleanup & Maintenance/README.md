@@ -1,3 +1,129 @@
 # Cleanup & Maintenance
 
-Because a tidy system is a happy system. Remove temp files, caches, logs, and other digital dust. Keep your PC running smooth with regular automated cleanups and scheduled maintenance scripts.
+These scripts focus on cleaning up junk files, maintaining system performance, and resolving common OS clutter or corruption.
+
+## Included Repositories:
+
+- [acgbfull--IBM_Appscan_Batch_Scan_Script](acgbfull--IBM_Appscan_Batch_Scan_Script.Name)
+- [ai-joe-git--ComfyUI-Intel-Arc-Clean-Install-Windows-venv-XPU-](ai-joe-git--ComfyUI-Intel-Arc-Clean-Install-Windows-venv-XPU-.Name)
+- [andry81--contools](andry81--contools.Name)
+- [Archive-projects--Batch-File-examples](Archive-projects--Batch-File-examples.Name)
+- [AveYo--MediaCreationTool.bat](AveYo--MediaCreationTool.bat.Name)
+- [awesome-windows11--windows11](awesome-windows11--windows11.Name)
+- [bongochong--CWP-Utilities](bongochong--CWP-Utilities.Name)
+- [buananetpbun--Run-Command-Window-Batch-Script](buananetpbun--Run-Command-Window-Batch-Script.Name)
+- [cavo789--tools_winscp](cavo789--tools_winscp.Name)
+- [Chainski--WindowsCleanerUtility](Chainski--WindowsCleanerUtility.Name)
+- [daboynb--windows_scripts](daboynb--windows_scripts.Name)
+- [ddashizzle--snapraid_made_simple](ddashizzle--snapraid_made_simple.Name)
+- [dend--windows-dev-box](dend--windows-dev-box.Name)
+- [Ec-25--FixIt](Ec-25--FixIt.Name)
+- [eppic--ytBATCH](eppic--ytBATCH.Name)
+- [happy05dz--Batch-Script-Collection](happy05dz--Batch-Script-Collection.Name)
+- [HiiARA--SoPI](HiiARA--SoPI.Name)
+- [jersonmartinez--ShellScriptBatch](jersonmartinez--ShellScriptBatch.Name)
+- [Kerbalnut--Batch-Tools-SysAdmin](Kerbalnut--Batch-Tools-SysAdmin.Name)
+- [kkkgo--KMS_VL_ALL](kkkgo--KMS_VL_ALL.Name)
+- [kodybrown--dos](kodybrown--dos.Name)
+- [Laf111--CEMU-Batch-Framework](Laf111--CEMU-Batch-Framework.Name)
+- [lstprjct--IDM-Activation-Script](lstprjct--IDM-Activation-Script.Name)
+- [ManuelGil--Script-Reset-Windows-Update-Tool](ManuelGil--Script-Reset-Windows-Update-Tool.Name)
+- [n00mkrad--ffmpeg-batch-utils](n00mkrad--ffmpeg-batch-utils.Name)
+- [Scrut1ny--Windows-Debloating-Script](Scrut1ny--Windows-Debloating-Script.Name)
+- [SeregaSPb--Windows-10-batch-optimizer](SeregaSPb--Windows-10-batch-optimizer.Name)
+- [shoober420--windows11-scripts](shoober420--windows11-scripts.Name)
+- [t4rra--hotspot-helper](t4rra--hotspot-helper.Name)
+- [TarikSeyceri--Windows-10-Update-Disabler.bat](TarikSeyceri--Windows-10-Update-Disabler.bat.Name)
+- [TarikSeyceri--Windows-Cleaner.bat](TarikSeyceri--Windows-Cleaner.bat.Name)
+- [TheCraZyDuDee--Windows-Gaming-Optimization-Script](TheCraZyDuDee--Windows-Gaming-Optimization-Script.Name)
+- [vegardit--cygwin-portable-installer](vegardit--cygwin-portable-installer.Name)
+- [warengonzaga--wrn-cleaner](warengonzaga--wrn-cleaner.Name)
+- [wizz13150--PDQ_Repo](wizz13150--PDQ_Repo.Name)
+- [wureset-tools--script-wureset](wureset-tools--script-wureset.Name)
+- [yaldabaoth444--asphalt_legends_unite_windows_bot](yaldabaoth444--asphalt_legends_unite_windows_bot.Name)
+- [Yamato-Security--EnableWindowsLogSettings](Yamato-Security--EnableWindowsLogSettings.Name)
+- [ZephrFish--WindowsHardeningScript](ZephrFish--WindowsHardeningScript.Name)
+- [Zusier--Zusiers-optimization-Batch](Zusier--Zusiers-optimization-Batch.Name)
+
+## Included Repositories:
+
+- [acgbfull--IBM_Appscan_Batch_Scan_Script](acgbfull--IBM_Appscan_Batch_Scan_Script.Name)
+- [ai-joe-git--ComfyUI-Intel-Arc-Clean-Install-Windows-venv-XPU-](ai-joe-git--ComfyUI-Intel-Arc-Clean-Install-Windows-venv-XPU-.Name)
+- [andry81--contools](andry81--contools.Name)
+- [Archive-projects--Batch-File-examples](Archive-projects--Batch-File-examples.Name)
+- [AveYo--MediaCreationTool.bat](AveYo--MediaCreationTool.bat.Name)
+- [awesome-windows11--windows11](awesome-windows11--windows11.Name)
+- [bongochong--CWP-Utilities](bongochong--CWP-Utilities.Name)
+- [buananetpbun--Run-Command-Window-Batch-Script](buananetpbun--Run-Command-Window-Batch-Script.Name)
+- [cavo789--tools_winscp](cavo789--tools_winscp.Name)
+- [Chainski--WindowsCleanerUtility](Chainski--WindowsCleanerUtility.Name)
+- [daboynb--windows_scripts](daboynb--windows_scripts.Name)
+- [ddashizzle--snapraid_made_simple](ddashizzle--snapraid_made_simple.Name)
+- [dend--windows-dev-box](dend--windows-dev-box.Name)
+- [Ec-25--FixIt](Ec-25--FixIt.Name)
+- [eppic--ytBATCH](eppic--ytBATCH.Name)
+- [happy05dz--Batch-Script-Collection](happy05dz--Batch-Script-Collection.Name)
+- [HiiARA--SoPI](HiiARA--SoPI.Name)
+- [jersonmartinez--ShellScriptBatch](jersonmartinez--ShellScriptBatch.Name)
+- [Kerbalnut--Batch-Tools-SysAdmin](Kerbalnut--Batch-Tools-SysAdmin.Name)
+- [kkkgo--KMS_VL_ALL](kkkgo--KMS_VL_ALL.Name)
+- [kodybrown--dos](kodybrown--dos.Name)
+- [Laf111--CEMU-Batch-Framework](Laf111--CEMU-Batch-Framework.Name)
+- [lstprjct--IDM-Activation-Script](lstprjct--IDM-Activation-Script.Name)
+- [ManuelGil--Script-Reset-Windows-Update-Tool](ManuelGil--Script-Reset-Windows-Update-Tool.Name)
+- [n00mkrad--ffmpeg-batch-utils](n00mkrad--ffmpeg-batch-utils.Name)
+- [Scrut1ny--Windows-Debloating-Script](Scrut1ny--Windows-Debloating-Script.Name)
+- [SeregaSPb--Windows-10-batch-optimizer](SeregaSPb--Windows-10-batch-optimizer.Name)
+- [shoober420--windows11-scripts](shoober420--windows11-scripts.Name)
+- [t4rra--hotspot-helper](t4rra--hotspot-helper.Name)
+- [TarikSeyceri--Windows-10-Update-Disabler.bat](TarikSeyceri--Windows-10-Update-Disabler.bat.Name)
+- [TarikSeyceri--Windows-Cleaner.bat](TarikSeyceri--Windows-Cleaner.bat.Name)
+- [TheCraZyDuDee--Windows-Gaming-Optimization-Script](TheCraZyDuDee--Windows-Gaming-Optimization-Script.Name)
+- [vegardit--cygwin-portable-installer](vegardit--cygwin-portable-installer.Name)
+- [warengonzaga--wrn-cleaner](warengonzaga--wrn-cleaner.Name)
+- [wizz13150--PDQ_Repo](wizz13150--PDQ_Repo.Name)
+- [wureset-tools--script-wureset](wureset-tools--script-wureset.Name)
+- [yaldabaoth444--asphalt_legends_unite_windows_bot](yaldabaoth444--asphalt_legends_unite_windows_bot.Name)
+- [Yamato-Security--EnableWindowsLogSettings](Yamato-Security--EnableWindowsLogSettings.Name)
+- [ZephrFish--WindowsHardeningScript](ZephrFish--WindowsHardeningScript.Name)
+- [Zusier--Zusiers-optimization-Batch](Zusier--Zusiers-optimization-Batch.Name)
+- **acgbfull--IBM_Appscan_Batch_Scan_Script** - **IBM AppScan**是一款Web应用程序安全漏洞扫描工具，其图形化界面不能批量扫描，需要通过调用其自带的AppScanCMD.exe实现，故编写该批量扫描脚本。
+- **ai-joe-git--ComfyUI-Intel-Arc-Clean-Install-Windows-venv-XPU-** - This repository provides **fully automated batch scripts** to install and launch ComfyUI on Windows, optimized for both Intel Arc GPUs **and** Intel Ultra Core iGPUs (Meteor Lake/Core Ultra series) using the XPU backend.
+- **andry81--contools** - > [!NOTE]
+- **Archive-projects--Batch-File-examples** - <img align="left" src="Images/ReadMe/cmd.png" width="64px" >
+- **AveYo--MediaCreationTool.bat** - Not just an Universal MediaCreationTool wrapper script with ingenious support for business editions,
+- **awesome-windows11--windows11** - <h1 align="center"><img width=32px src="https://i.ibb.co/5KpSCNv/win11.png"> Awesome Win11 (<a href="https://github.com/awesome-windows11/windows11/releases/tag/3.8.4">v3.8.4</a>) </h1>
+- **bongochong--CWP-Utilities** - *2023 brought me some serious challenges and setbacks, due to a significant death in the family, which I am still recovering from. That being said, I have been working on notable additions and optimizations for a new release, which will eventually get pushed to this repo. I'm still actively maintaining this software, but if you truly can't wait for the improvements that are on the backburner while this project is in maintenance mode, I encourage you to install Cygwin and try out [the Cygwin port of my command line block list utilities](https://github.com/bongochong/CombinedPrivacyBlockLists/tree/master/BLT/Cygwin).*
+- **buananetpbun--Run-Command-Window-Batch-Script** - The run command window is one of the fastest and most efficient ways to directly access a multitude of Windows' functions, without sifting through the Control Panel or other menus. We have compiled for you a comprehensive list of 133 commands, confirmed to work in Windows 7, Windows 8, and Windows 10.
+- **cavo789--tools_winscp** - ![Banner](./banner.svg)
+- **Chainski--WindowsCleanerUtility** - <p align= "center">
+- **daboynb--windows_scripts** - If you wanna help me
+- **ddashizzle--snapraid_made_simple** - Batch script to simplify maintenance and daily notification of SnapRAID for Windows 10 and adjacent versions. It is being placed here in the hopes that it will be useful to others. This implementation is intended to harden against drive failures.
+- **dend--windows-dev-box** - <div align="center">
+- **Ec-25--FixIt** - ![FIXIT Banner](https://user-images.githubusercontent.com/57842821/209219699-82159c0b-37a2-4084-ba1f-cb823b010013.png)
+- **eppic--ytBATCH** - [![icon](https://github.com/eppic/ytBATCH/blob/main/bin/256.ico)](https://github.com/eppic/ytBATCH)
+- **happy05dz--Batch-Script-Collection** - Collection of Batch scripts, examples and some details for various commands are considered. The subjects include system administration, file management, computer maintenance,  Internet tools, and network administration.
+- **HiiARA--SoPI** - <meta http-equiv="Content-Language" content="es">
+- **jersonmartinez--ShellScriptBatch** - Digging into the little-traveled land of Shell Script Batch.
+- **Kerbalnut--Batch-Tools-SysAdmin** - This repo has grown bloated and curly, with too many other side projects growing in it, outside of its original scope. It has been changed to a `Template` Repository, so that new repos can be created from it with the same files structure, without being cloned or forked and carrying over all its messy history.
+- **kkkgo--KMS_VL_ALL** - [see here](https://github.com/lixuy/vlmcsd#valid-apps)
+- **kodybrown--dos** - dos utilities
+- **Laf111--CEMU-Batch-Framework** - BatchFw is a free framework for **CEMU** (WII-U emulator) based on batch, wmic outputs, powershell, vbs scripts and 3rd party tools.
+- **lstprjct--IDM-Activation-Script** - An open-source tool to activate and reset the trial of [Internet Download Manager](https://www.internetdownloadmanager.com/)
+- **ManuelGil--Script-Reset-Windows-Update-Tool** - <div align="center">
+- **n00mkrad--ffmpeg-batch-utils** - Useful batch scripts for videos. Originally made as a toolbox for use with upscaling neural networks.
+- **Scrut1ny--Windows-Debloating-Script** - > [!CAUTION]
+- **SeregaSPb--Windows-10-batch-optimizer** - 0. Intro
+- **shoober420--windows11-scripts** - Its not only about FPS, but also latency.
+- **t4rra--hotspot-helper** - Fixes the lag spikes caused by windows hotspot when using wireless Virtual Reality streaming apps.
+- **TarikSeyceri--Windows-10-Update-Disabler.bat** - An executable cmd batch script that 100% Disables Windows 10 Update.
+- **TarikSeyceri--Windows-Cleaner.bat** - An executable cmd batch script that Cleans Windows from unneeded temporary files.
+- **TheCraZyDuDee--Windows-Gaming-Optimization-Script** - Simple Batch that does optimizations like disabling Tasks, Services and much more while Gaming.<br/>
+- **vegardit--cygwin-portable-installer** - [![Build Status](https://github.com/vegardit/cygwin-portable-installer/workflows/Build/badge.svg "GitHub Actions")](https://github.com/vegardit/cygwin-portable-installer/actions?query=workflow%3ABuild)
+- **warengonzaga--wrn-cleaner** - [![created by](https://img.shields.io/badge/created%20by-Waren%20Gonzaga-blue.svg?longCache=true&style=flat-square)](https://github.com/warengonzaga) [![release](https://img.shields.io/github/release/warengonzaga/wrn-cleaner.svg?style=flat-square)](https://github.com/warengonzaga/wrn-cleaner/releases) [![star](https://img.shields.io/github/stars/warengonzaga/wrn-cleaner.svg?style=flat-square)](https://github.com/warengonzaga/wrn-cleaner/stargazers) [![license](https://img.shields.io/github/license/warengonzaga/wrn-cleaner.svg?style=flat-square)](https://github.com/warengonzaga/wrn-cleaner/blob/main/license)
+- **wizz13150--PDQ_Repo** - PDQ_Repo  (Not Official)
+- **wureset-tools--script-wureset** - [![GitHub Release](https://img.shields.io/github/v/release/wureset-tools/script-wureset)](https://github.com/wureset-tools/script-wureset/releases/tag/v10.5.5)
+- **yaldabaoth444--asphalt_legends_unite_windows_bot** - 📑[`Documentation`](http://monopolist.temp.swtest.ru/)  💾[`Last version 2025i`](https://boosty.to/a9bot/posts/43382513-f57b-4331-bd96-6fedce841ffa)
+- **Yamato-Security--EnableWindowsLogSettings** - <div align="center">
+- **ZephrFish--WindowsHardeningScript** - This script enhances the security of Windows operating systems by making various system modifications. It includes adjusting settings, policies, and features to reduce vulnerabilities and protect against various cyber threats.
+- **Zusier--Zusiers-optimization-Batch** - **THIS SCRIPT IS CURRENTLY UNSUPPORTED, I WILL UPDATE IT SOON ENOUGH. USE AT YOUR OWN RISK**
