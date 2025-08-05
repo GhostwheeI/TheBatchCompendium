@@ -61,20 +61,25 @@ This repo unifies **hundreds of one-off scripts**, plus **entire toolkits from r
 
 Scripts and imported toolkits are organized by purpose:
 
+## Folder Structure
+<details>
+  <summary>Click to expand folder structure</summary>
+
 ```
-TheBatchCompendium/
-├── Activation, Licensing & Update Scripts/ # Activation tools and licensing scripts
-├── Automation & Installers/               # Deployment helpers and setup routines
-├── Cleanup & Maintenance/                 # Disk, cache, and service cleanup tools
-├── File, Media & Conversion Tools/        # File operations, media conversion, and related tools
-├── Game Server & Mod Utilities/           # Game server management and modding scripts
-├── Hardware & Network Tweaks/             # NIC, ping, IP configs, device fixes
-├── Privacy & Debloating/                  # Debloaters, telemetry blockers, hardening
-├── Scripting Libraries & Examples/        # Reusable routines and educational snippets
-├── Security, Hardening & Diagnostics/     # Security, hardening, and diagnostic tools
-├── System Optimization & Performance/     # Performance tuning and system optimization
-└── z.repo_support/                        # Instructions, logs, metadata
+Activation, Licensing & Update Scripts/
+Automation & Installers/
+Cleanup & Maintenance/
+File, Media & Conversion Tools/
+Game Server & Mod Utilities/
+Hardware & Network Tweaks/
+Other & Uncategorized/
+Privacy & Debloating/
+Scripting Libraries & Examples/
+Security, Hardening & Diagnostics/
+System Optimization & Performance/
+z.repo_support/
 ```
+</details>
 
 Each folder may contain:
 - 🧾 Single-purpose `.bat` scripts
