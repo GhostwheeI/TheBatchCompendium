@@ -29,18 +29,17 @@ Scripts and imported toolkits are organized by purpose:
 
 ```
 TheBatchCompendium/
-├── All-In-One/                        # General-purpose or multipurpose scripts
-├── Automation & Installers/          # Deployment helpers and setup routines
-├── Cleanup & Maintenance/            # Disk, cache, and service cleanup tools
-├── File & Media Utilities/           # File search, rename, sort, and media ops
-├── Hardware & Network Tweaks/        # NIC, ping, IP configs, device fixes
-├── Other & Uncategorized/            # One-off tools that don't fit elsewhere
-├── Privacy & Debloating/             # Debloaters, telemetry blockers, hardening
-├── Scripting Libraries & Examples/   # Reusable routines and educational snippets
-├── Security & Diagnostics/           # AV checks, system status, forensic helpers
-├── System Optimization & Tweaks/     # Performance and OS settings
-├── Update & Activation Utilities/    # Activation, licensing, and Windows Update
-└── z.repo_support/                   # Instructions, logs, metadata
+├── Activation, Licensing & Update Scripts/ # Activation tools and licensing scripts
+├── Automation & Installers/               # Deployment helpers and setup routines
+├── Cleanup & Maintenance/                 # Disk, cache, and service cleanup tools
+├── File, Media & Conversion Tools/        # File operations, media conversion, and related tools
+├── Game Server & Mod Utilities/           # Game server management and modding scripts
+├── Hardware & Network Tweaks/             # NIC, ping, IP configs, device fixes
+├── Privacy & Debloating/                  # Debloaters, telemetry blockers, hardening
+├── Scripting Libraries & Examples/        # Reusable routines and educational snippets
+├── Security, Hardening & Diagnostics/     # Security, hardening, and diagnostic tools
+├── System Optimization & Performance/     # Performance tuning and system optimization
+└── z.repo_support/                        # Instructions, logs, metadata
 ```
 
 Each folder may contain:
