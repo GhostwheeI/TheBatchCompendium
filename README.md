@@ -63,22 +63,100 @@ Scripts and imported toolkits are organized by purpose:
 
 ## Folder Structure
 <details>
-  <summary>Click to expand folder structure</summary>
+  <summary>Activation, Licensing & Update Scripts</summary>
 
-```
-Activation, Licensing & Update Scripts/
-Automation & Installers/
-Cleanup & Maintenance/
-File, Media & Conversion Tools/
-Game Server & Mod Utilities/
-Hardware & Network Tweaks/
-Other & Uncategorized/
-Privacy & Debloating/
-Scripting Libraries & Examples/
-Security, Hardening & Diagnostics/
-System Optimization & Performance/
-z.repo_support/
-```
+- LintangWisesa--Microsoft_Office_2016_Activator/
+- massgravel--Microsoft-Activation-Scripts/
+- README.md
+</details>
+
+<details>
+  <summary>Automation & Installers</summary>
+
+- README.md
+</details>
+
+<details>
+  <summary>Cleanup & Maintenance</summary>
+
+- README.md
+</details>
+
+<details>
+  <summary>File, Media & Conversion Tools</summary>
+
+- AndrewHazelden--MultiMesh-Scripting/
+- C0nw0nk--qBittorrent/
+- CoolDotty--NeverWake/
+- Espionage724--Windows/
+- FoxP--PNG-to-ICO/
+- Honguito98--enctool-batch/
+- ImGuiNET--ImGui.NET-nativebuild/
+- JaredCabot--OneDrive-Uninstaller/
+- JonnyBanana--BatchMan-e-Robby/
+- K3V1991--ADBKit/
+- KnightDanila--BAT_FFMPEG/
+- MansourM--ez-dns-changer.bat/
+- ManzDev--video-converter-scripts/
+- Moodkiller--SendTo-rclone-GDrive/
+- NARCOTIC--Windows-Optimizer/
+- NabiKAZ--video2gif/
+- PAXANDDOS--ForzaHorizonFix/
+- PassingTheKnowledge--Batchography/
+- README.md
+- Serede--mkvtoolnix-batch/
+- TerryHuangHD--Windows10-VersionSwitcher/
+- abbodi1406--BatUtil/
+- anonymlol--Encoding_automation_scripts/
+- ard...
+</details>
+
+<details>
+  <summary>Game Server & Mod Utilities</summary>
+
+- README.md
+</details>
+
+<details>
+  <summary>Hardware & Network Tweaks</summary>
+
+- README.md
+</details>
+
+<details>
+  <summary>Other & Uncategorized</summary>
+
+- README.md
+</details>
+
+<details>
+  <summary>Privacy & Debloating</summary>
+
+- README.md
+</details>
+
+<details>
+  <summary>Scripting Libraries & Examples</summary>
+
+- README.md
+</details>
+
+<details>
+  <summary>Security, Hardening & Diagnostics</summary>
+
+- README.md
+</details>
+
+<details>
+  <summary>System Optimization & Performance</summary>
+
+- README.md
+</details>
+
+<details>
+  <summary>z.repo_support</summary>
+
+- README.md
 </details>
 
 Each folder may contain:
