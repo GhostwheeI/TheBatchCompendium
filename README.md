@@ -8,6 +8,10 @@ Welcome to **The Batch Compendium**, a comprehensive collection of batch scripts
 
 ![Stars](https://img.shields.io/github/stars/GhostwheeI/TheBatchCompendium?style=social) ![Forks](https://img.shields.io/github/forks/GhostwheeI/TheBatchCompendium?style=social) ![Issues](https://img.shields.io/github/issues/GhostwheeI/TheBatchCompendium) ![License](https://img.shields.io/github/license/GhostwheeI/TheBatchCompendium)
 
+## Badges
+
+![Windows](https://img.shields.io/badge/Platform-Windows-0078D6?logo=windows&logoColor=white) ![Batch](https://img.shields.io/badge/Language-Batch-4D4D4D?logo=windows-terminal&logoColor=white) ![Automation](https://img.shields.io/badge/Category-Automation-FFB13B?logo=automattic&logoColor=white) ![Open Source](https://img.shields.io/badge/Open%20Source-Yes-brightgreen?logo=open-source-initiative&logoColor=white)
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Features](#features)
