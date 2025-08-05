@@ -25,28 +25,197 @@ This repo unifies **hundreds of one-off scripts**, plus **entire toolkits from r
 
 ## 🗂 Project Structure
 
-Scripts and imported toolkits are organized by purpose:
+Scripts and imported toolkits are organized by purpose. Each folder may contain single-purpose `.bat` scripts, full script-based repositories, or supporting documentation.
 
-```
-TheBatchCompendium/
-├── All-In-One/                        # General-purpose or multipurpose scripts
-├── Automation & Installers/          # Deployment helpers and setup routines
-├── Cleanup & Maintenance/            # Disk, cache, and service cleanup tools
-├── File & Media Utilities/           # File search, rename, sort, and media ops
-├── Hardware & Network Tweaks/        # NIC, ping, IP configs, device fixes
-├── Other & Uncategorized/            # One-off tools that don't fit elsewhere
-├── Privacy & Debloating/             # Debloaters, telemetry blockers, hardening
-├── Scripting Libraries & Examples/   # Reusable routines and educational snippets
-├── Security & Diagnostics/           # AV checks, system status, forensic helpers
-├── System Optimization & Tweaks/     # Performance and OS settings
-├── Update & Activation Utilities/    # Activation, licensing, and Windows Update
-└── z.repo_support/                   # Instructions, logs, metadata
-```
+<details>
+<summary><strong>📁 All-In-One</strong> - General-purpose or multipurpose scripts</summary>
 
-Each folder may contain:
-- 🧾 Single-purpose `.bat` scripts
-- 📦 Full script-based repositories (flattened for GitHub browsing)
-- 🔧 `.txt` files describing usage (where needed)
+- DannyDorito--ARMA-3-Startup-and-Restart-Script
+- DannyDorito--DayZ-Startup-and-Restart-Script
+- Jisll--windows11
+- Takaovi--BatchStealer
+- aliounebfam--vscode_projects_launcher
+- diogo-fernan--ir-rescue
+- frizb--Windows-Privilege-Escalation
+- jonstephens85--instantngp-batch
+- massgravel--Microsoft-Activation-Scripts
+- repnz--shellcode2exe
+- tinboye--Steam_workshop_scripts
+
+</details>
+
+<details>
+<summary><strong>📁 Automation & Installers</strong> - Deployment helpers and setup routines</summary>
+
+- Shicoder--Meshlab-MLXScriptBatchProcessing
+- cgartlab--Software_Install_Script
+
+</details>
+
+<details>
+<summary><strong>📁 Cleanup & Maintenance</strong> - Disk, cache, and service cleanup tools</summary>
+
+- Archive-projects--Batch-File-examples
+- AveYo--MediaCreationTool.bat
+- Chainski--WindowsCleanerUtility
+- Ec-25--FixIt
+- HiiARA--SoPI
+- Kerbalnut--Batch-Tools-SysAdmin
+- Laf111--CEMU-Batch-Framework
+- ManuelGil--Script-Reset-Windows-Update-Tool
+- Scrut1ny--Windows-Debloating-Script
+- SeregaSPb--Windows-10-batch-optimizer
+- TarikSeyceri--Windows-10-Update-Disabler.bat
+- TarikSeyceri--Windows-Cleaner.bat
+- TheCraZyDuDee--Windows-Gaming-Optimization-Script
+- Yamato-Security--EnableWindowsLogSettings
+- ZephrFish--WindowsHardeningScript
+- Zusier--Zusiers-optimization-Batch
+- acgbfull--IBM_Appscan_Batch_Scan_Script
+- ai-joe-git--ComfyUI-Intel-Arc-Clean-Install-Windows-venv-XPU-
+- andry81--contools
+- awesome-windows11--windows11
+- bongochong--CWP-Utilities
+- buananetpbun--Run-Command-Window-Batch-Script
+- cavo789--tools_winscp
+- daboynb--windows_scripts
+- ddashizzle--snapraid_made_simple
+- dend--windows-dev-box
+- eppic--ytBATCH
+- happy05dz--Batch-Script-Collection
+- jersonmartinez--ShellScriptBatch
+- kkkgo--KMS_VL_ALL
+- kodybrown--dos
+- lstprjct--IDM-Activation-Script
+- n00mkrad--ffmpeg-batch-utils
+- shoober420--windows11-scripts
+- t4rra--hotspot-helper
+- vegardit--cygwin-portable-installer
+- warengonzaga--wrn-cleaner
+- wizz13150--PDQ_Repo
+- wureset-tools--script-wureset
+- yaldabaoth444--asphalt_legends_unite_windows_bot
+
+</details>
+
+<details>
+<summary><strong>📁 File & Media Utilities</strong> - File search, rename, sort, and media ops</summary>
+
+- AhmetHan--EDR_Tester
+- AndrewHazelden--MultiMesh-Scripting
+- Batlez--Batlez-Tweaks
+- C0nw0nk--qBittorrent
+- CoolDotty--NeverWake
+- Espionage724--Windows
+- FoxP--PNG-to-ICO
+- Honguito98--enctool-batch
+- ImGuiNET--ImGui.NET-nativebuild
+- JaredCabot--OneDrive-Uninstaller
+- JonnyBanana--BatchMan-e-Robby
+- K3V1991--ADBKit
+- KnightDanila--BAT_FFMPEG
+- LintangWisesa--Microsoft_Office_2016_Activator
+- MansourM--ez-dns-changer.bat
+- ManzDev--video-converter-scripts
+- Moodkiller--SendTo-rclone-GDrive
+- NARCOTIC--Windows-Optimizer
+- NabiKAZ--video2gif
+- PAXANDDOS--ForzaHorizonFix
+- PassingTheKnowledge--Batchography
+- Serede--mkvtoolnix-batch
+- TerryHuangHD--Windows10-VersionSwitcher
+- abbodi1406--BatUtil
+- ancel1x--Ancels-Performance-Batch
+- anonymlol--Encoding_automation_scripts
+- ardyan69--wa
+- azmatt--windowsEnum
+- chsliu--batch
+- conan513--TrinityBuilder
+- describe19--check-video
+- eddex--aseprite-windows-docker-build
+- edinsuta--youtube-dl-batch
+- fr0st-iwnl--WinConfigs
+- gladiatx0r--Powerless
+- happy05dz--Batch-Script-Collection
+- jpalbert--webcam-settings-dialog-windows
+- kezoponk--DDoS.bat
+- leetfin--Windows10Tools
+- m2nlight--WindowsServerToWindowsDesktop
+- mitchv2020--QuestToolbox
+- moom825--batch-extention-spoofer
+- peterjc123--pytorch-scripts
+- prashantmi--Rar-Password-Cracker
+- prestonsn--windows-10-activation-script
+- rossy--mpv-install
+- scottgriv--batch-useful_bat_files
+- slathrop--git-scripts-win
+- swagkarna--Defeat-Defender-V1.2.0
+- szybnev--TTL-Changer
+- tcja--Windows-10-tweaks
+- userdocs--LFTP4WIN
+- warengonzaga--wifi-passview
+
+</details>
+
+<details>
+<summary><strong>📁 Hardware & Network Tweaks</strong> - NIC, ping, IP configs, device fixes</summary>
+
+- Deadshot0x7--Wifipassword
+- Octanium91--NFS_Heat_CPU_Load_FIX
+- ermannog--BatchScripts
+
+</details>
+
+<details>
+<summary><strong>📁 Other & Uncategorized</strong> - One-off tools that don't fit elsewhere</summary>
+
+- Da2dalus--FunBatchCode-MalicousAndNonMalicous
+- EbolaMan-YT--PsExec
+- Nickfost--Batch
+- corpnewt--Batch-Scripts
+- geekcomputers--Batch
+- matej137--OutlookRemover
+- npocmaka--batch.scripts
+
+</details>
+
+<details>
+<summary><strong>📁 Privacy & Debloating</strong> - Debloaters, telemetry blockers, hardening</summary>
+
+- Currently empty - ready for privacy and debloating scripts
+
+</details>
+
+<details>
+<summary><strong>📁 Scripting Libraries & Examples</strong> - Reusable routines and educational snippets</summary>
+
+- logicopslab--BatchScripting
+
+</details>
+
+<details>
+<summary><strong>📁 Security & Diagnostics</strong> - AV checks, system status, forensic helpers</summary>
+
+- atlantsecurity--windows-hardening-scripts
+
+</details>
+
+<details>
+<summary><strong>📁 System Optimization & Tweaks</strong> - Performance and OS settings</summary>
+
+- UnLovedCookie--CoutX
+
+</details>
+
+<details>
+<summary><strong>📁 Update & Activation Utilities</strong> - Activation, licensing, and Windows Update</summary>
+
+- BingLingGroup--run-udp2raw-batch
+- akhilnathe--winactivate
+- danielj0nes--Activate-Windows10-Pro-Script
+- virusfreak7--Windows11-activator-script-
+
+</details>
 
 ---
 
