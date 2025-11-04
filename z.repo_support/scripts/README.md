@@ -2,6 +2,12 @@
 
 This directory contains scripts to identify and discover highly-rated Windows batch script repositories on GitHub.
 
+## 📚 Documentation
+
+- **[USAGE_GUIDE.md](USAGE_GUIDE.md)** - Comprehensive guide on using all the tools
+- **[HIGHLY_RATED_REPOS.md](HIGHLY_RATED_REPOS.md)** - List of top batch repositories found on GitHub
+- **[../../CONTRIBUTING_REPOS.md](../../CONTRIBUTING_REPOS.md)** - Guide for contributing new repositories
+
 ## Scripts
 
 ### `identify_batch_repos.py`
