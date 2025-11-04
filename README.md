@@ -280,6 +280,19 @@ You can:
 
 Prefer clean, well-commented batch logic.
 
+### Finding New Repositories
+
+We provide tools to help identify highly-rated batch repositories on GitHub:
+
+```bash
+# Quick search for popular batch repos
+./find_batch_repos.sh --min-stars 100
+```
+
+For detailed instructions on finding and contributing new repositories, see:
+- 📘 [Contributing Repositories Guide](CONTRIBUTING_REPOS.md)
+- 🔧 [Tool Usage Guide](z.repo_support/scripts/USAGE_GUIDE.md)
+
 ### Updating the Script Count
 
 After adding new scripts, run the update script to refresh the counter:
