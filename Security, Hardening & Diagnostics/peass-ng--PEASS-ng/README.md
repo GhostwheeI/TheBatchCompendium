@@ -4,7 +4,7 @@
 **Repository:** [peass-ng/PEASS-ng](https://github.com/peass-ng/PEASS-ng)  
 **Stars:** 18,642 ⭐  
 **Language:** C#  
-**Category:** Development & Scripting Tools
+**Category:** Security, Hardening & Diagnostics
 
 ## Description
 
@@ -19,7 +19,7 @@ PEASS - Privilege Escalation Awesome Scripts SUITE (with colors)
 
 - **Stars:** 18,642
 - **Primary Language:** C#
-- **Category:** Development & Scripting Tools
+- **Category:** Security, Hardening & Diagnostics
 
 ## 📝 About This Repository
 

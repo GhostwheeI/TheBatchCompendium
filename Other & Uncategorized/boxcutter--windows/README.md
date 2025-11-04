@@ -4,7 +4,7 @@
 **Repository:** [boxcutter/windows](https://github.com/boxcutter/windows)  
 **Stars:** 761 ⭐  
 **Language:** Ruby  
-**Category:** Development & Scripting Tools
+**Category:** Other & Uncategorized
 
 ## Description
 
@@ -19,7 +19,7 @@ Virtual machine templates for Windows written in legacy JSON and Batch Scripting
 
 - **Stars:** 761
 - **Primary Language:** Ruby
-- **Category:** Development & Scripting Tools
+- **Category:** Other & Uncategorized
 
 ## 📝 About This Repository
 
