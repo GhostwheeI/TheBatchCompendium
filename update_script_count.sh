@@ -11,16 +11,17 @@
 # Count all .bat and .cmd files (excluding .git directory)
 SCRIPT_COUNT=$(find . -type f \( -name "*.bat" -o -name "*.cmd" \) ! -path "./.git/*" | wc -l)
 
-echo "Found $SCRIPT_COUNT batch scripts"
+echo "Found ${SCRIPT_COUNT} batch scripts"
 
-# Format the count with commas for better readability (manual formatting for 4-digit numbers)
-FORMATTED_COUNT=$(echo $SCRIPT_COUNT | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta')
+# Format the count with commas for better readability (works for any number length)
+FORMATTED_COUNT=$(echo "${SCRIPT_COUNT}" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta')
 
 # Update the badge in README.md (no commas in URL)
-sed -i "s/scripts-[0-9,]*%2B/scripts-${SCRIPT_COUNT}/g" README.md
-sed -i "s/scripts-[0-9,]*/scripts-${SCRIPT_COUNT}/g" README.md
+# First update any badge with %2B (plus sign URL encoded), then update plain number badges
+sed -i "s/scripts-[0-9]*%2B-green/scripts-${SCRIPT_COUNT}-green/g" README.md
+sed -i "s/badge\/scripts-[0-9]*/badge\/scripts-${SCRIPT_COUNT}/g" README.md
 
 # Update the big counter at the top of README.md (with commas for display)
 sed -i "s/## 📊 \*\*[0-9,]* BATCH SCRIPTS\*\* 📊/## 📊 **${FORMATTED_COUNT} BATCH SCRIPTS** 📊/g" README.md
 
-echo "README.md updated with script count: $FORMATTED_COUNT"
+echo "README.md updated with script count: ${FORMATTED_COUNT}"
