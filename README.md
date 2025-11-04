@@ -299,9 +299,42 @@ For detailed instructions on finding and contributing new repositories, see:
 
 After adding new scripts, run the update script to refresh the counter:
 ```bash
-./update_script_count.sh
+./maintenance update-count
 ```
 This will automatically count all `.bat` and `.cmd` files and update the README.
+
+## 🛠️ Repository Maintenance
+
+This repository includes maintenance tools to help manage and update the collection:
+
+### Quick Maintenance Commands
+
+```bash
+# Update script count in README
+./maintenance update-count
+
+# Find new batch repositories on GitHub  
+./maintenance find-repos --min-stars 100
+
+# Update repository description
+./maintenance update-desc
+
+# Add repository topics/tags
+./maintenance add-topics
+
+# View all available commands
+./maintenance help
+```
+
+### Advanced Tools
+
+For advanced repository management, see the tools in [`z.repo_support/`](z.repo_support/):
+- Repository discovery and analysis scripts
+- Automated documentation updates  
+- GitHub API integration tools
+- Quality assessment utilities
+
+All maintenance scripts are designed to preserve the collection's organization and quality standards.
 
 ---
 

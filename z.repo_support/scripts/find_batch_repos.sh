@@ -2,7 +2,7 @@
 # Wrapper script to find highly rated batch script repositories
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PYTHON_SCRIPT="${SCRIPT_DIR}/z.repo_support/scripts/identify_batch_repos.py"
+PYTHON_SCRIPT="${SCRIPT_DIR}/identify_batch_repos.py"
 
 # Check if Python 3 is available
 if ! command -v python3 &> /dev/null; then
