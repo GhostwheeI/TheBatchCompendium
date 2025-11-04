@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-11-04T08:13:01.788048",
+  "success": true,
+  "steps": {
+    "discovery": {
+      "success": true,
+      "file": "../../z.repo_support/scripts/discovered_repos_20251104_081301.csv",
+      "count": 13,
+      "output": "Searching for batch script repositories with at least 30 stars...\n\nSearching with query: batch script stars:>=30 language:Batchfile\nFound: ShadowWhisperer/Remove-MS-Edge (4491 stars)\nFound: npocmaka/batch.scripts (1119 stars)\nFound: diogo-fernan/ir-rescue (487 stars)\nFound: davidmarble/virtualenvwrapper-win (459 stars)\nFound: vogeljo/reset-vassistx (332 stars)\nSearching with query: windows batch stars:>=30\nFound: peass-ng/PEASS-ng (18642 stars)\nFound: batsh-dev-team/Batsh (4333 stars)\nFound: ayoisaiah/f2 (2303 stars)\nFound: YILS-LIN/short-video-factory (2251 stars)\nSearching with query: .bat OR .cmd stars:>=30 language:Batchfile\nFound: AveYo/MediaCreationTool.bat (9943 stars)\nFound: illsk1lls/ZipRipper (595 stars)\nFound: slorelee/wimbuilder2 (539 stars)\nFound: TheBATeam/Batch-WI-FI-Brute-Forcer (349 stars)\n\nSaved 13 repositories to discovered_repos_20251104_081301.csv\n\nFound 13 highly-rated batch script repositories!\n\nTop 5 repositories by stars:\n1. peass-ng/PEASS-ng - 18642 stars\n2. AveYo/MediaCreationTool.bat - 9943 stars\n3. ShadowWhisperer/Remove-MS-Edge - 4491 stars\n4. batsh-dev-team/Batsh - 4333 stars\n5. ayoisaiah/f2 - 2303 stars\n"
+    },
+    "processing": {
+      "success": true,
+      "file": "../../z.repo_support/scripts/filtered_new_repos_20251104_081301.csv",
+      "count": 0,
+      "output": "Processing 13 new repositories against 210 existing ones...\nFound 13 duplicates\nAfter removing duplicates: 0 repositories\nAfter quality filtering: 0 repositories\n\nSaved 0 filtered repositories to ../../z.repo_support/scripts/filtered_new_repos_20251104_081301.csv\n\nRepository Discovery Processing Report\n============================================================\n\nDiscovery Summary:\n-----------------\nTotal Repositories Discovered: 13\nDuplicates Removed: 13\nUnique Repositories: 0\nQuality Filtered (Final): 0\n\nCategory Distribution:\n---------------------\n\nReport saved to ../../z.repo_support/scripts/filtered_new_repos_20251104_081301_report.txt\n"
+    },
+    "integration": {
+      "success": true,
+      "skipped": true
+    },
+    "documentation": {
+      "success": true,
+      "skipped": true
+    },
+    "notification": {
+      "success": false,
+      "error": "Command '['python3', '../../z.repo_support/scripts/notification_manager.py', '--type', 'discovery_complete', '--data', '../../z.repo_support/scripts/notification_data_20251104_081301.json', '--channels', 'console', 'file', '--file-path', '../../z.repo_support/scripts/automation_notifications.log']' returned non-zero exit status 2.",
+      "stderr": "usage: notification_manager.py [-h] --type {discovery,integration,error}\n                               [--channels {console,file,webhook,github_issue} [{console,file,webhook,github_issue} ...]]\n                               [--data DATA] [--file-path FILE_PATH]\n                               [--webhook-url WEBHOOK_URL]\n                               [--github-repo GITHUB_REPO]\n                               [--github-token GITHUB_TOKEN]\n                               [--discovered DISCOVERED]\n                               [--new-repos NEW_REPOS] [--error-msg ERROR_MSG]\nnotification_manager.py: error: argument --type: invalid choice: 'discovery_complete' (choose from 'discovery', 'integration', 'error')\n"
+    }
+  },
+  "summary": {
+    "discovered": 13,
+    "filtered": 0,
+    "integrated": 0
+  }
+}

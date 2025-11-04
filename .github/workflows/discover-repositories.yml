@@ -1,12 +1,14 @@
 name: Discover New Batch Repositories
 
 on:
+  # 1. SCHEDULED RUNS - Automatic bi-weekly execution
   schedule:
     # Run every 2 weeks on Monday at 9:00 AM UTC
     # Week 1 and 3 of every month (approximately bi-weekly)
     - cron: '0 9 1-7 * 1'     # First Monday of each month
     - cron: '0 9 15-21 * 1'   # Third Monday of each month
-  # Allow manual triggering
+  
+  # 2. MANUAL TRIGGER - Click "Run workflow" button
   workflow_dispatch:
     inputs:
       min_stars:
@@ -19,18 +21,101 @@ on:
         required: false
         default: '100'
         type: string
+  
+  # 3. PUSH TRIGGER - Run when automation files are updated
+  push:
+    branches: [ main ]
+    paths:
+      - 'z.repo_support/scripts/**'
+      - '.github/workflows/discover-repositories.yml'
+  
+  # 4. PULL REQUEST - Run on PRs to test changes
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'z.repo_support/scripts/**'
+      - '.github/workflows/discover-repositories.yml'
+  
+  # 5. REPOSITORY DISPATCH - Trigger via API or other workflows
+  repository_dispatch:
+    types: [discover-repositories]
 
 env:
   PYTHON_VERSION: '3.9'
 
 jobs:
+  # Test job for validating changes (runs on push/PR)
+  test-automation:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+        
+    - name: Test automation scripts
+      run: |
+        cd z.repo_support/scripts
+        
+        # Test that all scripts can be imported/executed
+        python3 -c "import sys; sys.path.append('.'); import automate_discovery; print('✅ Main automation script OK')"
+        python3 identify_batch_repos.py --help > /dev/null && echo "✅ Discovery script OK"
+        python3 process_new_discoveries.py --help > /dev/null && echo "✅ Processing script OK"
+        python3 integrate_repositories.py --help > /dev/null && echo "✅ Integration script OK"
+        python3 quality_filter.py --help > /dev/null && echo "✅ Quality filter OK"
+        
+        # Test dry run
+        python3 automate_discovery.py --dry-run --min-stars 100 --max-results 10
+        
+        echo "🎉 All automation tests passed!"
+
+  # Main discovery job (runs on schedule, manual, or API trigger)
   discover-repositories:
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
+    # Only run full discovery on schedule, manual trigger, or API dispatch
+    if: |
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'repository_dispatch'
       
     steps:
+    - name: Log trigger information
+      run: |
+        echo "🚀 Repository Discovery Triggered!"
+        echo "Event: ${{ github.event_name }}"
+        echo "Actor: ${{ github.actor }}"
+        echo "Repository: ${{ github.repository }}"
+        echo "Ref: ${{ github.ref }}"
+        echo "Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+        
+        case "${{ github.event_name }}" in
+          "schedule")
+            echo "📅 Trigger: Scheduled run (bi-weekly automation)"
+            ;;
+          "workflow_dispatch")
+            echo "🖱️ Trigger: Manual execution by ${{ github.actor }}"
+            echo "Parameters: min_stars=${{ github.event.inputs.min_stars || '50' }}, max_results=${{ github.event.inputs.max_results || '100' }}"
+            ;;
+          "repository_dispatch")
+            echo "🔌 Trigger: API dispatch (event_type: ${{ github.event.client_payload.event_type }})"
+            ;;
+        esac
+        
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
@@ -79,25 +164,233 @@ jobs:
       run: |
         cd z.repo_support/scripts
         
-        # Merge with existing data and remove duplicates
+        echo "🔍 Processing discovered repositories and checking for existing content..."
+        
+        # Enhanced processing with existing script checking
+        python3 -c "
+import csv
+import os
+import sys
+from pathlib import Path
+
+print('🔍 Pre-processing: Checking for existing repositories and scripts...')
+
+# Load discovered repositories
+discovery_file = os.environ.get('DISCOVERY_FILE', 'discovered_repos_$(date +%Y%m%d).csv')
+if not os.path.exists(discovery_file):
+    print(f'Discovery file {discovery_file} not found')
+    sys.exit(1)
+
+with open(discovery_file, 'r') as f:
+    reader = csv.DictReader(f)
+    discovered_repos = list(reader)
+
+print(f'Discovered {len(discovered_repos)} repositories')
+
+# Load existing repositories
+existing_repos = []
+if os.path.exists('repo_results.csv'):
+    with open('repo_results.csv', 'r') as f:
+        reader = csv.DictReader(f)
+        existing_repos = list(reader)
+    print(f'Found {len(existing_repos)} existing repositories')
+else:
+    print('No existing repository database found')
+
+# Check for existing directories/scripts
+base_path = Path('../../../')
+existing_dirs = set()
+
+# Scan existing directory structure
+for category_dir in base_path.iterdir():
+    if category_dir.is_dir() and not category_dir.name.startswith('.') and not category_dir.name.startswith('z.'):
+        for repo_dir in category_dir.iterdir():
+            if repo_dir.is_dir():
+                existing_dirs.add(repo_dir.name.lower())
+
+print(f'Found {len(existing_dirs)} existing repository directories')
+
+# Filter out repositories that already exist
+filtered_repos = []
+for repo in discovered_repos:
+    repo_name = repo.get('name', '').replace('/', '_').replace('\\\\', '_')
+    repo_url = repo.get('url', '')
+    
+    # Check if repository already exists in CSV
+    exists_in_csv = any(
+        existing.get('name', '').lower() == repo.get('name', '').lower() or
+        existing.get('url', '').lower() == repo_url.lower()
+        for existing in existing_repos
+    )
+    
+    # Check if directory already exists
+    exists_as_dir = repo_name.lower() in existing_dirs
+    
+    if exists_in_csv:
+        print(f'⏭️ Skipping {repo.get(\"name\", \"unknown\")} - already in database')
+    elif exists_as_dir:
+        print(f'⏭️ Skipping {repo.get(\"name\", \"unknown\")} - directory already exists')
+    else:
+        filtered_repos.append(repo)
+        print(f'✅ New repository: {repo.get(\"name\", \"unknown\")} ({repo.get(\"stars\", 0)} stars)')
+
+print(f'Pre-filtered to {len(filtered_repos)} truly new repositories')
+
+# Save pre-filtered results
+with open('pre_filtered_repos.csv', 'w', newline='') as f:
+    if filtered_repos:
+        fieldnames = filtered_repos[0].keys()
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(filtered_repos)
+    else:
+        writer = csv.writer(f)
+        writer.writerow(['name', 'url', 'description', 'stars', 'language'])
+
+print('✅ Pre-filtering complete')
+"
+        
+        # Now run the main processing on pre-filtered results  
         python3 process_new_discoveries.py \
-          --new-repos "$DISCOVERY_FILE" \
+          --new-repos "pre_filtered_repos.csv" \
           --existing-repos "repo_results.csv" \
           --output "filtered_new_repos.csv" \
           --report
           
-    - name: Integrate new repositories
+    - name: Check for existing scripts and organize repositories
       run: |
         cd z.repo_support/scripts
         
-        # Run the integration script
+        echo "🔍 Checking for existing scripts and organizing repositories..."
+        
+        # Enhanced integration with explicit checks for existing content
         python3 integrate_repositories.py \
           --new-repos "filtered_new_repos.csv" \
+          --base-path "../../.." \
           --update-collection
+        
+        # Additional organization and README creation
+        python3 -c "
+import csv
+import os
+import sys
+from pathlib import Path
+
+print('🔧 Post-integration organization and README verification...')
+
+# Load the filtered repositories
+base_path = Path('../../../')
+filtered_file = 'filtered_new_repos.csv'
+
+if not os.path.exists(filtered_file):
+    print('No new repositories to process')
+    sys.exit(0)
+
+with open(filtered_file, 'r') as f:
+    reader = csv.DictReader(f)
+    new_repos = list(reader)
+
+if not new_repos:
+    print('No repositories in filtered file')
+    sys.exit(0)
+
+print(f'Processing {len(new_repos)} repositories for organization...')
+
+for repo in new_repos:
+    repo_name = repo.get('name', '').replace('/', '_').replace('\\\\', '_')
+    category = repo.get('category', 'Uncategorized')
+    
+    if not repo_name:
+        continue
+    
+    # Create category directory
+    category_dir = base_path / category.replace(' & ', '_').replace(' ', '_')
+    category_dir.mkdir(exist_ok=True)
+    
+    # Create repository directory
+    repo_dir = category_dir / repo_name
+    repo_dir.mkdir(exist_ok=True)
+    
+    # Check if README exists, if not create it
+    readme_path = repo_dir / 'README.md'
+    if not readme_path.exists():
+        print(f'Creating README for {repo_name}...')
+        
+        # Create comprehensive README
+        readme_content = f'''# {repo.get('name', 'Unknown Repository')}
+
+**Repository:** [{repo.get('name', 'Unknown')}]({repo.get('url', '')})  
+**Stars:** {repo.get('stars', 0):,} ⭐  
+**Category:** {category}  
+**Quality Score:** {repo.get('quality_score', 'N/A')}
+
+## Description
+
+{repo.get('description', 'No description available.')}
+
+## 🔗 Links
+
+- **Original Repository:** [{repo.get('url', '')}]({repo.get('url', '')})
+- **Owner Profile:** [https://github.com/{repo.get('name', '').split('/')[0] if '/' in repo.get('name', '') else 'unknown'}](https://github.com/{repo.get('name', '').split('/')[0] if '/' in repo.get('name', '') else 'unknown'})
+
+## 📊 Repository Statistics
+
+- **Stars:** {repo.get('stars', 0):,}
+- **Forks:** {repo.get('forks', 0):,}
+- **Language:** {repo.get('language', 'Unknown')}
+- **Last Updated:** {repo.get('updated_at', 'Unknown')}
+
+## 🚀 Quick Start
+
+1. Visit the [original repository]({repo.get('url', '')})
+2. Read the project documentation
+3. Clone or download the batch scripts
+4. Review scripts before execution
+5. Follow repository-specific installation instructions
+
+## ⚠️ Safety Guidelines
+
+- **Always review** batch scripts before running them
+- **Test in a safe environment** first (VM recommended)
+- **Understand the operations** each script performs
+- **Backup your system** before running system modification scripts
+- **Check antivirus** scan results for downloaded files
+
+## 📄 License
+
+This repository follows the license terms of the original project. Check the [original repository]({repo.get('url', '')}) for specific license information.
+
+## 🤝 Contributing
+
+To contribute to the original project:
+1. Visit the [original repository]({repo.get('url', '')})
+2. Read their contributing guidelines
+3. Fork and submit pull requests to their repository
+
+---
+
+**Added to Collection:** {repo.get('discovery_date', 'Automated discovery')}  
+**Quality Score:** {repo.get('quality_score', 'N/A')}  
+**Auto-Generated:** This README was created by The Batch Compendium discovery system.
+
+*Part of [The Batch Compendium](https://github.com/GhostwheeI/TheBatchCompendium) - A comprehensive collection of Windows batch scripts.*
+'''
+        
+        with open(readme_path, 'w', encoding='utf-8') as f:
+            f.write(readme_content)
+        
+        print(f'✅ Created README for {repo_name}')
+    else:
+        print(f'ℹ️ README already exists for {repo_name}')
+
+print('✅ Organization and README verification complete!')
+"
           
     - name: Generate updated documentation
       run: |
         cd z.repo_support/scripts
+        
+        echo "📝 Generating updated documentation..."
         
         # Update the HIGHLY_RATED_REPOS.md file
         python3 generate_highly_rated_docs.py \
@@ -106,6 +399,78 @@ jobs:
           
         # Update main repository statistics
         bash update_script_count.sh
+        
+    - name: Final validation and organization check
+      run: |
+        cd z.repo_support/scripts
+        
+        echo "🔍 Final validation: Ensuring all repositories are properly organized..."
+        
+        python3 -c "
+import csv
+import os
+from pathlib import Path
+
+print('🔍 Performing final validation...')
+
+# Check if we have new repositories to validate
+if not os.path.exists('filtered_new_repos.csv'):
+    print('No new repositories to validate')
+    exit(0)
+
+with open('filtered_new_repos.csv', 'r') as f:
+    reader = csv.DictReader(f)
+    new_repos = list(reader)
+
+if not new_repos:
+    print('No repositories in filtered file')
+    exit(0)
+
+base_path = Path('../../../')
+validation_errors = []
+validation_success = []
+
+for repo in new_repos:
+    repo_name = repo.get('name', '').replace('/', '_').replace('\\\\', '_')
+    category = repo.get('category', 'Uncategorized')
+    
+    if not repo_name:
+        continue
+    
+    # Check directory structure
+    category_dir = base_path / category.replace(' & ', '_').replace(' ', '_')
+    repo_dir = category_dir / repo_name
+    readme_path = repo_dir / 'README.md'
+    
+    # Validate structure
+    if not category_dir.exists():
+        validation_errors.append(f'❌ Category directory missing: {category_dir}')
+    elif not repo_dir.exists():
+        validation_errors.append(f'❌ Repository directory missing: {repo_dir}')
+    elif not readme_path.exists():
+        validation_errors.append(f'❌ README missing: {readme_path}')
+    else:
+        validation_success.append(f'✅ {repo_name} properly organized')
+
+print(f'\\n📊 Validation Results:')
+print(f'✅ Successfully organized: {len(validation_success)}')
+print(f'❌ Validation errors: {len(validation_errors)}')
+
+if validation_success:
+    print('\\n✅ Successfully organized repositories:')
+    for success in validation_success[:10]:  # Show first 10
+        print(f'  {success}')
+    if len(validation_success) > 10:
+        print(f'  ... and {len(validation_success) - 10} more')
+
+if validation_errors:
+    print('\\n❌ Validation errors found:')
+    for error in validation_errors:
+        print(f'  {error}')
+    exit(1)
+
+print('\\n🎉 All repositories properly organized with READMEs!')
+"
         
     - name: Check for changes
       id: changes
@@ -142,34 +507,64 @@ jobs:
         NEW_REPOS=$(wc -l < z.repo_support/scripts/filtered_new_repos.csv)
         NEW_REPOS=$((NEW_REPOS - 1))  # Subtract header line
         
+        # Count total discovered before filtering
+        TOTAL_DISCOVERED=$(wc -l < z.repo_support/scripts/discovered_repos_*.csv | head -1)
+        TOTAL_DISCOVERED=$((TOTAL_DISCOVERED - 1))  # Subtract header line
+        
         # Create PR body
         cat > pr_body.md << EOF
-        ## 🤖 Automated Repository Discovery
+        ## 🤖 Automated Repository Discovery & Integration
         
-        This PR contains automatically discovered batch repositories from GitHub.
+        This PR contains automatically discovered, filtered, and organized batch repositories from GitHub.
         
-        ### Summary
+        ### 📊 Discovery Summary
         - **Search Criteria:** Repositories with ${{ github.event.inputs.min_stars || '50' }}+ stars
-        - **New Repositories Found:** $NEW_REPOS
+        - **Total Discovered:** $TOTAL_DISCOVERED repositories
+        - **After Duplicate Removal:** $NEW_REPOS new repositories
+        - **Success Rate:** $(( NEW_REPOS * 100 / TOTAL_DISCOVERED ))% (quality filtered)
         - **Discovery Date:** $(date +%Y-%m-%d)
         
-        ### Changes
-        - 📊 Updated repository collection with new high-quality batch repositories
-        - 📝 Regenerated documentation and statistics
-        - 🔄 Updated HIGHLY_RATED_REPOS.md with latest findings
-        - 📈 Updated main README with new script counts
+        ### 🔧 Integration & Organization
+        - ✅ **Duplicate Check:** Verified against existing repositories and directories
+        - ✅ **Smart Organization:** Auto-categorized into appropriate directories
+        - ✅ **README Creation:** Generated comprehensive READMEs for all new repositories
+        - ✅ **Quality Filtering:** Applied multi-factor quality scoring
+        - ✅ **Safety Validation:** Checked for suspicious or problematic content
         
-        ### Quality Assurance
-        - ✅ Filtered by minimum star count (${{ github.event.inputs.min_stars || '50' }}+)
-        - ✅ Removed duplicates from existing collection
-        - ✅ Validated repository quality metrics
-        - ✅ Updated categorization and documentation
+        ### 📝 Documentation Updates
+        - 📊 Updated repository collection database (repo_results.csv)
+        - � Regenerated HIGHLY_RATED_REPOS.md with latest findings
+        - 📈 Updated main README statistics and script counts
+        - 🗂️ Created organized directory structures with READMEs
+        - 📋 Updated category index and documentation
         
-        ### Files Modified
+        ### 🎯 Quality Assurance
+        - ✅ Minimum ${{ github.event.inputs.min_stars || '50' }}+ stars requirement
+        - ✅ Duplicate detection (by name, URL, and existing directories)
+        - ✅ Quality scoring and filtering system
+        - ✅ Automated categorization and organization
+        - ✅ Comprehensive README generation
+        - ✅ Final validation of all structures
+        
+        ### 📁 New Repository Structure
+        Each new repository includes:
+        - 📂 Organized into appropriate category directory
+        - 📄 Comprehensive README with safety guidelines
+        - 🔗 Links to original repository and owner
+        - 📊 Quality metrics and statistics
+        - ⚠️ Safety warnings and usage instructions
+        
+        ### 🔍 Files Modified
         $(git diff --name-only origin/main | sed 's/^/- /' || echo "- Error listing files")
         
         ---
-        *This PR was automatically generated by the Repository Discovery workflow.*
+        **Automation Details:**
+        - 🤖 **Trigger:** ${{ github.event_name }}
+        - ⏰ **Runtime:** $(date +"%Y-%m-%d %H:%M:%S UTC")
+        - 🔧 **Workflow:** Discover New Batch Repositories
+        - 📋 **Quality Checks:** ✅ Passed all validation steps
+        
+        *This PR was automatically generated by The Batch Compendium discovery system.*
         EOF
         
         # Create the pull request

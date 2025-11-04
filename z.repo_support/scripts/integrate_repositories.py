@@ -36,13 +36,16 @@ class RepositoryIntegrator:
             with open(filepath, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
+                    # Filter out None keys and ensure clean data
+                    clean_row = {k: v for k, v in row.items() if k is not None and isinstance(k, str)}
+                    
                     # Normalize data types
-                    if 'stars' in row:
+                    if 'stars' in clean_row:
                         try:
-                            row['stars'] = int(row['stars'])
+                            clean_row['stars'] = int(clean_row['stars'])
                         except (ValueError, TypeError):
-                            row['stars'] = 0
-                    repos.append(row)
+                            clean_row['stars'] = 0
+                    repos.append(clean_row)
         except FileNotFoundError:
             print(f"Warning: File not found: {filepath}")
             return []
@@ -57,10 +60,12 @@ class RepositoryIntegrator:
         if not repos:
             return
         
-        # Get all unique fieldnames
+        # Get all unique fieldnames, filtering out None values
         fieldnames = set()
         for repo in repos:
-            fieldnames.update(repo.keys())
+            # Filter out None keys and ensure all keys are strings
+            valid_keys = [k for k in repo.keys() if k is not None and isinstance(k, str)]
+            fieldnames.update(valid_keys)
         fieldnames = sorted(fieldnames)
         
         with open(filepath, 'w', newline='', encoding='utf-8') as f:
@@ -217,14 +222,17 @@ To contribute to the original project:
         update_script = self.scripts_path / "update_script_count.sh"
         if update_script.exists():
             try:
-                # Change to the repository root before running the script
-                original_cwd = os.getcwd()
-                os.chdir(self.base_path)
-                
-                subprocess.run(['bash', str(update_script)], check=True)
+                # Run the script from the base directory with proper working dir
+                result = subprocess.run(
+                    ['bash', str(update_script.resolve())], 
+                    cwd=str(self.base_path),
+                    check=True,
+                    capture_output=True,
+                    text=True
+                )
                 print("Updated script counts successfully")
-                
-                os.chdir(original_cwd)
+                if result.stdout:
+                    print(f"Output: {result.stdout.strip()}")
             except subprocess.CalledProcessError as e:
                 print(f"Error running update script: {e}")
             except Exception as e:
@@ -311,6 +319,8 @@ Integration completed successfully!
         
         # Save summary to file
         summary_file = self.scripts_path / f"integration_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        # Ensure the directory exists
+        summary_file.parent.mkdir(parents=True, exist_ok=True)
         with open(summary_file, 'w', encoding='utf-8') as f:
             f.write(summary)
         
