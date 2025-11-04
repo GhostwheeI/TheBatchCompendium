@@ -18,10 +18,14 @@ FORMATTED_COUNT=$(echo "${SCRIPT_COUNT}" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta')
 
 # Update the badge in README.md (no commas in URL)
 # First update any badge with %2B (plus sign URL encoded), then update plain number badges
-sed -i "s/scripts-[0-9]*%2B-green/scripts-${SCRIPT_COUNT}-green/g" README.md
-sed -i "s/badge\/scripts-[0-9]*/badge\/scripts-${SCRIPT_COUNT}/g" README.md
+# Using .bak extension for cross-platform compatibility (macOS requires an extension argument)
+sed -i.bak "s/scripts-[0-9]*%2B-green/scripts-${SCRIPT_COUNT}-green/g" README.md
+sed -i.bak "s/badge\/scripts-[0-9]*/badge\/scripts-${SCRIPT_COUNT}/g" README.md
 
 # Update the big counter at the top of README.md (with commas for display)
-sed -i "s/## 📊 \*\*[0-9,]* BATCH SCRIPTS\*\* 📊/## 📊 **${FORMATTED_COUNT} BATCH SCRIPTS** 📊/g" README.md
+sed -i.bak "s/## 📊 \*\*[0-9,]* BATCH SCRIPTS\*\* 📊/## 📊 **${FORMATTED_COUNT} BATCH SCRIPTS** 📊/g" README.md
+
+# Remove backup files created by sed
+rm -f README.md.bak
 
 echo "README.md updated with script count: ${FORMATTED_COUNT}"
