@@ -1,0 +1,202 @@
+name: Discover New Batch Repositories
+
+on:
+  schedule:
+    # Run every 2 weeks on Monday at 9:00 AM UTC
+    # Week 1 and 3 of every month (approximately bi-weekly)
+    - cron: '0 9 1-7 * 1'     # First Monday of each month
+    - cron: '0 9 15-21 * 1'   # Third Monday of each month
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      min_stars:
+        description: 'Minimum star count for repositories'
+        required: false
+        default: '50'
+        type: string
+      max_results:
+        description: 'Maximum number of results per search'
+        required: false
+        default: '100'
+        type: string
+
+env:
+  PYTHON_VERSION: '3.9'
+
+jobs:
+  discover-repositories:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+        
+    - name: Configure Git
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "Repository Discovery Bot"
+        
+    - name: Create discovery branch
+      run: |
+        BRANCH_NAME="auto-discovery-$(date +%Y%m%d-%H%M%S)"
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+        git checkout -b $BRANCH_NAME
+        
+    - name: Run repository discovery
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        MIN_STARS: ${{ github.event.inputs.min_stars || '50' }}
+        MAX_RESULTS: ${{ github.event.inputs.max_results || '100' }}
+      run: |
+        cd z.repo_support/scripts
+        
+        # Run the discovery script
+        python3 identify_batch_repos.py \
+          --token "$GITHUB_TOKEN" \
+          --min-stars "$MIN_STARS" \
+          --max-results "$MAX_RESULTS" \
+          --output "discovered_repos_$(date +%Y%m%d).csv"
+          
+        # Store the output filename for later steps
+        echo "DISCOVERY_FILE=discovered_repos_$(date +%Y%m%d).csv" >> $GITHUB_ENV
+        
+    - name: Process and filter new repositories
+      run: |
+        cd z.repo_support/scripts
+        
+        # Merge with existing data and remove duplicates
+        python3 process_new_discoveries.py \
+          --new-repos "$DISCOVERY_FILE" \
+          --existing-repos "repo_results.csv" \
+          --output "filtered_new_repos.csv" \
+          --report
+          
+    - name: Integrate new repositories
+      run: |
+        cd z.repo_support/scripts
+        
+        # Run the integration script
+        python3 integrate_repositories.py \
+          --new-repos "filtered_new_repos.csv" \
+          --update-collection
+          
+    - name: Generate updated documentation
+      run: |
+        cd z.repo_support/scripts
+        
+        # Update the HIGHLY_RATED_REPOS.md file
+        python3 generate_highly_rated_docs.py \
+          --input "repo_results.csv" \
+          --output "HIGHLY_RATED_REPOS.md"
+          
+        # Update main repository statistics
+        bash update_script_count.sh
+        
+    - name: Check for changes
+      id: changes
+      run: |
+        if [[ -n $(git status --porcelain) ]]; then
+          echo "changes=true" >> $GITHUB_OUTPUT
+          echo "Changes detected:"
+          git status --short
+        else
+          echo "changes=false" >> $GITHUB_OUTPUT
+          echo "No changes detected"
+        fi
+        
+    - name: Commit and push changes
+      if: steps.changes.outputs.changes == 'true'
+      run: |
+        git add .
+        git commit -m "🤖 Automated repository discovery $(date +%Y-%m-%d)
+
+        - Discovered new batch repositories with ${{ github.event.inputs.min_stars || '50' }}+ stars
+        - Updated repository collection and documentation
+        - Generated updated statistics and categories
+        
+        Discovery run: $(date +%Y-%m-%d %H:%M:%S UTC)"
+        
+        git push origin $BRANCH_NAME
+        
+    - name: Create Pull Request
+      if: steps.changes.outputs.changes == 'true'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Count new repositories found
+        NEW_REPOS=$(wc -l < z.repo_support/scripts/filtered_new_repos.csv)
+        NEW_REPOS=$((NEW_REPOS - 1))  # Subtract header line
+        
+        # Create PR body
+        cat > pr_body.md << EOF
+        ## 🤖 Automated Repository Discovery
+        
+        This PR contains automatically discovered batch repositories from GitHub.
+        
+        ### Summary
+        - **Search Criteria:** Repositories with ${{ github.event.inputs.min_stars || '50' }}+ stars
+        - **New Repositories Found:** $NEW_REPOS
+        - **Discovery Date:** $(date +%Y-%m-%d)
+        
+        ### Changes
+        - 📊 Updated repository collection with new high-quality batch repositories
+        - 📝 Regenerated documentation and statistics
+        - 🔄 Updated HIGHLY_RATED_REPOS.md with latest findings
+        - 📈 Updated main README with new script counts
+        
+        ### Quality Assurance
+        - ✅ Filtered by minimum star count (${{ github.event.inputs.min_stars || '50' }}+)
+        - ✅ Removed duplicates from existing collection
+        - ✅ Validated repository quality metrics
+        - ✅ Updated categorization and documentation
+        
+        ### Files Modified
+        $(git diff --name-only origin/main | sed 's/^/- /' || echo "- Error listing files")
+        
+        ---
+        *This PR was automatically generated by the Repository Discovery workflow.*
+        EOF
+        
+        # Create the pull request
+        gh pr create \
+          --title "🤖 Automated Repository Discovery - $(date +%Y-%m-%d)" \
+          --body-file pr_body.md \
+          --base main \
+          --head $BRANCH_NAME \
+          --label "automation" \
+          --label "repository-discovery"
+          
+    - name: Summary
+      run: |
+        echo "## 🎯 Discovery Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [[ "${{ steps.changes.outputs.changes }}" == "true" ]]; then
+          NEW_REPOS=$(wc -l < z.repo_support/scripts/filtered_new_repos.csv)
+          NEW_REPOS=$((NEW_REPOS - 1))
+          echo "✅ **Success!** Found $NEW_REPOS new repositories" >> $GITHUB_STEP_SUMMARY
+          echo "📝 Created pull request with updates" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "ℹ️ No new repositories found matching criteria" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Search Parameters" >> $GITHUB_STEP_SUMMARY
+        echo "- **Minimum Stars:** ${{ github.event.inputs.min_stars || '50' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Max Results:** ${{ github.event.inputs.max_results || '100' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Discovery Date:** $(date +%Y-%m-%d)" >> $GITHUB_STEP_SUMMARY
