@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="https://github.com/user-attachments/assets/c510f50c-b10d-475a-8d4a-f229f73585f9" alt="The Batch Compendium Banner">
+
 # 🎯 The Largest Batch Script Collection 🎯
 
 ## 📊 **2,047 BATCH SCRIPTS** 📊
