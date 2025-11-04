@@ -1,5 +1,17 @@
+<div align="center">
+
+# 🎯 The Largest Batch Script Collection 🎯
+
+## 📊 **2,047 BATCH SCRIPTS** 📊
+
+### *The ultimate compendium of Windows batch automation*
+
+</div>
+
+---
+
 ![Windows](https://img.shields.io/badge/platform-Windows-blue)
-![Scripts](https://img.shields.io/badge/scripts-500%2B-green)
+![Scripts](https://img.shields.io/badge/scripts-2047-green)
 ![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 
 # The Batch Compendium
@@ -267,6 +279,14 @@ You can:
 - Improve categorization or documentation
 
 Prefer clean, well-commented batch logic.
+
+### Updating the Script Count
+
+After adding new scripts, run the update script to refresh the counter:
+```bash
+./update_script_count.sh
+```
+This will automatically count all `.bat` and `.cmd` files and update the README.
 
 ---
 
