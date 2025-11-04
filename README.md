@@ -280,6 +280,14 @@ You can:
 
 Prefer clean, well-commented batch logic.
 
+### Updating the Script Count
+
+After adding new scripts, run the update script to refresh the counter:
+```bash
+./update_script_count.sh
+```
+This will automatically count all `.bat` and `.cmd` files and update the README.
+
 ---
 
 ## 🔐 License
