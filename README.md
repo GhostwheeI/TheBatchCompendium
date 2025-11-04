@@ -65,8 +65,12 @@ Scripts and imported toolkits are organized by purpose:
 <details>
   <summary>Activation, Licensing & Update Scripts</summary>
 
+- akhilnathe--winactivate/
+- danielj0nes--Activate-Windows10-Pro-Script/
 - LintangWisesa--Microsoft_Office_2016_Activator/
 - massgravel--Microsoft-Activation-Scripts/
+- prestonsn--windows-10-activation-script/
+- virusfreak7--Windows11-activator-script-/
 - README.md
 </details>
 
@@ -87,69 +91,108 @@ Scripts and imported toolkits are organized by purpose:
 
 - AndrewHazelden--MultiMesh-Scripting/
 - C0nw0nk--qBittorrent/
-- CoolDotty--NeverWake/
-- Espionage724--Windows/
 - FoxP--PNG-to-ICO/
 - Honguito98--enctool-batch/
 - ImGuiNET--ImGui.NET-nativebuild/
-- JaredCabot--OneDrive-Uninstaller/
 - JonnyBanana--BatchMan-e-Robby/
 - K3V1991--ADBKit/
 - KnightDanila--BAT_FFMPEG/
-- MansourM--ez-dns-changer.bat/
 - ManzDev--video-converter-scripts/
 - Moodkiller--SendTo-rclone-GDrive/
-- NARCOTIC--Windows-Optimizer/
 - NabiKAZ--video2gif/
 - PAXANDDOS--ForzaHorizonFix/
-- PassingTheKnowledge--Batchography/
 - README.md
 - Serede--mkvtoolnix-batch/
-- TerryHuangHD--Windows10-VersionSwitcher/
 - abbodi1406--BatUtil/
 - anonymlol--Encoding_automation_scripts/
-- ard...
+- and more...
 </details>
 
 <details>
   <summary>Game Server & Mod Utilities</summary>
 
+- DannyDorito--ARMA-3-Startup-and-Restart-Script/
+- DannyDorito--DayZ-Startup-and-Restart-Script/
+- jonstephens85--instantngp-batch/
+- mitchv2020--QuestToolbox/
+- Takaovi--BatchStealer/
+- tinboye--Steam_workshop_scripts/
 - README.md
 </details>
 
 <details>
-  <summary>Hardware & Network Tweaks</summary>
+  <summary>Network, Connectivity & Hardware Tweaks</summary>
 
+- BingLingGroup--run-udp2raw-batch/
+- kezoponk--DDoS.bat/
+- MansourM--ez-dns-changer.bat/
+- szybnev--TTL-Changer/
 - README.md
 </details>
 
 <details>
   <summary>Other & Uncategorized</summary>
 
+- corpnewt--Batch-Scripts/
+- Da2dalus--FunBatchCode-MalicousAndNonMalicous/
+- EbolaMan-YT--PsExec/
+- geekcomputers--Batch/
+- matej137--OutlookRemover/
+- Nickfost--Batch/
+- peterjc123--pytorch-scripts/
 - README.md
 </details>
 
 <details>
   <summary>Privacy & Debloating</summary>
 
+- Espionage724--Windows/
+- JaredCabot--OneDrive-Uninstaller/
+- tcja--Windows-10-tweaks/
 - README.md
 </details>
 
 <details>
-  <summary>Scripting Libraries & Examples</summary>
+  <summary>Scripting Libraries, Examples & Tutorials</summary>
 
+- happy05dz--Batch-Script-Collection/
+- npocmaka--batch.scripts/
+- PassingTheKnowledge--Batchography/
 - README.md
 </details>
 
 <details>
   <summary>Security, Hardening & Diagnostics</summary>
 
+- AhmetHan--EDR_Tester/
+- azmatt--windowsEnum/
+- diogo-fernan--ir-rescue/
+- frizb--Windows-Privilege-Escalation/
+- gladiatx0r--Powerless/
+- repnz--shellcode2exe/
+- swagkarna--Defeat-Defender-V1.2.0/
+- README.md
+</details>
+
+<details>
+  <summary>Single-Function Scripts</summary>
+
+- Over 400+ single-purpose batch scripts for Windows customization, tweaks, and utilities
 - README.md
 </details>
 
 <details>
   <summary>System Optimization & Performance</summary>
 
+- ancel1x--Ancels-Performance-Batch/
+- Batlez--Batlez-Tweaks/
+- CoolDotty--NeverWake/
+- fr0st-iwnl--WinConfigs/
+- Jisll--windows11/
+- leetfin--Windows10Tools/
+- m2nlight--WindowsServerToWindowsDesktop/
+- NARCOTIC--Windows-Optimizer/
+- TerryHuangHD--Windows10-VersionSwitcher/
 - README.md
 </details>
 
