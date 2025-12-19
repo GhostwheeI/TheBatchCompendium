@@ -248,11 +248,17 @@ class UpstreamUpdater:
                     # Check if there are new commits
                     last_commit = self.get_repo_last_commit(repo_name)
                     if last_commit:
-                        commit_date = datetime.fromisoformat(
-                            last_commit['commit']['committer']['date'].replace('Z', '+00:00')
-                        )
-                        if commit_date > last_updated:
-                            return True, f"New commits available since last update"
+                        try:
+                            commit_date_str = last_commit['commit']['committer']['date']
+                            # Handle different date formats
+                            if commit_date_str.endswith('Z'):
+                                commit_date_str = commit_date_str[:-1] + '+00:00'
+                            commit_date = datetime.fromisoformat(commit_date_str)
+                            if commit_date > last_updated:
+                                return True, f"New commits available since last update"
+                        except (KeyError, ValueError, TypeError) as e:
+                            print(f"  Warning: Could not parse commit date: {e}")
+                            return True, "Could not verify commit date - updating to be safe"
             
             return False, "Repository is up to date"
             

@@ -153,7 +153,7 @@ jobs:
         echo "🔄 Step 1: Updating existing repositories from upstream..."
         # Update a limited number of existing repositories (5 per run to avoid timeouts)
         python3 update_upstream_repos.py \
-          --token "$GITHUB_TOKEN" \
+          --github-token "$GITHUB_TOKEN" \
           --base-path "../../.." \
           --limit 5 || echo "⚠️ Some upstream updates failed, continuing..."
         

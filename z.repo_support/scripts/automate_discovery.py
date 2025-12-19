@@ -331,8 +331,11 @@ class BatchCompendiumAutomation:
                 timeout=3600  # 1 hour timeout for updates
             )
             
-            # Check if there were any updates (ignore non-zero exit if only due to skips)
-            if result.returncode == 0 or 'Successfully Updated' in result.stdout:
+            # Check exit code and output for success indicators
+            success_indicators = ['Successfully Updated', 'Update Summary', 'Up to date']
+            has_success = any(indicator in result.stdout for indicator in success_indicators)
+            
+            if result.returncode == 0 or has_success:
                 print(f"✅ Upstream updates completed")
                 return {
                     'success': True,
