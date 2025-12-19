@@ -316,6 +316,9 @@ This repository includes maintenance tools to help manage and update the collect
 # Find new batch repositories on GitHub  
 ./maintenance find-repos --min-stars 100
 
+# Update existing repositories from upstream sources
+./maintenance update-upstream --limit 10
+
 # Update repository description
 ./maintenance update-desc
 

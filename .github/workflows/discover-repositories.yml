@@ -150,6 +150,15 @@ jobs:
       run: |
         cd z.repo_support/scripts
         
+        echo "🔄 Step 1: Updating existing repositories from upstream..."
+        # Update a limited number of existing repositories (5 per run to avoid timeouts)
+        python3 update_upstream_repos.py \
+          --token "$GITHUB_TOKEN" \
+          --base-path "../../.." \
+          --limit 5 || echo "⚠️ Some upstream updates failed, continuing..."
+        
+        echo ""
+        echo "🔍 Step 2: Discovering new repositories..."
         # Run the discovery script
         python3 identify_batch_repos.py \
           --token "$GITHUB_TOKEN" \
@@ -515,7 +524,12 @@ print('\\n🎉 All repositories properly organized with READMEs!')
         cat > pr_body.md << EOF
         ## 🤖 Automated Repository Discovery & Integration
         
-        This PR contains automatically discovered, filtered, and organized batch repositories from GitHub.
+        This PR contains automatically discovered, filtered, and organized batch repositories from GitHub, plus updates to existing repositories.
+        
+        ### 🔄 Upstream Updates
+        - ✅ **Existing Repos Updated:** Limited refresh of upstream repositories (5 repos per run)
+        - ✅ **Latest Content:** Fetched latest versions from original sources
+        - ✅ **Metadata Tracking:** Updated repository metadata with timestamps
         
         ### 📊 Discovery Summary
         - **Search Criteria:** Repositories with ${{ github.event.inputs.min_stars || '50' }}+ stars
