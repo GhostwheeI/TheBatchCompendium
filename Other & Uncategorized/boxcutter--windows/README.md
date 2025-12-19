@@ -1,25 +1,25 @@
-# Remove-MS-Edge
+# windows
 
-**Owner:** [ShadowWhisperer](https://github.com/ShadowWhisperer)  
-**Repository:** [ShadowWhisperer/Remove-MS-Edge](https://github.com/ShadowWhisperer/Remove-MS-Edge)  
-**Stars:** 4,491 ⭐  
-**Language:** Batchfile  
-**Category:** Development & Scripting Tools
+**Owner:** [boxcutter](https://github.com/boxcutter)  
+**Repository:** [boxcutter/windows](https://github.com/boxcutter/windows)  
+**Stars:** 761 ⭐  
+**Language:** Ruby  
+**Category:** Other & Uncategorized
 
 ## Description
 
-Uninstall Microsoft Edge with an executable or batch script.
+Virtual machine templates for Windows written in legacy JSON and Batch Scripting/JScript
 
 ## 🔗 Links
 
-- **GitHub Repository:** [https://github.com/ShadowWhisperer/Remove-MS-Edge](https://github.com/ShadowWhisperer/Remove-MS-Edge)
-- **Owner Profile:** [https://github.com/ShadowWhisperer](https://github.com/ShadowWhisperer)
+- **GitHub Repository:** [https://github.com/boxcutter/windows](https://github.com/boxcutter/windows)
+- **Owner Profile:** [https://github.com/boxcutter](https://github.com/boxcutter)
 
 ## 📊 Repository Stats
 
-- **Stars:** 4,491
-- **Primary Language:** Batchfile
-- **Category:** Development & Scripting Tools
+- **Stars:** 761
+- **Primary Language:** Ruby
+- **Category:** Other & Uncategorized
 
 ## 📝 About This Repository
 
@@ -27,14 +27,14 @@ This repository is part of [The Batch Compendium](https://github.com/YourUsernam
 
 ### Why This Repository?
 
-- ✅ **High Quality:** 4,491 stars indicate community trust
+- ✅ **High Quality:** 761 stars indicate community trust
 - ✅ **Active Project:** Well-maintained and documented
 - ✅ **Batch Scripts:** Contains useful Windows batch files
 - ✅ **Open Source:** Free to use and learn from
 
 ## 🚀 Quick Start
 
-1. Visit the [original repository](https://github.com/ShadowWhisperer/Remove-MS-Edge)
+1. Visit the [original repository](https://github.com/boxcutter/windows)
 2. Read the project's documentation
 3. Clone or download the scripts you need
 4. Follow the repository's installation instructions
@@ -48,12 +48,12 @@ This repository is part of [The Batch Compendium](https://github.com/YourUsernam
 
 ## 📄 License
 
-This repository follows the license terms of the original project. Please check the [original repository](https://github.com/ShadowWhisperer/Remove-MS-Edge) for specific license information.
+This repository follows the license terms of the original project. Please check the [original repository](https://github.com/boxcutter/windows) for specific license information.
 
 ## 🤝 Contributing
 
 To contribute to the original project:
-1. Visit [https://github.com/ShadowWhisperer/Remove-MS-Edge](https://github.com/ShadowWhisperer/Remove-MS-Edge)
+1. Visit [https://github.com/boxcutter/windows](https://github.com/boxcutter/windows)
 2. Read their contributing guidelines
 3. Fork, modify, and submit pull requests to their repository
 

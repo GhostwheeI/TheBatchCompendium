@@ -1,25 +1,25 @@
-# Batsh
+# PEASS-ng
 
-**Owner:** [batsh-dev-team](https://github.com/batsh-dev-team)  
-**Repository:** [batsh-dev-team/Batsh](https://github.com/batsh-dev-team/Batsh)  
-**Stars:** 4,333 ⭐  
-**Language:** OCaml  
-**Category:** Development & Scripting Tools
+**Owner:** [peass-ng](https://github.com/peass-ng)  
+**Repository:** [peass-ng/PEASS-ng](https://github.com/peass-ng/PEASS-ng)  
+**Stars:** 18,642 ⭐  
+**Language:** C#  
+**Category:** Security, Hardening & Diagnostics
 
 ## Description
 
-A language that compiles to Bash and Windows Batch
+PEASS - Privilege Escalation Awesome Scripts SUITE (with colors)
 
 ## 🔗 Links
 
-- **GitHub Repository:** [https://github.com/batsh-dev-team/Batsh](https://github.com/batsh-dev-team/Batsh)
-- **Owner Profile:** [https://github.com/batsh-dev-team](https://github.com/batsh-dev-team)
+- **GitHub Repository:** [https://github.com/peass-ng/PEASS-ng](https://github.com/peass-ng/PEASS-ng)
+- **Owner Profile:** [https://github.com/peass-ng](https://github.com/peass-ng)
 
 ## 📊 Repository Stats
 
-- **Stars:** 4,333
-- **Primary Language:** OCaml
-- **Category:** Development & Scripting Tools
+- **Stars:** 18,642
+- **Primary Language:** C#
+- **Category:** Security, Hardening & Diagnostics
 
 ## 📝 About This Repository
 
@@ -27,14 +27,14 @@ This repository is part of [The Batch Compendium](https://github.com/YourUsernam
 
 ### Why This Repository?
 
-- ✅ **High Quality:** 4,333 stars indicate community trust
+- ✅ **High Quality:** 18,642 stars indicate community trust
 - ✅ **Active Project:** Well-maintained and documented
 - ✅ **Batch Scripts:** Contains useful Windows batch files
 - ✅ **Open Source:** Free to use and learn from
 
 ## 🚀 Quick Start
 
-1. Visit the [original repository](https://github.com/batsh-dev-team/Batsh)
+1. Visit the [original repository](https://github.com/peass-ng/PEASS-ng)
 2. Read the project's documentation
 3. Clone or download the scripts you need
 4. Follow the repository's installation instructions
@@ -48,12 +48,12 @@ This repository is part of [The Batch Compendium](https://github.com/YourUsernam
 
 ## 📄 License
 
-This repository follows the license terms of the original project. Please check the [original repository](https://github.com/batsh-dev-team/Batsh) for specific license information.
+This repository follows the license terms of the original project. Please check the [original repository](https://github.com/peass-ng/PEASS-ng) for specific license information.
 
 ## 🤝 Contributing
 
 To contribute to the original project:
-1. Visit [https://github.com/batsh-dev-team/Batsh](https://github.com/batsh-dev-team/Batsh)
+1. Visit [https://github.com/peass-ng/PEASS-ng](https://github.com/peass-ng/PEASS-ng)
 2. Read their contributing guidelines
 3. Fork, modify, and submit pull requests to their repository
 
