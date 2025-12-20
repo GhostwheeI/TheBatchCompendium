@@ -20,7 +20,7 @@ if not os.path.exists(filtered_file):
     sys.exit(0)
 
 try:
-    with open(filtered_file, 'r', newline='') as f:
+    with open(filtered_file, 'r') as f:
         reader = csv.DictReader(f)
         new_repos = list(reader)
 except (OSError, csv.Error) as e:
@@ -42,7 +42,6 @@ for repo in new_repos:
 
     # Create category directory
     category_dir = base_path / category.replace(' & ', '_').replace(' ', '_')
-    
     # Create repository directory
     repo_dir = category_dir / repo_name
     
