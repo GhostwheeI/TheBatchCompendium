@@ -15,7 +15,7 @@ A curated list of Windows batch automation, optimization, and maintenance resour
 - [Security, Hardening & Diagnostics](#security-hardening--diagnostics)
 - [Single-Function Scripts](#single-function-scripts)
 - [System Optimization & Performance](#system-optimization--performance)
-- [Uncategorized](#uncategorized)
+- [Uncategorized (Staging)](#uncategorized-staging)
 - [z.repo_support](#zreposupport)
 - [Contributing](#contributing)
 - [License](#license)
@@ -56,14 +56,14 @@ A curated list of Windows batch automation, optimization, and maintenance resour
 ## System Optimization & Performance
 - [System Optimization & Performance](./System%20Optimization%20%26%20Performance/) – Performance tuning, optimization helpers, and system tweaks.
 
-## Uncategorized
+## Uncategorized (Staging)
 - [Uncategorized](./Uncategorized/) – Unsorted contributions awaiting categorization.
 
 ## z.repo_support
 - [z.repo_support](./z.repo_support/) – Repository maintenance helpers and documentation tooling.
 
 ## Contributing
-- Contributions are welcome. See [CONTRIBUTING_REPOS.md](./CONTRIBUTING_REPOS.md) and [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) for guidance and background.
+- Contributions are welcome. See [CONTRIBUTING_REPOS.md](CONTRIBUTING_REPOS.md) for guidance and background.
 
 ## License
-- Scripts retain their original licenses; review the files within each folder for attribution and terms.
+- There is no single root license; each bundled project retains its own licensing. Review the LICENSE files within individual folders for attribution and terms.
