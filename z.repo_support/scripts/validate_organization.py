@@ -15,9 +15,13 @@ if not os.path.exists('filtered_new_repos.csv'):
     print('No new repositories to validate')
     exit(0)
 
-with open('filtered_new_repos.csv', 'r') as f:
-    reader = csv.DictReader(f)
-    new_repos = list(reader)
+try:
+    with open('filtered_new_repos.csv', 'r') as f:
+        reader = csv.DictReader(f)
+        new_repos = list(reader)
+except (OSError, csv.Error) as e:
+    print(f"Error reading 'filtered_new_repos.csv': {e}")
+    exit(1)
 
 if not new_repos:
     print('No repositories in filtered file')
@@ -28,7 +32,7 @@ validation_errors = []
 validation_success = []
 
 for repo in new_repos:
-    repo_name = repo.get('name', '').replace('/', '_').replace('\\\\', '_')
+    repo_name = repo.get('name', '').replace('/', '_').replace('\\', '_')
     category = repo.get('category', 'Uncategorized')
 
     if not repo_name:

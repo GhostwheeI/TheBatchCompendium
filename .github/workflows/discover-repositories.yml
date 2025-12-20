@@ -171,6 +171,8 @@ jobs:
         echo "DISCOVERY_FILE=discovered_repos_$(date +%Y%m%d).csv" >> $GITHUB_ENV
         
     - name: Process and filter new repositories
+      env:
+        DISCOVERY_FILE: ${{ env.DISCOVERY_FILE }}
       run: |
         cd z.repo_support/scripts
 

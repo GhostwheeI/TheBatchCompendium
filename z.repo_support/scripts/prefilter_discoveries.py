@@ -18,19 +18,27 @@ if not discovery_file or not os.path.exists(discovery_file):
     print(f'Discovery file not found: {discovery_file}')
     sys.exit(1)
 
-with open(discovery_file, 'r') as f:
-    reader = csv.DictReader(f)
-    discovered_repos = list(reader)
+try:
+    with open(discovery_file, 'r') as f:
+        reader = csv.DictReader(f)
+        discovered_repos = list(reader)
+except (OSError, csv.Error) as e:
+    print(f'Failed to read discovery file "{discovery_file}": {e}')
+    sys.exit(1)
 
 print(f'Discovered {len(discovered_repos)} repositories')
 
 # Load existing repositories
 existing_repos = []
 if os.path.exists('repo_results.csv'):
-    with open('repo_results.csv', 'r') as f:
-        reader = csv.DictReader(f)
-        existing_repos = list(reader)
-    print(f'Found {len(existing_repos)} existing repositories')
+    try:
+        with open('repo_results.csv', 'r') as f:
+            reader = csv.DictReader(f)
+            existing_repos = list(reader)
+        print(f'Found {len(existing_repos)} existing repositories')
+    except (OSError, csv.Error) as e:
+        print(f'Failed to read existing repository database "repo_results.csv": {e}')
+        sys.exit(1)
 else:
     print('No existing repository database found')
 
@@ -39,18 +47,27 @@ base_path = Path('../../../')
 existing_dirs = set()
 
 # Scan existing directory structure
-for category_dir in base_path.iterdir():
-    if category_dir.is_dir() and not category_dir.name.startswith('.') and not category_dir.name.startswith('z.'):
-        for repo_dir in category_dir.iterdir():
-            if repo_dir.is_dir():
-                existing_dirs.add(repo_dir.name.lower())
+if not base_path.exists() or not base_path.is_dir():
+    print(f'Base path does not exist or is not a directory: {base_path}')
+else:
+    try:
+        for category_dir in base_path.iterdir():
+            if category_dir.is_dir() and not category_dir.name.startswith('.') and not category_dir.name.startswith('z.'):
+                try:
+                    for repo_dir in category_dir.iterdir():
+                        if repo_dir.is_dir():
+                            existing_dirs.add(repo_dir.name.lower())
+                except OSError as e:
+                    print(f'Warning: unable to access contents of {category_dir}: {e}')
+    except OSError as e:
+        print(f'Warning: unable to access base path {base_path}: {e}')
 
 print(f'Found {len(existing_dirs)} existing repository directories')
 
 # Filter out repositories that already exist
 filtered_repos = []
 for repo in discovered_repos:
-    repo_name = repo.get('name', '').replace('/', '_').replace('\\\\', '_')
+    repo_name = repo.get('name', '').replace('/', '_').replace('\\', '_')
     repo_url = repo.get('url', '')
 
     # Check if repository already exists in CSV

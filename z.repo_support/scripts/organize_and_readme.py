@@ -19,9 +19,13 @@ if not os.path.exists(filtered_file):
     print('No new repositories to process')
     sys.exit(0)
 
-with open(filtered_file, 'r') as f:
-    reader = csv.DictReader(f)
-    new_repos = list(reader)
+try:
+    with open(filtered_file, 'r', newline='') as f:
+        reader = csv.DictReader(f)
+        new_repos = list(reader)
+except (OSError, csv.Error) as e:
+    print(f'Failed to read CSV file "{filtered_file}": {e}', file=sys.stderr)
+    sys.exit(1)
 
 if not new_repos:
     print('No repositories in filtered file')
@@ -30,7 +34,7 @@ if not new_repos:
 print(f'Processing {len(new_repos)} repositories for organization...')
 
 for repo in new_repos:
-    repo_name = repo.get('name', '').replace('/', '_').replace('\\\\', '_')
+    repo_name = repo.get('name', '').replace('/', '_').replace('\\', '_')
     category = repo.get('category', 'Uncategorized')
 
     if not repo_name:
@@ -38,16 +42,25 @@ for repo in new_repos:
 
     # Create category directory
     category_dir = base_path / category.replace(' & ', '_').replace(' ', '_')
-    category_dir.mkdir(exist_ok=True)
-
+    
     # Create repository directory
     repo_dir = category_dir / repo_name
-    repo_dir.mkdir(exist_ok=True)
+    
+    try:
+        category_dir.mkdir(exist_ok=True)
+        repo_dir.mkdir(exist_ok=True)
+    except OSError as e:
+        print(f"Failed to create directories for {repo_name}: {e}", file=sys.stderr)
+        continue
 
     # Check if README exists, if not create it
     readme_path = repo_dir / 'README.md'
     if not readme_path.exists():
         print(f'Creating README for {repo_name}...')
+
+        # Extract owner name for cleaner code
+        repo_full_name = repo.get('name', '')
+        owner = repo_full_name.split('/')[0] if '/' in repo_full_name else 'unknown'
 
         # Create comprehensive README
         readme_content = f'''# {repo.get('name', 'Unknown Repository')}
@@ -64,7 +77,7 @@ for repo in new_repos:
 ## 🔗 Links
 
 - **Original Repository:** [{repo.get('url', '')}]({repo.get('url', '')})
-- **Owner Profile:** [https://github.com/{repo.get('name', '').split('/')[0] if '/' in repo.get('name', '') else 'unknown'}](https://github.com/{repo.get('name', '').split('/')[0] if '/' in repo.get('name', '') else 'unknown'})
+- **Owner Profile:** [https://github.com/{owner}](https://github.com/{owner})
 
 ## 📊 Repository Statistics
 
