@@ -67,3 +67,4 @@ jobs:
             } catch (e) {
               console.log(`Could not enable auto-merge: ${e.message}`);
             }
+
