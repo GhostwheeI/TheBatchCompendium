@@ -11,7 +11,7 @@ permissions:
 jobs:
   dismiss-reviewer:
     runs-on: ubuntu-latest
-    if: github.actor == 'copilot-swe-agent[bot]'
+    if: github.event.pull_request.user.login == 'copilot-swe-agent[bot]'
     steps:
       - name: Remove owner and request Copilot review
         uses: actions/github-script@v7
