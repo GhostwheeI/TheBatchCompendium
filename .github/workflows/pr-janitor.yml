@@ -52,7 +52,7 @@ jobs:
             Thank you for your contributions!
           stale-pr-label: 'stale'
           close-pr-label: 'auto-closed'
-          exempt-pr-labels: 'keep-open,in-progress,blocked'
+          exempt-pr-labels: 'keep-open,in-progress,blocked,wip'
           exempt-draft-pr: false
           ascending: true
           operations-per-run: 100
