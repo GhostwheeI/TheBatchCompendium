@@ -4,7 +4,7 @@
 
 # 🎯 The Largest Batch Script Collection 🎯
 
-## 📊 **2,821 BATCH SCRIPTS** 📊
+## 📊 **2,047 BATCH SCRIPTS** 📊
 
 ### *The ultimate compendium of Windows batch automation*
 
@@ -13,7 +13,7 @@
 ---
 
 ![Windows](https://img.shields.io/badge/platform-Windows-blue)
-![Scripts](https://img.shields.io/badge/scripts-2821-green)
+![Scripts](https://img.shields.io/badge/scripts-2047-green)
 ![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 
 # The Batch Compendium
@@ -51,7 +51,7 @@ The Batch Compendium is a curated collection of batch scripts categorized for va
 3. Follow the instructions in the script's `README.md` or comments.
 
 ## Contributing
-We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! Please see our [CONTRIBUTING_REPOS.md](CONTRIBUTING_REPOS.md) for guidelines.
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
@@ -368,7 +368,7 @@ For more details, see:
 
 ## 🔐 License
 
-All content is covered under the [MIT License](LICENSE.md).  
+All content is covered under the [MIT License](LICENSE).  
 Authors are credited where original repo info is preserved.
 
 ---
