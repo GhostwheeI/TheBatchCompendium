@@ -1,0 +1,40 @@
+name: Auto-dismiss owner from Copilot PRs
+
+on:
+  pull_request:
+    types: [opened, review_requested]
+
+jobs:
+  dismiss-reviewer:
+    runs-on: ubuntu-latest
+    if: github.actor == 'copilot-swe-agent[bot]'
+    steps:
+      - name: Remove owner and request Copilot review
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pull_number = context.payload.pull_request.number;
+            
+            // Remove GhostwheeI as reviewer
+            try {
+              await github.rest.pulls.removeRequestedReviewers({
+                owner,
+                repo,
+                pull_number,
+                reviewers: ['GhostwheeI']
+              });
+              console.log(`Removed GhostwheeI from reviewers on PR #${pull_number}`);
+            } catch (e) {
+              console.log(`Could not remove reviewer: ${e.message}`);
+            }
+            
+            // Request Copilot code review
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: pull_number,
+              body: '@copilot review'
+            });
+            console.log(`Requested Copilot review on PR #${pull_number}`);
