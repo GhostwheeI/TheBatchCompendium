@@ -22,24 +22,28 @@ jobs:
             const repo = context.repo.repo;
             const pull_number = context.payload.pull_request.number;
             
-            // Remove GhostwheeI as reviewer
+            // Remove repository owner as reviewer
             try {
               await github.rest.pulls.removeRequestedReviewers({
                 owner,
                 repo,
                 pull_number,
-                reviewers: ['GhostwheeI']
+                reviewers: [owner]
               });
-              console.log(`Removed GhostwheeI from reviewers on PR #${pull_number}`);
+              console.log(`Removed ${owner} from reviewers on PR #${pull_number}`);
             } catch (e) {
               console.log(`Could not remove reviewer: ${e.message}`);
             }
             
             // Request Copilot code review
-            await github.rest.issues.createComment({
-              owner,
-              repo,
-              issue_number: pull_number,
-              body: '@copilot review'
-            });
-            console.log(`Requested Copilot review on PR #${pull_number}`);
+            try {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pull_number,
+                body: '@copilot review'
+              });
+              console.log(`Requested Copilot review on PR #${pull_number}`);
+            } catch (e) {
+              console.log(`Could not request Copilot review: ${e.message}`);
+            }
