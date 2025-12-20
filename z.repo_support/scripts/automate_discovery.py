@@ -17,6 +17,9 @@ from pathlib import Path
 class BatchCompendiumAutomation:
     """Complete automation system for batch repository discovery and integration."""
     
+    # Configuration constants
+    UPSTREAM_UPDATE_TIMEOUT_SECONDS = 3600  # 1 hour timeout for upstream updates
+    
     def __init__(self, base_path: str = "."):
         """
         Initialize the automation system.
@@ -306,11 +309,71 @@ class BatchCompendiumAutomation:
                 'stderr': e.stderr
             }
     
+    def run_upstream_updates(self, github_token: Optional[str] = None, limit: Optional[int] = None) -> Dict:
+        """Run upstream repository updates."""
+        print(f"🔄 Updating existing repositories from upstream sources...")
+        
+        try:
+            cmd = [
+                'python3',
+                str(self.scripts_path / 'update_upstream_repos.py'),
+                '--base-path', str(self.base_path)
+            ]
+            
+            if github_token:
+                cmd.extend(['--github-token', github_token])
+            
+            if limit:
+                cmd.extend(['--limit', str(limit)])
+            
+            result = subprocess.run(
+                cmd,
+                cwd=self.scripts_path,
+                capture_output=True,
+                text=True,
+                timeout=self.UPSTREAM_UPDATE_TIMEOUT_SECONDS
+            )
+            
+            # Check exit code and output for success indicators
+            success_indicators = ['Successfully Updated', 'Update Summary', 'Up to date']
+            has_success = any(indicator in result.stdout for indicator in success_indicators)
+            
+            if result.returncode == 0 or has_success:
+                print(f"✅ Upstream updates completed")
+                return {
+                    'success': True,
+                    'output': result.stdout
+                }
+            else:
+                print(f"⚠️ Upstream updates completed with warnings")
+                return {
+                    'success': True,
+                    'output': result.stdout,
+                    'warnings': result.stderr
+                }
+                
+        except subprocess.TimeoutExpired:
+            print(f"⚠️ Upstream updates timed out but continuing...")
+            return {
+                'success': False,
+                'error': 'Update operation timed out',
+                'timeout': True
+            }
+        except subprocess.CalledProcessError as e:
+            print(f"⚠️ Upstream updates failed but continuing...")
+            return {
+                'success': False,
+                'error': str(e),
+                'stderr': e.stderr
+            }
+    
     def run_complete_automation(self, 
                                min_stars: int = 50,
                                max_results: int = 100,
                                github_token: Optional[str] = None,
-                               notification_channels: List[str] = None) -> Dict:
+                               notification_channels: List[str] = None,
+                               update_existing: bool = True,
+                               update_limit: Optional[int] = None) -> Dict:
         """Run the complete automation process."""
         
         print(f"""
@@ -320,6 +383,7 @@ class BatchCompendiumAutomation:
 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
 Min Stars: {min_stars}
 Max Results: {max_results}
+Update Existing: {update_existing}
 {'=' * 60}
 """)
         
@@ -330,6 +394,14 @@ Max Results: {max_results}
         }
         
         try:
+            # Step 0: Update existing repositories (if requested)
+            if update_existing:
+                upstream_result = self.run_upstream_updates(github_token, update_limit)
+                results['steps']['upstream_updates'] = upstream_result
+                # Don't fail if upstream updates have issues, just log them
+                if not upstream_result.get('success'):
+                    print(f"⚠️ Some upstream updates failed, but continuing with discovery...")
+            
             # Step 1: Repository Discovery
             discovery_result = self.run_discovery(min_stars, max_results, github_token)
             results['steps']['discovery'] = discovery_result
@@ -389,6 +461,7 @@ Max Results: {max_results}
             
             results['success'] = True
             results['summary'] = {
+                'upstream_updated': results['steps'].get('upstream_updates', {}).get('success', False),
                 'discovered': discovered_count,
                 'filtered': filtered_count,
                 'integrated': filtered_count if filtered_count > 0 else 0
@@ -399,6 +472,7 @@ Max Results: {max_results}
 ✅ Automation Completed Successfully!
 {'=' * 60}
 📊 Summary:
+  • Upstream Updates: {'✓ Completed' if update_existing else '⏭️ Skipped'}
   • Repositories Discovered: {discovered_count}
   • Quality Filtered: {filtered_count}
   • Successfully Integrated: {filtered_count if filtered_count > 0 else 0}
@@ -491,6 +565,23 @@ def main():
         help='Clean up temporary files after automation'
     )
     parser.add_argument(
+        '--update-existing',
+        action='store_true',
+        default=True,
+        help='Enable updating existing repositories from upstream (enabled by default)'
+    )
+    parser.add_argument(
+        '--no-update-existing',
+        action='store_false',
+        dest='update_existing',
+        help='Skip updating existing repositories'
+    )
+    parser.add_argument(
+        '--update-limit',
+        type=int,
+        help='Limit number of repositories to update from upstream (for testing)'
+    )
+    parser.add_argument(
         '--dry-run',
         action='store_true',
         help='Show what would be done without making changes'
@@ -504,6 +595,7 @@ def main():
         print(f"  Min stars: {args.min_stars}")
         print(f"  Max results: {args.max_results}")
         print(f"  Base path: {args.base_path}")
+        print(f"  Update existing: {args.update_existing}")
         print(f"  Notifications: {args.notifications}")
         return
     
@@ -521,7 +613,9 @@ def main():
             min_stars=args.min_stars,
             max_results=args.max_results,
             github_token=github_token,
-            notification_channels=args.notifications
+            notification_channels=args.notifications,
+            update_existing=args.update_existing,
+            update_limit=args.update_limit
         )
         
         # Save results

@@ -32,6 +32,9 @@ show_help() {
     echo -e "  ${GREEN}add-topics${NC}      Add topics/tags to the GitHub repository"
     echo -e "                   Usage: $0 add-topics"
     echo ""
+    echo -e "  ${GREEN}update-upstream${NC} Update existing repositories from their upstream sources"
+    echo -e "                   Usage: $0 update-upstream [--limit N] [--force]"
+    echo ""
     echo -e "  ${GREEN}scripts-dir${NC}     Open the scripts directory"
     echo -e "                   Usage: $0 scripts-dir"
     echo ""
@@ -40,6 +43,7 @@ show_help() {
     echo "Examples:"
     echo "  $0 find-repos --min-stars 100 --max-results 50"
     echo "  $0 update-count"
+    echo "  $0 update-upstream --limit 10"
     echo "  $0 help"
     echo ""
     echo -e "${YELLOW}Note: All scripts are located in z.repo_support/scripts/${NC}"
@@ -62,6 +66,11 @@ case "$1" in
     "add-topics")
         echo -e "${BLUE}🏷️ Adding repository topics...${NC}"
         "${SCRIPTS_DIR}/add_topics.sh"
+        ;;
+    "update-upstream")
+        shift
+        echo -e "${BLUE}🔄 Updating repositories from upstream sources...${NC}"
+        python3 "${SCRIPTS_DIR}/update_upstream_repos.py" --base-path "${REPO_ROOT}" "$@"
         ;;
     "scripts-dir")
         echo -e "${BLUE}📂 Scripts directory: ${SCRIPTS_DIR}${NC}"
