@@ -33,7 +33,7 @@ jobs:
           days-before-stale: ${{ github.event.inputs.stale_days || '30' }}
           days-before-close: ${{ github.event.inputs.close_days || '7' }}
           stale-pr-message: |
-            This draft PR has been inactive for ${{ github.event.inputs.stale_days || '30' }} days and will be closed in ${{ github.event.inputs.close_days || '7' }} days unless there is activity.
+            This draft PR has been inactive for 30 days and will be closed in 7 days unless there is activity.
             
             If you're still working on this, please:
             - Add a comment to keep it open
@@ -59,6 +59,7 @@ jobs:
           
   auto-merge-green-prs:
     runs-on: ubuntu-latest
+    needs: manage-draft-prs
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -93,8 +94,13 @@ jobs:
                 continue;
               }
               
-              // Check if PR is from Copilot
-              const isCopilotPR = pr.user.login.toLowerCase().includes('copilot') ||
+              // Check if PR is from Copilot with more specific matching
+              const login = pr.user.login.toLowerCase();
+              const isCopilotUser = login === 'github-copilot[bot]' ||
+                                     login === 'copilot-ai[bot]' ||
+                                     login.startsWith('copilot-') ||
+                                     login.startsWith('github-copilot');
+              const isCopilotPR = isCopilotUser ||
                                    pr.user.type === 'Bot' ||
                                    pr.head.ref.startsWith('copilot/') ||
                                    pr.user.login === 'github-actions[bot]';
@@ -104,26 +110,59 @@ jobs:
                 continue;
               }
               
-              // Get PR details including mergeable state
-              const { data: prDetails } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pr.number
-              });
-              
-              // Check commit status
-              const { data: statuses } = await github.rest.repos.getCombinedStatusForRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: pr.head.sha
-              });
-              
-              // Check if all checks passed
-              const allChecksPassed = statuses.state === 'success' || statuses.statuses.length === 0;
-              const isMergeable = prDetails.mergeable === true;
-              const hasConflicts = prDetails.mergeable === false;
-              
-              console.log(`PR #${pr.number}: checks=${statuses.state}, mergeable=${prDetails.mergeable}`);
+              // Fetch PR details and status in a single GraphQL query to reduce API calls
+              try {
+                const prInfo = await github.graphql(`
+                  query($owner: String!, $repo: String!, $prNumber: Int!) {
+                    repository(owner: $owner, name: $repo) {
+                      pullRequest(number: $prNumber) {
+                        mergeable
+                        commits(last: 1) {
+                          nodes {
+                            commit {
+                              statusCheckRollup {
+                                state
+                                contexts(first: 100) {
+                                  nodes {
+                                    ... on StatusContext {
+                                      context
+                                      state
+                                    }
+                                    ... on CheckRun {
+                                      name
+                                      conclusion
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                `, {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  prNumber: pr.number
+                });
+                
+                const prNode = prInfo.repository.pullRequest;
+                const mergeableState = prNode.mergeable; // MERGEABLE, CONFLICTING, UNKNOWN
+                const statusRollup = prNode.commits.nodes[0]?.commit.statusCheckRollup;
+                const combinedState = statusRollup ? statusRollup.state : null;
+                const contexts = statusRollup?.contexts?.nodes || [];
+                
+                // Check if all checks passed (and at least one check exists)
+                const allChecksPassed = combinedState === 'SUCCESS' && contexts.length > 0;
+                const isMergeable = mergeableState === 'MERGEABLE';
+                const hasConflicts = mergeableState === 'CONFLICTING';
+                
+                console.log(`PR #${pr.number}: checks=${combinedState}, mergeable=${mergeableState}, contexts=${contexts.length}`);
+              } catch (error) {
+                console.log(`Error fetching PR #${pr.number} details: ${error.message}`);
+                continue;
+              }
               
               // Auto-merge if checks passed and no conflicts
               if (allChecksPassed && isMergeable) {
@@ -162,21 +201,41 @@ jobs:
               } else if (hasConflicts) {
                 console.log(`Skipping PR #${pr.number} - has merge conflicts`);
                 
-                // Add conflict label
-                await github.rest.issues.addLabels({
+                // Add conflict label only if not already present
+                if (!labels.includes('has-conflicts')) {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    labels: ['has-conflicts']
+                  });
+                } else {
+                  console.log(`PR #${pr.number} already has 'has-conflicts' label`);
+                }
+                
+                // Check for existing conflict comment to avoid duplicates
+                const conflictCommentBody = '⚠️ This PR has merge conflicts that need to be resolved before it can be merged.';
+                const { data: existingComments } = await github.rest.issues.listComments({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                  labels: ['has-conflicts']
+                  per_page: 100
                 });
                 
-                // Add comment about conflicts
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: pr.number,
-                  body: '⚠️ This PR has merge conflicts that need to be resolved before it can be merged.'
-                });
+                const hasConflictComment = existingComments.some(
+                  comment => comment.body && comment.body.includes(conflictCommentBody)
+                );
+                
+                if (!hasConflictComment) {
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    body: conflictCommentBody
+                  });
+                } else {
+                  console.log(`PR #${pr.number} already has a conflict notification comment`);
+                }
               } else {
                 console.log(`Skipping PR #${pr.number} - checks not passed or not mergeable`);
               }
@@ -186,6 +245,7 @@ jobs:
             
   close-obsolete-draft-prs:
     runs-on: ubuntu-latest
+    needs: auto-merge-green-prs
     steps:
       - name: Close clearly obsolete draft PRs
         uses: actions/github-script@v7
@@ -210,7 +270,13 @@ jobs:
               // Only process draft PRs from Copilot
               if (!pr.draft) continue;
               
-              const isCopilotPR = pr.user.login.toLowerCase().includes('copilot') ||
+              // Check if PR is from Copilot with more specific matching
+              const login = pr.user.login.toLowerCase();
+              const isCopilotUser = login === 'github-copilot[bot]' ||
+                                     login === 'copilot-ai[bot]' ||
+                                     login.startsWith('copilot-') ||
+                                     login.startsWith('github-copilot');
+              const isCopilotPR = isCopilotUser ||
                                    pr.user.type === 'Bot' ||
                                    pr.head.ref.startsWith('copilot/') ||
                                    pr.user.login === 'github-actions[bot]';

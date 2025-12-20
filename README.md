@@ -346,6 +346,7 @@ This repository includes automated workflows to minimize manual maintenance:
 **PR Management**
 - **Stale Draft PR Cleanup**: Automatically labels and closes inactive draft PRs after 30 days
 - **Auto-Merge**: Green PRs from Copilot are automatically merged when all checks pass
+  - Note: Auto-merge requires at least one CI check to be configured. PRs without any status checks will not be auto-merged.
 - **Conflict Detection**: PRs with merge conflicts are automatically labeled
 
 **Issue Management**
