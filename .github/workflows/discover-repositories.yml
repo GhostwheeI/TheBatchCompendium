@@ -29,9 +29,10 @@ on:
       - 'z.repo_support/scripts/**'
       - '.github/workflows/discover-repositories.yml'
   
-  # 4. PULL REQUEST - Run on PRs to test changes
+  # 4. PULL REQUEST - Run on PRs to test changes (skip draft PRs)
   pull_request:
     branches: [ main ]
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - 'z.repo_support/scripts/**'
       - '.github/workflows/discover-repositories.yml'
@@ -44,12 +45,12 @@ env:
   PYTHON_VERSION: '3.9'
 
 jobs:
-  # Test job for validating changes (runs on push/PR)
+  # Test job for validating changes (runs on push/PR, skips draft PRs)
   test-automation:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'push' ||
-      github.event_name == 'pull_request'
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false)
     
     steps:
     - name: Checkout repository
