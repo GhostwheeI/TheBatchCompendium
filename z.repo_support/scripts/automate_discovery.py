@@ -17,6 +17,9 @@ from pathlib import Path
 class BatchCompendiumAutomation:
     """Complete automation system for batch repository discovery and integration."""
     
+    # Configuration constants
+    UPSTREAM_UPDATE_TIMEOUT_SECONDS = 3600  # 1 hour timeout for upstream updates
+    
     def __init__(self, base_path: str = "."):
         """
         Initialize the automation system.
@@ -328,7 +331,7 @@ class BatchCompendiumAutomation:
                 cwd=self.scripts_path,
                 capture_output=True,
                 text=True,
-                timeout=3600  # 1 hour timeout for updates
+                timeout=self.UPSTREAM_UPDATE_TIMEOUT_SECONDS
             )
             
             # Check exit code and output for success indicators
@@ -565,7 +568,7 @@ def main():
         '--update-existing',
         action='store_true',
         default=True,
-        help='Update existing repositories from upstream (default: True)'
+        help='Enable updating existing repositories from upstream (enabled by default)'
     )
     parser.add_argument(
         '--no-update-existing',

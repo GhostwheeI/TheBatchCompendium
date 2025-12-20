@@ -26,6 +26,10 @@ except ImportError:
 class UpstreamUpdater:
     """Update repositories and scripts from their upstream sources."""
     
+    # Configuration constants
+    GIT_CLONE_TIMEOUT_SECONDS = 300  # 5 minute timeout for git clone operations
+    UPDATE_THRESHOLD_DAYS = 30  # Update repositories older than this many days
+    
     def __init__(self, base_path: str = ".", github_token: Optional[str] = None):
         """
         Initialize the upstream updater.
@@ -139,7 +143,7 @@ class UpstreamUpdater:
                     ['git', 'clone', '--depth', '1', repo_url, str(clone_path)],
                     capture_output=True,
                     text=True,
-                    timeout=300  # 5 minute timeout
+                    timeout=self.GIT_CLONE_TIMEOUT_SECONDS
                 )
                 
                 if result.returncode != 0:
@@ -233,11 +237,11 @@ class UpstreamUpdater:
             with open(metadata_file, 'r', encoding='utf-8') as f:
                 metadata = json.load(f)
             
-            # Check last update time (update if older than 30 days)
+            # Check last update time (update if older than UPDATE_THRESHOLD_DAYS)
             last_updated = datetime.fromisoformat(metadata.get('last_updated', '2000-01-01'))
             days_since_update = (datetime.now() - last_updated).days
             
-            if days_since_update > 30:
+            if days_since_update > self.UPDATE_THRESHOLD_DAYS:
                 return True, f"Last updated {days_since_update} days ago"
             
             # Check if repository information has changed
@@ -250,7 +254,9 @@ class UpstreamUpdater:
                     if last_commit:
                         try:
                             commit_date_str = last_commit['commit']['committer']['date']
-                            # Handle different date formats
+                            # Handle different date formats.
+                            # Note: Replacing 'Z' with '+00:00' is required for Python 3.6–3.10,
+                            # where datetime.fromisoformat() does not accept a 'Z' suffix.
                             if commit_date_str.endswith('Z'):
                                 commit_date_str = commit_date_str[:-1] + '+00:00'
                             commit_date = datetime.fromisoformat(commit_date_str)
@@ -258,7 +264,7 @@ class UpstreamUpdater:
                                 return True, f"New commits available since last update"
                         except (KeyError, ValueError, TypeError) as e:
                             print(f"  Warning: Could not parse commit date: {e}")
-                            return True, "Could not verify commit date - updating to be safe"
+                            return True, f"Could not verify commit date ({type(e).__name__}: {e}) - updating to be safe"
             
             return False, "Repository is up to date"
             
@@ -286,7 +292,6 @@ class UpstreamUpdater:
             print("No repositories to update")
             return self.stats
         
-        total_repos = len(repos)
         if limit:
             repos = repos[:limit]
             print(f"Limiting update to first {limit} repositories")
