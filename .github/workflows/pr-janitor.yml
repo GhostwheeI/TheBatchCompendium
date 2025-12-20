@@ -54,7 +54,6 @@ jobs:
           close-pr-label: 'auto-closed'
           exempt-pr-labels: 'keep-open,in-progress,blocked'
           exempt-draft-pr: false
-          only-labels: 'draft'
           ascending: true
           operations-per-run: 100
           
@@ -95,9 +94,10 @@ jobs:
               }
               
               // Check if PR is from Copilot
-              const isCopilotPR = pr.user.login === 'Copilot' || 
+              const isCopilotPR = pr.user.login.toLowerCase().includes('copilot') ||
                                    pr.user.type === 'Bot' ||
-                                   pr.head.ref.startsWith('copilot/');
+                                   pr.head.ref.startsWith('copilot/') ||
+                                   pr.user.login === 'github-actions[bot]';
               
               if (!isCopilotPR) {
                 console.log(`Skipping PR #${pr.number} - not from Copilot`);
@@ -210,9 +210,10 @@ jobs:
               // Only process draft PRs from Copilot
               if (!pr.draft) continue;
               
-              const isCopilotPR = pr.user.login === 'Copilot' || 
+              const isCopilotPR = pr.user.login.toLowerCase().includes('copilot') ||
                                    pr.user.type === 'Bot' ||
-                                   pr.head.ref.startsWith('copilot/');
+                                   pr.head.ref.startsWith('copilot/') ||
+                                   pr.user.login === 'github-actions[bot]';
               
               if (!isCopilotPR) continue;
               
