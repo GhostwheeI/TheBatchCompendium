@@ -1,0 +1,57 @@
+name: Issue Janitor - Auto-manage Stale Issues
+
+on:
+  schedule:
+    # Run daily at 01:00 UTC
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+    inputs:
+      stale_days:
+        description: 'Days before marking issue as stale'
+        required: false
+        default: '60'
+        type: string
+      close_days:
+        description: 'Days before closing stale issue'
+        required: false
+        default: '14'
+        type: string
+
+permissions:
+  issues: write
+  
+jobs:
+  stale-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark and close stale issues
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-stale: ${{ github.event.inputs.stale_days || '60' }}
+          days-before-close: ${{ github.event.inputs.close_days || '14' }}
+          stale-issue-message: |
+            This issue has been inactive for ${{ github.event.inputs.stale_days || '60' }} days and will be closed in ${{ github.event.inputs.close_days || '14' }} days unless there is activity.
+            
+            If this issue is still relevant:
+            - Add a comment to keep it open
+            - Provide an update on the status
+            - Add relevant labels
+            
+            Issues are automatically cleaned up to reduce notification noise and maintain an active issue tracker.
+          close-issue-message: |
+            This issue has been automatically closed due to inactivity.
+            
+            If this issue is still relevant:
+            - Reopen the issue
+            - Provide an update with current status
+            - Add relevant context or reproduction steps
+            
+            Thank you for your contributions!
+          stale-issue-label: 'stale'
+          close-issue-label: 'auto-closed'
+          exempt-issue-labels: 'keep-open,in-progress,blocked,pinned,security'
+          exempt-all-milestones: true
+          ascending: true
+          operations-per-run: 100
+          remove-stale-when-updated: true

@@ -1,0 +1,263 @@
+name: PR Janitor - Auto-manage Draft PRs
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      stale_days:
+        description: 'Days before marking PR as stale'
+        required: false
+        default: '30'
+        type: string
+      close_days:
+        description: 'Days before closing stale PR'
+        required: false
+        default: '7'
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  manage-draft-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check and label stale draft PRs
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-stale: ${{ github.event.inputs.stale_days || '30' }}
+          days-before-close: ${{ github.event.inputs.close_days || '7' }}
+          stale-pr-message: |
+            This draft PR has been inactive for ${{ github.event.inputs.stale_days || '30' }} days and will be closed in ${{ github.event.inputs.close_days || '7' }} days unless there is activity.
+            
+            If you're still working on this, please:
+            - Add a comment to keep it open
+            - Push new commits
+            - Mark it as ready for review if it's complete
+            
+            Copilot agent PRs are automatically cleaned up to reduce notification noise.
+          close-pr-message: |
+            This draft PR has been automatically closed due to inactivity. 
+            
+            If you need to resume work on this:
+            - Reopen the PR
+            - Push new commits
+            - Comment on the PR
+            
+            Thank you for your contributions!
+          stale-pr-label: 'stale'
+          close-pr-label: 'auto-closed'
+          exempt-pr-labels: 'keep-open,in-progress,blocked'
+          exempt-draft-pr: false
+          only-labels: 'draft'
+          ascending: true
+          operations-per-run: 100
+          
+  auto-merge-green-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Auto-merge green draft PRs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              sort: 'created',
+              direction: 'asc',
+              per_page: 100
+            });
+            
+            console.log(`Found ${pullRequests.length} open PRs`);
+            
+            for (const pr of pullRequests) {
+              // Skip non-draft PRs
+              if (!pr.draft) {
+                console.log(`Skipping PR #${pr.number} - not a draft`);
+                continue;
+              }
+              
+              // Skip PRs with labels indicating they should be kept open
+              const labels = pr.labels.map(l => l.name);
+              if (labels.includes('keep-open') || labels.includes('blocked') || labels.includes('wip')) {
+                console.log(`Skipping PR #${pr.number} - has exemption label`);
+                continue;
+              }
+              
+              // Check if PR is from Copilot
+              const isCopilotPR = pr.user.login === 'Copilot' || 
+                                   pr.user.type === 'Bot' ||
+                                   pr.head.ref.startsWith('copilot/');
+              
+              if (!isCopilotPR) {
+                console.log(`Skipping PR #${pr.number} - not from Copilot`);
+                continue;
+              }
+              
+              // Get PR details including mergeable state
+              const { data: prDetails } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number
+              });
+              
+              // Check commit status
+              const { data: statuses } = await github.rest.repos.getCombinedStatusForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: pr.head.sha
+              });
+              
+              // Check if all checks passed
+              const allChecksPassed = statuses.state === 'success' || statuses.statuses.length === 0;
+              const isMergeable = prDetails.mergeable === true;
+              const hasConflicts = prDetails.mergeable === false;
+              
+              console.log(`PR #${pr.number}: checks=${statuses.state}, mergeable=${prDetails.mergeable}`);
+              
+              // Auto-merge if checks passed and no conflicts
+              if (allChecksPassed && isMergeable) {
+                console.log(`Auto-merging PR #${pr.number}`);
+                
+                // Convert to ready for review first
+                await github.rest.pulls.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  draft: false
+                });
+                
+                // Add auto-merge label
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  labels: ['auto-merged']
+                });
+                
+                // Merge the PR
+                try {
+                  await github.rest.pulls.merge({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: pr.number,
+                    merge_method: 'squash',
+                    commit_title: `${pr.title} (auto-merged)`,
+                    commit_message: `Automatically merged green PR from Copilot.\n\n${pr.body || ''}`
+                  });
+                  console.log(`✅ Successfully merged PR #${pr.number}`);
+                } catch (error) {
+                  console.log(`❌ Failed to merge PR #${pr.number}: ${error.message}`);
+                }
+              } else if (hasConflicts) {
+                console.log(`Skipping PR #${pr.number} - has merge conflicts`);
+                
+                // Add conflict label
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  labels: ['has-conflicts']
+                });
+                
+                // Add comment about conflicts
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: '⚠️ This PR has merge conflicts that need to be resolved before it can be merged.'
+                });
+              } else {
+                console.log(`Skipping PR #${pr.number} - checks not passed or not mergeable`);
+              }
+            }
+            
+            console.log('✅ PR auto-merge check complete');
+            
+  close-obsolete-draft-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close clearly obsolete draft PRs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              sort: 'created',
+              direction: 'asc',
+              per_page: 100
+            });
+            
+            console.log(`Checking ${pullRequests.length} PRs for obsolete status`);
+            
+            const now = new Date();
+            const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+            
+            for (const pr of pullRequests) {
+              // Only process draft PRs from Copilot
+              if (!pr.draft) continue;
+              
+              const isCopilotPR = pr.user.login === 'Copilot' || 
+                                   pr.user.type === 'Bot' ||
+                                   pr.head.ref.startsWith('copilot/');
+              
+              if (!isCopilotPR) continue;
+              
+              const createdDate = new Date(pr.created_at);
+              const updatedDate = new Date(pr.updated_at);
+              
+              // Check if PR is very old (60+ days) with no recent activity
+              if (updatedDate < sixtyDaysAgo) {
+                console.log(`Closing obsolete PR #${pr.number} (last updated: ${pr.updated_at})`);
+                
+                // Add comment explaining closure
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: `This draft PR has been automatically closed due to 60+ days of inactivity.
+                  
+Copilot draft PRs are routinely cleaned up to minimize maintenance overhead and notification noise.
+
+If this work is still relevant, please:
+- Reopen the PR
+- Rebase against the latest main branch
+- Add a comment describing the current status
+
+Thank you!`
+                });
+                
+                // Add labels
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  labels: ['obsolete', 'auto-closed']
+                });
+                
+                // Close the PR
+                await github.rest.pulls.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  state: 'closed'
+                });
+                
+                console.log(`✅ Closed PR #${pr.number}`);
+              }
+            }
+            
+            console.log('✅ Obsolete PR cleanup complete');

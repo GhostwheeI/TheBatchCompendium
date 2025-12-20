@@ -339,6 +339,30 @@ For advanced repository management, see the tools in [`z.repo_support/`](z.repo_
 
 All maintenance scripts are designed to preserve the collection's organization and quality standards.
 
+### Automated Janitor Jobs 🤖
+
+This repository includes automated workflows to minimize manual maintenance:
+
+**PR Management**
+- **Stale Draft PR Cleanup**: Automatically labels and closes inactive draft PRs after 30 days
+- **Auto-Merge**: Green PRs from Copilot are automatically merged when all checks pass
+- **Conflict Detection**: PRs with merge conflicts are automatically labeled
+
+**Issue Management**
+- **Stale Issues**: Inactive issues are labeled after 60 days and closed after 14 more days
+- **Auto-Labeling**: Issues and PRs are automatically categorized
+
+**Workflow Management**
+- **Draft PR Skip**: CI checks skip draft PRs to reduce noise
+- **Scheduled Runs**: Daily janitor jobs run at 00:00 and 01:00 UTC
+- **Manual Triggers**: All workflows can be manually triggered when needed
+
+These automation workflows help keep the repository clean and reduce notification noise for minimal-maintainer scenarios.
+
+For more details, see:
+- [`.github/workflows/pr-janitor.yml`](.github/workflows/pr-janitor.yml)
+- [`.github/workflows/issue-janitor.yml`](.github/workflows/issue-janitor.yml)
+
 ---
 
 ## 🔐 License
