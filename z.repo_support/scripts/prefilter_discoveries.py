@@ -12,9 +12,10 @@ from pathlib import Path
 print('🔍 Pre-processing: Checking for existing repositories and scripts...')
 
 # Load discovered repositories
-discovery_file = os.environ.get('DISCOVERY_FILE', f'discovered_repos_{os.environ.get("DATE", "")}.csv')
-if not os.path.exists(discovery_file):
-    print(f'Discovery file {discovery_file} not found')
+# The DISCOVERY_FILE is set by the workflow step
+discovery_file = os.environ.get('DISCOVERY_FILE')
+if not discovery_file or not os.path.exists(discovery_file):
+    print(f'Discovery file not found: {discovery_file}')
     sys.exit(1)
 
 with open(discovery_file, 'r') as f:
@@ -49,7 +50,7 @@ print(f'Found {len(existing_dirs)} existing repository directories')
 # Filter out repositories that already exist
 filtered_repos = []
 for repo in discovered_repos:
-    repo_name = repo.get('name', '').replace('/', '_').replace('\\', '_')
+    repo_name = repo.get('name', '').replace('/', '_').replace('\\\\', '_')
     repo_url = repo.get('url', '')
 
     # Check if repository already exists in CSV

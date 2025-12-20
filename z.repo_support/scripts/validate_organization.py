@@ -28,7 +28,7 @@ validation_errors = []
 validation_success = []
 
 for repo in new_repos:
-    repo_name = repo.get('name', '').replace('/', '_').replace('\\', '_')
+    repo_name = repo.get('name', '').replace('/', '_').replace('\\\\', '_')
     category = repo.get('category', 'Uncategorized')
 
     if not repo_name:

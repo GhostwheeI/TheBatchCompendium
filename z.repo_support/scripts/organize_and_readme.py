@@ -30,7 +30,7 @@ if not new_repos:
 print(f'Processing {len(new_repos)} repositories for organization...')
 
 for repo in new_repos:
-    repo_name = repo.get('name', '').replace('/', '_').replace('\\', '_')
+    repo_name = repo.get('name', '').replace('/', '_').replace('\\\\', '_')
     category = repo.get('category', 'Uncategorized')
 
     if not repo_name:
