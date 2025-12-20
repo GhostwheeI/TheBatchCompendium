@@ -229,16 +229,13 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                  body: `This draft PR has been automatically closed due to 60+ days of inactivity.
-                  
-Copilot draft PRs are routinely cleaned up to minimize maintenance overhead and notification noise.
-
-If this work is still relevant, please:
-- Reopen the PR
-- Rebase against the latest main branch
-- Add a comment describing the current status
-
-Thank you!`
+                  body: 'This draft PR has been automatically closed due to 60+ days of inactivity.\n\n' +
+                        'Copilot draft PRs are routinely cleaned up to minimize maintenance overhead and notification noise.\n\n' +
+                        'If this work is still relevant, please:\n' +
+                        '- Reopen the PR\n' +
+                        '- Rebase against the latest main branch\n' +
+                        '- Add a comment describing the current status\n\n' +
+                        'Thank you!'
                 });
                 
                 // Add labels
