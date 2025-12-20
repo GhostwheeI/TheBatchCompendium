@@ -66,4 +66,5 @@ A curated list of Windows batch automation, optimization, and maintenance resour
 - Contributions are welcome. See [CONTRIBUTING_REPOS.md](CONTRIBUTING_REPOS.md) for guidance and background.
 
 ## License
-- There is no single root license; each bundled project retains its own licensing. Review the LICENSE files within individual folders for attribution and terms.
+- Unless otherwise noted, the repository structure, curation metadata, and original documentation (including this README) are licensed under the MIT License. See [LICENSE](LICENSE) at the repository root for full terms.
+- Bundled third-party projects are kept in their own subfolders and retain their individual licenses. Review the LICENSE files within those folders for attribution and specific usage terms.
