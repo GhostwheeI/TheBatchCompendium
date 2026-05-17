@@ -66,7 +66,8 @@ class RepositoryIntegrator:
             # Filter out None keys and ensure all keys are strings
             valid_keys = [k for k in repo.keys() if k is not None and isinstance(k, str)]
             fieldnames.update(valid_keys)
-        fieldnames = sorted(fieldnames)
+        fieldnames.discard(None)
+        fieldnames = sorted(list(fieldnames))
         
         with open(filepath, 'w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)

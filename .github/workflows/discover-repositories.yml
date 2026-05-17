@@ -155,7 +155,7 @@ jobs:
         # Update a limited number of existing repositories (5 per run to avoid timeouts)
         python3 update_upstream_repos.py \
           --github-token "$GITHUB_TOKEN" \
-          --base-path "../../.." \
+          --base-path "../.." \
           --limit 5 || echo "⚠️ Some upstream updates failed, continuing..."
         
         echo ""
@@ -197,7 +197,7 @@ jobs:
         # Enhanced integration with explicit checks for existing content
         python3 integrate_repositories.py \
           --new-repos "filtered_new_repos.csv" \
-          --base-path "../../.." \
+          --base-path "../.." \
           --update-collection
 
         # Additional organization and README creation
