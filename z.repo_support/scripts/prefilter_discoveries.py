@@ -43,7 +43,7 @@ else:
     print('No existing repository database found')
 
 # Check for existing directories/scripts
-base_path = Path('../../../')
+base_path = Path('../../')
 existing_dirs = set()
 
 # Scan existing directory structure
