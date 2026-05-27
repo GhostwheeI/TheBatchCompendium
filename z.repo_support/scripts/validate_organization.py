@@ -27,7 +27,7 @@ if not new_repos:
     print('No repositories in filtered file')
     exit(0)
 
-base_path = Path('../../../')
+base_path = Path('../../')
 validation_errors = []
 validation_success = []
 

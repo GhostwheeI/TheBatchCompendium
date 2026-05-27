@@ -12,7 +12,7 @@ from pathlib import Path
 print('🔧 Post-integration organization and README verification...')
 
 # Load the filtered repositories
-base_path = Path('../../../')
+base_path = Path('../../')
 filtered_file = 'filtered_new_repos.csv'
 
 if not os.path.exists(filtered_file):
