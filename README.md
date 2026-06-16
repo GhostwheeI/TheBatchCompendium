@@ -26,13 +26,6 @@ Welcome to **The Batch Compendium**, a comprehensive collection of batch scripts
 
 ![Windows](https://img.shields.io/badge/Platform-Windows-0078D6?logo=windows&logoColor=white) ![Batch](https://img.shields.io/badge/Language-Batch-4D4D4D?logo=windows-terminal&logoColor=white) ![Automation](https://img.shields.io/badge/Category-Automation-FFB13B?logo=automattic&logoColor=white) ![Open Source](https://img.shields.io/badge/Open%20Source-Yes-brightgreen?logo=open-source-initiative&logoColor=white)
 
-## Table of Contents
-- [Introduction](#introduction)
-- [Features](#features)
-- [Getting Started](#getting-started)
-- [Contributing](#contributing)
-- [License](#license)
-
 ## Introduction
 The Batch Compendium is a curated collection of batch scripts categorized for various use cases, including system optimization, privacy, diagnostics, and more. Whether you're a system administrator, developer, or enthusiast, you'll find scripts to suit your needs.
 
@@ -41,20 +34,6 @@ The Batch Compendium is a curated collection of batch scripts categorized for va
 - **Categorized Structure**: Organized into folders for easy navigation.
 - **Community-Driven**: Contributions from developers worldwide.
 - **Open Source**: Free to use and modify under the MIT License.
-
-## Getting Started
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/GhostwheeI/TheBatchCompendium.git
-   ```
-2. Navigate to the desired category and script.
-3. Follow the instructions in the script's `README.md` or comments.
-
-## Contributing
-We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -71,11 +50,7 @@ This repo unifies **hundreds of one-off scripts**, plus **entire toolkits from r
 
 ---
 
-## 🗂 Project Structure
-
-Scripts and imported toolkits are organized by purpose:
-
-## Folder Structure
+## 🗂 Repository Index
 <details>
   <summary>Activation, Licensing & Update Scripts</summary>
 
@@ -443,12 +418,6 @@ Scripts and imported toolkits are organized by purpose:
 - [README.md](./System%20Tweaks%20%26%20Performance%20Enhancements/README.md)
 </details>
 
-<details>
-  <summary>z.repo_support</summary>
-
-- [README.md](./z.repo_support/README.md)
-</details>
-
 Each folder may contain:
 - 🧾 Single-purpose `.bat` scripts
 - 📦 Full script-based repositories (flattened for GitHub browsing)
@@ -525,8 +494,7 @@ We provide tools to help identify highly-rated batch repositories on GitHub:
 ```
 
 For detailed instructions on finding and contributing new repositories, see:
-- 📘 [Contributing Repositories Guide](CONTRIBUTING_REPOS.md)
-- 🔧 [Tool Usage Guide](z.repo_support/scripts/USAGE_GUIDE.md)
+- 📖 [Contributing Repositories Guide](CONTRIBUTING_REPOS.md)
 
 ### Updating the Script Count
 
@@ -562,15 +530,6 @@ This repository includes maintenance tools to help manage and update the collect
 ./maintenance help
 ```
 
-### Advanced Tools
-
-For advanced repository management, see the tools in [`z.repo_support/`](z.repo_support/):
-- Repository discovery and analysis scripts
-- Automated documentation updates  
-- GitHub API integration tools
-- Quality assessment utilities
-
-All maintenance scripts are designed to preserve the collection's organization and quality standards.
 
 ### Automated Janitor Jobs 🤖
 
@@ -596,6 +555,12 @@ These automation workflows help keep the repository clean and reduce notificatio
 For more details, see:
 - [`.github/workflows/pr-janitor.yml`](.github/workflows/pr-janitor.yml)
 - [`.github/workflows/issue-janitor.yml`](.github/workflows/issue-janitor.yml)
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
