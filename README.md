@@ -29,12 +29,6 @@ Welcome to **The Batch Compendium**, a comprehensive collection of batch scripts
 ## Introduction
 The Batch Compendium is a curated collection of batch scripts categorized for various use cases, including system optimization, privacy, diagnostics, and more. Whether you're a system administrator, developer, or enthusiast, you'll find scripts to suit your needs.
 
-## Features
-- **Extensive Collection**: Hundreds of batch scripts for diverse tasks.
-- **Categorized Structure**: Organized into folders for easy navigation.
-- **Community-Driven**: Contributions from developers worldwide.
-- **Open Source**: Free to use and modify under the MIT License.
-
 ---
 
 ## 🗂 Category Index
