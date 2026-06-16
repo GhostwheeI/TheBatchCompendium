@@ -261,7 +261,7 @@ jobs:
         NEW_REPOS=$((NEW_REPOS - 1))  # Subtract header line
         
         # Count total discovered before filtering
-        TOTAL_DISCOVERED=$(wc -l < z.repo_support/scripts/discovered_repos_*.csv | head -1)
+        TOTAL_DISCOVERED=$(wc -l < "z.repo_support/scripts/$DISCOVERY_FILE" | head -1)
         TOTAL_DISCOVERED=$((TOTAL_DISCOVERED - 1))  # Subtract header line
         
         # Create PR body
