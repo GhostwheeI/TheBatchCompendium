@@ -1,3 +1,14 @@
+# MFWL-Minecraft-For-Windows-Unlock-Launcher
+
+One-click batch script to unlock Minecraft for Windows (MCBE).
+
+## Disclaimer
+For educational purposes only.
+
+---
+
+## Original Readme
+
 # [MFWL]Minecraft For Windows Launcher
 [![licence](https://img.shields.io/github/license/jiesou/MFWL-Minecraft-For-Windows-Unlock-Launcher)](https://github.com/GeForceLegend/jiesou/MFWL-Minecraft-For-Windows-Unlock-Launcher/LICENSE)
 [![stars](https://img.shields.io/github/stars/jiesou/MFWL-Minecraft-For-Windows-Unlock-Launcher)](https://github.com/jiesou/Minecraft-Text-Sinicization)

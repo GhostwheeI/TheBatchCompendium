@@ -1,3 +1,15 @@
+# Short Video Factory
+
+A tool built with batch scripts for processing short videos.
+
+## Features
+- Batch processing of videos
+- Various transformation and formatting commands
+
+---
+
+## Original Readme
+
 <a id="readme-top"></a>
 
 <!-- 项目海报 -->

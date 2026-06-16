@@ -1,3 +1,14 @@
+# Battery Report
+
+A simple batch script to generate a Windows battery report.
+
+## Usage
+Simply run the script and it will generate an HTML battery report for your laptop/device using the built-in Windows powercfg utility.
+
+---
+
+## Original Readme
+
 # 电池报告
 # batteryreport
 

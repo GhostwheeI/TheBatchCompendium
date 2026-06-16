@@ -1,5 +1,17 @@
 # run-udp2raw-batch
 
+Windows batch script to launch udp2raw, udpspeeder, and kcptun/tinyportmapper.
+
+## Features
+- Easily start multiple command-line network tools simultaneously.
+- Useful for gaming network optimization (e.g., accelerating connections via SSTAP).
+
+---
+
+## Original Readme
+
+# run-udp2raw-batch
+
 用于启动[udp2raw](https://github.com/wangyu-/udp2raw-tunnel)，[udpspeeder](https://github.com/wangyu-/UDPspeeder)，[kcptun](https://github.com/xtaci/kcptun)/[tinyportmapper](https://github.com/wangyu-/tinyPortMapper)的windows batch脚本，方便一键启动多个命令行工具。
 
 # License

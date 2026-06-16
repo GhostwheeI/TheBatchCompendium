@@ -1,3 +1,19 @@
+# you-get-ffmpeg
+
+Combines you-get, youtube-dl, and ffmpeg, including commands for file management and video playback.
+
+## Features
+- Video downloading (using you-get or youtube-dl)
+- Format conversion (using ffmpeg)
+- File management and organization
+
+## Usage
+Run the batch file and follow the on-screen prompts.
+
+---
+
+## Original Readme
+
 # you-get&ffmpeg（也许现在需要加一个youtube-dl了）
 本工具用于Windows下，结合you-get、youtube-dl和FFMPEG组成的工具。
 

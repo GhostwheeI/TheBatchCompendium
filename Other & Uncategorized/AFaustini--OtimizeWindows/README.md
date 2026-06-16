@@ -1,3 +1,16 @@
+# Optimize Windows
+
+Batch file (.bat) for Windows optimization.
+
+## Features
+- System cleaning
+- Performance tweaks
+- Automated maintenance routines
+
+---
+
+## Original Readme
+
 # OtimizeWindows
 Arquivo em lote (.bat) para otimização do Windows
 

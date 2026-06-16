@@ -1,3 +1,18 @@
+# IDM Activation Script
+
+GPL-3.0 open-source IDM Activation Script Chinese version.
+
+## Features
+- Windows batch script
+- Supports IDM trial period freeze
+- Standard activation
+- Reset capabilities
+- Environment self-test
+
+---
+
+## Original Readme
+
 # IDM 激活脚本中文版 v1.3.7（IDM Activation Script · 简体中文）
 
 [![Windows validation](https://github.com/tytsxai/IDM-Activation-Script-Chinese/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tytsxai/IDM-Activation-Script-Chinese/actions/workflows/ci.yml)

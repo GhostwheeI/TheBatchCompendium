@@ -1,3 +1,20 @@
+# Support Menu
+
+Interactive batch script (.bat) to optimize technical support on Windows.
+
+## Features
+- Automates system restarts
+- Cleans temporary files
+- Network diagnostics
+- Fixes common printing errors
+- Adjusts sharing settings between Windows 10 and 11 via PowerShell
+
+This tool increases efficiency and reduces human errors during technical support.
+
+---
+
+## Original Readme
+
 # menu-do-suporte
 Script batch (.bat) interativo para otimizar suporte técnico no Windows, automatizando reinício do sistema, limpeza de temporários, diagnóstico de rede, correção de erros comuns de impressão e ajustes de compartilhamento entre Windows 10 e 11 via PowerShell, aumentando a eficiência e reduzindo erros humanos.
 

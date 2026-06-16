@@ -1,4 +1,15 @@
 # MangaMeeyaAssociations
+
+Adds MangaMeeya context menu options to images, archives, and folders.
+
+## Usage
+Place the .bat file in the MangaMeeya folder and run it.
+
+---
+
+## Original Readme
+
+# MangaMeeyaAssociations
 在图片、压缩包和文件夹右键菜单加入MangaMeeya调用项。将bat放在MangaMeeya文件夹下运行。 关联bmp、jpg、png、pdf、7z、rar、zip、webp。
 ![文件夹](https://raw.githubusercontent.com/gameclamp/MangaMeeyaAssociations/master/screenshot/01.PNG)
 ![图片](https://raw.githubusercontent.com/gameclamp/MangaMeeyaAssociations/master/screenshot/02.PNG)

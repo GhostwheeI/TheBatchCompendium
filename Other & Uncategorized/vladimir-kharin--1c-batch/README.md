@@ -1,3 +1,15 @@
+# 1C Batch
+
+Skill for AI agents: assemble/disassemble 1C treatments to XML.
+
+## Features
+- Upload/download configurations and extensions
+- Uses batch commands for 1C:Enterprise platform automation
+
+---
+
+## Original Readme
+
 # 1c-batch
 
 Навык ([Agent Skill](https://agentskills.io)) для AI-агентов — автоматизация пакетных операций с платформой 1С:Предприятие 8. Набор bat-скриптов для сборки обработок, управления конфигурацией и расширениями, запуска 1С — всё без ручного вмешательства.
