@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Automatically parse repository subfolders and metadata, extract descriptions,
-format them into 1-sentence summaries, and update the Folder Structure in README.md.
+format them into 1-sentence summaries, translate non-English descriptions to English,
+and update the Folder Structure in README.md.
 """
 
 import os
@@ -42,6 +43,40 @@ HARDCODED_FALLBACKS = {
     "terryhuanghd--windows10-versionswitcher": "A batch script to switch between different editions of Windows 10."
 }
 
+# Translation mapping to convert non-English descriptions to English
+TRANSLATION_MAP = {
+    "结合you-get、youtube-dl和ffmpeg，附带文件管理视频播放等命令.": 
+        "Combines you-get, youtube-dl, and FFMPEG, with file management and video playback commands.",
+    "script batch (.bat) interativo para otimizar suporte técnico no windows, automatizando reinício do sistema, limpeza de temporários, diagnóstico de rede, correção de erros comuns de impressão e ajustes de compartilhamento entre windows 10 e 11 via powershell, aumentando a eficiência e reduzindo erros humanos.": 
+        "Interactive batch script (.bat) to optimize Windows support, automate system tasks, and adjust sharing settings via PowerShell.",
+    "gpl-3.0 开源的 idm activation script 中文版：windows 批处理脚本，支持 idm 试用期冻结、普通激活、重置 and environment self-test.": 
+        "GPL-3.0 open-source IDM Activation Script Chinese version: Windows batch script supporting IDM trial freeze, activation, reset, and self-check.",
+    "gpl-3.0 开源的 idm activation script 中文版：windows 批处理脚本，支持 idm 试用期冻结、普通激活、重置和环境自检.": 
+        "GPL-3.0 open-source IDM Activation Script Chinese version: Windows batch script supporting IDM trial freeze, activation, reset, and self-check.",
+    "常用批处理.": 
+        "Common batch scripts.",
+    "one tool for windows folder icon batch modify. | 一个批量修改 windows 文件夹图标的小工具。.": 
+        "One tool for Windows folder icon batch modification.",
+    "在图片、压缩包 and 文件夹右键菜单加入mangameeya调用项。将bat放在mangameeya文件夹下运行。.":
+        "Adds MangaMeeya context menu options to images, archives, and folders. Run the bat file from the MangaMeeya folder.",
+    "在图片、压缩包和文件夹右键菜单加入mangameeya调用项。将bat放在mangameeya文件夹下运行。.": 
+        "Adds MangaMeeya context menu options to images, archives, and folders. Run the bat file from the MangaMeeya folder.",
+    "解锁 minecraft for windows （mcbe）的一键 bat 脚本.": 
+        "One-click batch script to unlock Minecraft for Windows (MCBE).",
+    "用于启动[udp2raw](https://github.com/wangyu-/udp2raw-tunnel)，[udpspeeder](https://github.com/wangyu-/udpspeeder)，[kcptun](https://github.com/xtaci/kcptun)/[tinyportmapper](https://github.com/wangyu-/tinyportmapper)的windows batch脚本，方便一键启动多个命令行工具。 [gplv3](license) [udpspeeder+udp2raw使用教程，并配合sstap加速优化网络游戏](https://www.moerats.com/archives/662/).": 
+        "Windows batch script to launch udp2raw, udpspeeder, and kcptun/tinyportmapper to easily start multiple command-line tools.",
+    "用于启动[udp2raw](https://github.com/wangyu-/udp2raw-tunnel)，[udpspeeder](https://github.com/wangyu-/udpspeeder)，[kcptun](https://github.com/xtaci/kcptun)/[tinyportmapper](https://github.com/wangyu-/tinyportmapper)的windows batch脚本，方便一键启动多个命令行工具。":
+        "Windows batch script to launch udp2raw, udpspeeder, and kcptun/tinyportmapper to easily start multiple command-line tools.",
+    "arquivo em lote (.bat) para otimização do windows.": 
+        "Batch file (.bat) for Windows optimization.",
+    "ativador office 365.": 
+        "Office 365 Activator.",
+    "windows repair tool pro هي أداة مجانية مخصصة لصيانة وإصلاح مشاكل ويندوز بسهولة من خلال واجهة cmd بسيطة وسريعة.": 
+        "Windows Repair Tool Pro is a free tool dedicated to maintaining and repairing Windows problems easily through a simple and fast CMD interface.",
+    "навык (skill) для ai-агентов: сборка/разборка обработок 1с в xml, выгрузка/загрузка конфигураций и расширений пакетными командами 1с: предприятие.": 
+        "Skill for AI agents: assemble/disassemble 1C treatments to XML, upload/download configurations and extensions using batch commands."
+}
+
 def load_csv_descriptions():
     """Load repo descriptions from all available CSV files into a dictionary."""
     descriptions = {}
@@ -63,10 +98,36 @@ def load_csv_descriptions():
             print(f"[WARN] Warning loading CSV {csv_file.name}: {e}")
     return descriptions
 
-def clean_description(desc):
-    """Format and clean a raw description to a single sentence or less."""
+def translate_to_english(desc):
+    """Translate non-English descriptions using the translation mapping."""
     if not desc:
         return ""
+    
+    normalized = desc.strip().lower()
+    
+    # Precise comparison (strip punctuation/spaces) to avoid matching short words in long texts
+    norm_clean = normalized.strip('.?! ')
+    for non_eng, eng in TRANSLATION_MAP.items():
+        non_eng_clean = non_eng.lower().strip('.?! ')
+        if non_eng_clean == norm_clean or non_eng_clean in norm_clean:
+            return eng
+            
+    # Handle specific partial match prefixes
+    if "one click generation of product marketing and general content short videos" in normalized:
+        return "One click generation of product marketing and general content short videos, AI batch automatic clipping, beautiful cross platform desktop tool."
+        
+    if "one tool for windows folder icon batch modify" in normalized:
+        return "One tool for Windows folder icon batch modification."
+        
+    return desc
+
+def clean_description(desc):
+    """Format, clean, and translate a raw description to a single sentence or less."""
+    if not desc:
+        return ""
+    
+    # Translate to English if needed
+    desc = translate_to_english(desc)
     
     # Strip whitespace, quotes, HTML tags
     desc = desc.strip()
@@ -149,6 +210,13 @@ def process_readme(dry_run=True):
     csv_descriptions = load_csv_descriptions()
     print(f"[INFO] Loaded {len(csv_descriptions)} descriptions from CSV database.")
     
+    # We must reset the root README.md to its original clean state (discarding previous run's changes)
+    # to avoid double appending or matching dirty lines.
+    # We can do this by running a git checkout on README.md before processing it.
+    if not dry_run:
+        print("[INFO] Resetting README.md to main head to prevent dirty additions...")
+        os.system("git checkout HEAD -- README.md")
+        
     with open(README_PATH, "r", encoding="utf-8") as f:
         lines = f.readlines()
         

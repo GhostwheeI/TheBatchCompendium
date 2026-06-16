@@ -92,7 +92,7 @@ Scripts and imported toolkits are organized by purpose:
   <summary>Audio, Video Capture, Conversion & Playback</summary>
 
 - [HaveAGitGat--HBBatchBeast/](./Audio%2C%20Video%20Capture%2C%20Conversion%20%26%20Playback/HaveAGitGat--HBBatchBeast) - A free GUI application for HandBrake and FFmpeg/FFprobe with an emphasis on batch conversion (including recursive folder scans and folder watching) -Windows, macOS, Linux & Docker.
-- [WWILLV--you-get-ffmpeg/](./Audio%2C%20Video%20Capture%2C%20Conversion%20%26%20Playback/WWILLV--you-get-ffmpeg) - 结合you-get、youtube-dl和FFMPEG，附带文件管理视频播放等命令.
+- [WWILLV--you-get-ffmpeg/](./Audio%2C%20Video%20Capture%2C%20Conversion%20%26%20Playback/WWILLV--you-get-ffmpeg) - Combines you-get, youtube-dl, and FFMPEG, with file management and video playback commands.
 - [README.md](./Audio%2C%20Video%20Capture%2C%20Conversion%20%26%20Playback/README.md)
 </details>
 
@@ -112,7 +112,7 @@ Scripts and imported toolkits are organized by purpose:
   <summary>Development & Scripting Tools</summary>
 
 - [abbodi1406--BatUtil/](./Development%20%26%20Scripting%20Tools/abbodi1406--BatUtil) - Collection of batch scripts utilities for Windows.
-- [AliceDzindzik--menu-do-suporte/](./Development%20%26%20Scripting%20Tools/AliceDzindzik--menu-do-suporte) - Script batch (.bat) interativo para otimizar suporte técnico no Windows, automatizando reinício do sistema, limpeza de temporários, diagnóstico de rede, correção de erros comuns de impressão e ajustes de compartilhamento entre Windows 10 e 11 via PowerShell, aumentando a eficiência e reduzindo erros humanos.
+- [AliceDzindzik--menu-do-suporte/](./Development%20%26%20Scripting%20Tools/AliceDzindzik--menu-do-suporte) - Interactive batch script (.bat) to optimize Windows support, automate system tasks, and adjust sharing settings via PowerShell.
 - [AnonKryptiQuz--I-Espresso/](./Development%20%26%20Scripting%20Tools/AnonKryptiQuz--I-Espresso) - I-Espresso is a tool that enables users to generate Portable Executable (PE) files from batch scripts.
 - [AnthonyMusgrove--Emby-ScripterX/](./Development%20%26%20Scripting%20Tools/AnthonyMusgrove--Emby-ScripterX) - Run custom external application or script (batch/bash/powershell/php/python/node.js/custom) on various events within the Emby Server.
 - [Archive-projects--Batch-File-examples/](./Development%20%26%20Scripting%20Tools/Archive-projects--Batch-File-examples) - :shell: Various batch files (descriptions are in the read me file).
@@ -163,7 +163,7 @@ Scripts and imported toolkits are organized by purpose:
 - [skidaim--TJprojMain-explorer.exe-remover/](./Development%20%26%20Scripting%20Tools/skidaim--TJprojMain-explorer.exe-remover) - This simple batch script will get rid of the annoying TJprojMain malware, which infects all your exe files to spread.
 - [slorelee--wimbuilder2/](./Development%20%26%20Scripting%20Tools/slorelee--wimbuilder2) - wimbuilder with new UI & new syntax (hta+bat+vbs+js).
 - [TarikSeyceri--Windows-10-Update-Disabler.bat/](./Development%20%26%20Scripting%20Tools/TarikSeyceri--Windows-10-Update-Disabler.bat) - An executable cmd batch script that 100% Disables Windows 10 Update.
-- [tytsxai--IDM-Activation-Script-Chinese/](./Development%20%26%20Scripting%20Tools/tytsxai--IDM-Activation-Script-Chinese) - GPL-3.0 开源的 IDM Activation Script 中文版：Windows 批处理脚本，支持 IDM 试用期冻结、普通激活、重置和环境自检.
+- [tytsxai--IDM-Activation-Script-Chinese/](./Development%20%26%20Scripting%20Tools/tytsxai--IDM-Activation-Script-Chinese) - GPL-3.0 open-source IDM Activation Script Chinese version: Windows batch script supporting IDM trial freeze, activation, reset, and self-check.
 - [vogeljo--reset-vassistx/](./Development%20%26%20Scripting%20Tools/vogeljo--reset-vassistx) - A small batch script for resetting Visual Assist X's trial period.
 - [warengonzaga--wifi-passview/](./Development%20%26%20Scripting%20Tools/warengonzaga--wifi-passview) - An open source batch script based WiFi Passview for Windows!
 - [wizz13150--PDQ_Repo/](./Development%20%26%20Scripting%20Tools/wizz13150--PDQ_Repo) - PDQ Deploy Scripts, Tools, Utilities ...
@@ -198,7 +198,7 @@ Scripts and imported toolkits are organized by purpose:
 - [AndrewHazelden--MultiMesh-Scripting/](./File%2C%20Media%20%26%20Conversion%20Tools/AndrewHazelden--MultiMesh-Scripting) - Released 2017-02-14 by Andrew Hazelden.
 - [anonymlol--Encoding_automation_scripts/](./File%2C%20Media%20%26%20Conversion%20Tools/anonymlol--Encoding_automation_scripts) - Automation scripts for video and audio encoding using x264, x265, and FFmpeg.
 - [ardyan69--wa/](./File%2C%20Media%20%26%20Conversion%20Tools/ardyan69--wa) - Using PROTOCOL for opening Whatsapp Application.
-- [auspbro--batch-snippets/](./File%2C%20Media%20%26%20Conversion%20Tools/auspbro--batch-snippets) - 常用批处理.
+- [auspbro--batch-snippets/](./File%2C%20Media%20%26%20Conversion%20Tools/auspbro--batch-snippets) - Common batch scripts.
 - [AveYo--MediaCreationTool.bat/](./File%2C%20Media%20%26%20Conversion%20Tools/AveYo--MediaCreationTool.bat) - Universal MCT wrapper script for all Windows 10/11 versions from 1507 to 21H2!
 - [AxtMueller--Windows-Batch-Deployment/](./File%2C%20Media%20%26%20Conversion%20Tools/AxtMueller--Windows-Batch-Deployment) - A programmable and rootkit-like Windows remote access tool.
 - [ayoisaiah--f2/](./File%2C%20Media%20%26%20Conversion%20Tools/ayoisaiah--f2) - F2 is a cross-platform command-line tool for batch renaming files and directories quickly and safely.
@@ -214,7 +214,7 @@ Scripts and imported toolkits are organized by purpose:
 - [describe19--check-video/](./File%2C%20Media%20%26%20Conversion%20Tools/describe19--check-video) - Windows .bat script that checks video file integrity using ffmpeg.exe.
 - [eddex--aseprite-windows-docker-build/](./File%2C%20Media%20%26%20Conversion%20Tools/eddex--aseprite-windows-docker-build) - This repository aims to make the complicated process of compiling [Aseprite](https://github.com/aseprite/aseprite) more simple.
 - [edinsuta--youtube-dl-batch/](./File%2C%20Media%20%26%20Conversion%20Tools/edinsuta--youtube-dl-batch) - These batch files are just made to simplify the usage of Windows .exe releases of http://rg3.github.io/youtube-dl/ (Source: https://github.com/rg3/youtube-dl) for people who want to just simply use `youtube-dl` as a tool to download high-quality videos from YouTube (or elsewhere) without using third-party services or software clients (since these usually come with video quality restrictions) rather than use it for development purposes.
-- [fengyunkkx--FolderIconTool/](./File%2C%20Media%20%26%20Conversion%20Tools/fengyunkkx--FolderIconTool) - One tool for Windows folder icon batch modify. | 一个批量修改 Windows 文件夹图标的小工具。.
+- [fengyunkkx--FolderIconTool/](./File%2C%20Media%20%26%20Conversion%20Tools/fengyunkkx--FolderIconTool) - One tool for Windows folder icon batch modification.
 - [FoxP--PNG-to-ICO/](./File%2C%20Media%20%26%20Conversion%20Tools/FoxP--PNG-to-ICO) - [KISS](https://en.wikipedia.org/wiki/KISS_principle) batch script to easily convert PNG, GIF, BMP, SVG or JPG images to multi-resolution [ICO](https://en.wikipedia.org/wiki/ICO_(file_format)) files using [ImageMagick](https://www.imagemagick.org/script/index.php).
 - [GDX-X--PFS-BatchKit-Manager/](./File%2C%20Media%20%26%20Conversion%20Tools/GDX-X--PFS-BatchKit-Manager) - Manage your PlayStation 2/PSX DESR HDD.
 - [HaveAGitGat--HBBatchBeast/](./File%2C%20Media%20%26%20Conversion%20Tools/HaveAGitGat--HBBatchBeast) - A free GUI application for HandBrake and FFmpeg/FFprobe with an emphasis on batch conversion (including recursive folder scans and folder watching) -Windows, macOS, Linux & Docker.
@@ -254,7 +254,7 @@ Scripts and imported toolkits are organized by purpose:
 - [warengonzaga--wifi-passview/](./File%2C%20Media%20%26%20Conversion%20Tools/warengonzaga--wifi-passview) - [![created by](https://img.shields.io/badge/created%20by-Waren%20Gonzaga-blue.svg?longCache=true&style=flat-square)](https://github.com/warengonzaga) [![release](https://img.shields.io/github/release/warengonzaga/wifi-passview.svg?style=flat-square)](https://github.com/warengonzaga/wifi-passview/releases) [![star](https://img.shields.io/github/stars/warengonzaga/wifi-passview.svg?style=flat-square)](https://github.com/warengonzaga/wifi-passview/stargazers) [![license](https://img.shields.io/github/license/warengonzaga/wifi-passview.svg?style=flat-square)](https://github.com/warengonzaga/wifi-passview/blob/main/license) _**Disclaimer**: WiFi Passview is **NOT** designed for malicious use!
 - [wieslawsoltes--BatchEncoder/](./File%2C%20Media%20%26%20Conversion%20Tools/wieslawsoltes--BatchEncoder) - BatchEncoder is an audio files conversion software.
 - [xxmichibxx--Batch-CIA-3DS-Decryptor-Redux/](./File%2C%20Media%20%26%20Conversion%20Tools/xxmichibxx--Batch-CIA-3DS-Decryptor-Redux) - Decrypting Nintendo 3DS games and applications (.3ds, .cia).
-- [YILS-LIN--short-video-factory/](./File%2C%20Media%20%26%20Conversion%20Tools/YILS-LIN--short-video-factory) - 一键生成产品营销与泛内容短视频，AI批量自动剪辑，高颜值跨平台桌面端工具 One click generation of product marketing and general content short videos, AI batch automatic cliping, beautiful cross platform desktop tool.
+- [YILS-LIN--short-video-factory/](./File%2C%20Media%20%26%20Conversion%20Tools/YILS-LIN--short-video-factory) - One click generation of product marketing and general content short videos, AI batch automatic clipping, beautiful cross platform desktop tool.
 - [yornaath--batshit/](./File%2C%20Media%20%26%20Conversion%20Tools/yornaath--batshit) - A batch manager that will deduplicate and batch requests for a certain data type made within a window.
 - [README.md](./File%2C%20Media%20%26%20Conversion%20Tools/README.md)
 </details>
@@ -274,8 +274,8 @@ Scripts and imported toolkits are organized by purpose:
 <details>
   <summary>Gaming & Entertainment Tools</summary>
 
-- [gameclamp--MangaMeeyaAssociations/](./Gaming%20%26%20Entertainment%20Tools/gameclamp--MangaMeeyaAssociations) - 在图片、压缩包和文件夹右键菜单加入MangaMeeya调用项。将bat放在MangaMeeya文件夹下运行。.
-- [jiesou--MFWL-Minecraft-For-Windows-Unlock-Launcher/](./Gaming%20%26%20Entertainment%20Tools/jiesou--MFWL-Minecraft-For-Windows-Unlock-Launcher) - 解锁 Minecraft for Windows （MCBE）的一键 BAT 脚本.
+- [gameclamp--MangaMeeyaAssociations/](./Gaming%20%26%20Entertainment%20Tools/gameclamp--MangaMeeyaAssociations) - Adds MangaMeeya context menu options to images, archives, and folders.
+- [jiesou--MFWL-Minecraft-For-Windows-Unlock-Launcher/](./Gaming%20%26%20Entertainment%20Tools/jiesou--MFWL-Minecraft-For-Windows-Unlock-Launcher) - One-click batch script to unlock Minecraft for Windows (MCBE).
 - [xxmichibxx--Batch-CIA-3DS-Decryptor-Redux/](./Gaming%20%26%20Entertainment%20Tools/xxmichibxx--Batch-CIA-3DS-Decryptor-Redux) - Decrypting Nintendo 3DS games and applications (.3ds, .cia).
 - [README.md](./Gaming%20%26%20Entertainment%20Tools/README.md)
 </details>
@@ -283,17 +283,17 @@ Scripts and imported toolkits are organized by purpose:
 <details>
   <summary>Network & Internet Tools</summary>
 
-- [auspbro--batch-snippets/](./Network%20%26%20Internet%20Tools/auspbro--batch-snippets) - 常用批处理.
+- [auspbro--batch-snippets/](./Network%20%26%20Internet%20Tools/auspbro--batch-snippets) - Common batch scripts.
 - [TechnicalUserX--batch_wifi_brute_forcer/](./Network%20%26%20Internet%20Tools/TechnicalUserX--batch_wifi_brute_forcer) - An active attack tool against Wi-Fi networks with internal CMD commands.
 - [TheBATeam--Batch-WI-FI-Brute-Forcer/](./Network%20%26%20Internet%20Tools/TheBATeam--Batch-WI-FI-Brute-Forcer) - This project is based upon the trick that, how to hack WI-FI with CMD.
-- [YILS-LIN--short-video-factory/](./Network%20%26%20Internet%20Tools/YILS-LIN--short-video-factory) - 一键生成产品营销与泛内容短视频，AI批量自动剪辑，高颜值跨平台桌面端工具 One click generation of product marketing and general content short videos, AI batch automatic cliping, beautiful cross platform desktop tool.
+- [YILS-LIN--short-video-factory/](./Network%20%26%20Internet%20Tools/YILS-LIN--short-video-factory) - One click generation of product marketing and general content short videos, AI batch automatic clipping, beautiful cross platform desktop tool.
 - [README.md](./Network%20%26%20Internet%20Tools/README.md)
 </details>
 
 <details>
   <summary>Network, Connectivity & Hardware Tweaks</summary>
 
-- [BingLingGroup--run-udp2raw-batch/](./Network%2C%20Connectivity%20%26%20Hardware%20Tweaks/BingLingGroup--run-udp2raw-batch) - 用于启动[udp2raw](https://github.com/wangyu-/udp2raw-tunnel)，[udpspeeder](https://github.com/wangyu-/UDPspeeder)，[kcptun](https://github.com/xtaci/kcptun)/[tinyportmapper](https://github.com/wangyu-/tinyPortMapper)的windows batch脚本，方便一键启动多个命令行工具。 [GPLv3](LICENSE) [UDPSpeeder+Udp2raw使用教程，并配合SSTap加速优化网络游戏](https://www.moerats.com/archives/662/).
+- [BingLingGroup--run-udp2raw-batch/](./Network%2C%20Connectivity%20%26%20Hardware%20Tweaks/BingLingGroup--run-udp2raw-batch) - Windows batch script to launch udp2raw, udpspeeder, and kcptun/tinyportmapper to easily start multiple command-line tools.
 - [kezoponk--DDoS.bat/](./Network%2C%20Connectivity%20%26%20Hardware%20Tweaks/kezoponk--DDoS.bat) - DDoS or DoS, the definition depends if you use it alone or with several computers on different networks.
 - [MansourM--ez-dns-changer.bat/](./Network%2C%20Connectivity%20%26%20Hardware%20Tweaks/MansourM--ez-dns-changer.bat) - A simple script to quickly change DNS settings on Windows.
 - [szybnev--TTL-Changer/](./Network%2C%20Connectivity%20%26%20Hardware%20Tweaks/szybnev--TTL-Changer) - A lightweight batch script to change the Time-To-Live (TTL) network settings.
@@ -303,7 +303,7 @@ Scripts and imported toolkits are organized by purpose:
 <details>
   <summary>Other & Uncategorized</summary>
 
-- [AFaustini--OtimizeWindows/](./Other%20%26%20Uncategorized/AFaustini--OtimizeWindows) - Arquivo em lote (.bat) para otimização do Windows.
+- [AFaustini--OtimizeWindows/](./Other%20%26%20Uncategorized/AFaustini--OtimizeWindows) - Batch file (.bat) for Windows optimization.
 - [Andrew-J-Larson--OS-Scripts/](./Other%20%26%20Uncategorized/Andrew-J-Larson--OS-Scripts) - This is where I'll put my custom scripts/functions that might be useful in future projects of mine.
 - [boxcutter--windows/](./Other%20%26%20Uncategorized/boxcutter--windows) - Virtual machine templates for Windows written in legacy JSON and Batch Scripting/JScript.
 - [carlospolop--winPE/](./Other%20%26%20Uncategorized/carlospolop--winPE) - Windows privilege escalation with cmd.
@@ -319,8 +319,8 @@ Scripts and imported toolkits are organized by purpose:
 - [Kawwabi--TerabyteTweaker/](./Other%20%26%20Uncategorized/Kawwabi--TerabyteTweaker) - Terabyte Tweaker is a program written in batch that allows your PC to run at better speeds, it transforms a "Bad PC" onto a "Medium PC", and turns a "Medium PC" into a monster.
 - [Kreijstal--BatchProjects/](./Other%20%26%20Uncategorized/Kreijstal--BatchProjects) - All projects batch.
 - [matej137--OutlookRemover/](./Other%20%26%20Uncategorized/matej137--OutlookRemover) - This script prevents the Outlook (new) app from installing by installing a custom blank app with the same package id as the original one, thus making its installation fail.
-- [minigueimeiros--office-365-cmd/](./Other%20%26%20Uncategorized/minigueimeiros--office-365-cmd) - Ativador Office 365.
-- [newmatrix--WinRTP/](./Other%20%26%20Uncategorized/newmatrix--WinRTP) - Windows Repair Tool Pro هي أداة مجانية مخصصة لصيانة وإصلاح مشاكل ويندوز بسهولة من خلال واجهة CMD بسيطة وسريعة.
+- [minigueimeiros--office-365-cmd/](./Other%20%26%20Uncategorized/minigueimeiros--office-365-cmd) - Office 365 Activator.
+- [newmatrix--WinRTP/](./Other%20%26%20Uncategorized/newmatrix--WinRTP) - Windows Repair Tool Pro is a free tool dedicated to maintaining and repairing Windows problems easily through a simple and fast CMD interface.
 - [Nickfost--Batch/](./Other%20%26%20Uncategorized/Nickfost--Batch) - A collection of batch scripts for various Windows automation tasks.
 - [ParrySMS--batteryreport/](./Other%20%26%20Uncategorized/ParrySMS--batteryreport) - a simple bat to get battery report.
 - [peterjc123--pytorch-scripts/](./Other%20%26%20Uncategorized/peterjc123--pytorch-scripts) - This repo **won't** be updated anymore.
@@ -329,7 +329,7 @@ Scripts and imported toolkits are organized by purpose:
 - [TheBobPony--MSEdgeTweaker/](./Other%20%26%20Uncategorized/TheBobPony--MSEdgeTweaker) - Easily configure Microsoft Edge, the way you want it!
 - [tsgrgo--windows-update-disabler/](./Other%20%26%20Uncategorized/tsgrgo--windows-update-disabler) - Disable/Enable Windows update with a lightweight batch tool.
 - [vektort13--antiOS_batch/](./Other%20%26%20Uncategorized/vektort13--antiOS_batch) - Level 2B - OS unique identifiers spoof.
-- [vladimir-kharin--1c-batch/](./Other%20%26%20Uncategorized/vladimir-kharin--1c-batch) - Навык (Skill) для AI-агентов: сборка/разборка обработок 1С в XML, выгрузка/загрузка конфигураций и расширений пакетными командами 1С: Предприятие.
+- [vladimir-kharin--1c-batch/](./Other%20%26%20Uncategorized/vladimir-kharin--1c-batch) - Skill for AI agents: assemble/disassemble 1C treatments to XML, upload/download configurations and extensions using batch commands.
 - [yanncam--exe2powershell/](./Other%20%26%20Uncategorized/yanncam--exe2powershell) - exe2powershell - exe2bat reborn for modern Windows.
 - [README.md](./Other%20%26%20Uncategorized/README.md)
 </details>
