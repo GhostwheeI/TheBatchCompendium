@@ -152,8 +152,6 @@ owner/repo-name,https://github.com/owner/repo-name,Description here,150,System T
 Match repositories to these categories:
 
 - **Activation, Licensing & Update Scripts**
-- **Automation & Installers**
-- **Cleanup & Maintenance**
 - **File, Media & Conversion Tools**
 - **Game Server & Mod Utilities**
 - **Network, Connectivity & Hardware Tweaks**

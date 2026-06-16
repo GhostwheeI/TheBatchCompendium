@@ -213,9 +213,9 @@ def process_readme(dry_run=True):
     # We must reset the root README.md to its original clean state (discarding previous run's changes)
     # to avoid double appending or matching dirty lines.
     # We can do this by running a git checkout on README.md before processing it.
-    if not dry_run:
-        print("[INFO] Resetting README.md to main head to prevent dirty additions...")
-        os.system("git checkout HEAD -- README.md")
+    # if not dry_run:
+    #     print("[INFO] Resetting README.md to main head to prevent dirty additions...")
+    #     os.system("git checkout HEAD -- README.md")
         
     with open(README_PATH, "r", encoding="utf-8") as f:
         lines = f.readlines()
@@ -251,7 +251,7 @@ def process_readme(dry_run=True):
             in_folder_structure = False
             
         if in_folder_structure:
-            if "<details>" in line:
+            if "<details" in line:
                 in_details_block = True
             elif "</details>" in line:
                 in_details_block = False
