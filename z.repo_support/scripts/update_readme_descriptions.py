@@ -241,13 +241,13 @@ def process_readme(dry_run=True):
         line_stripped = line.strip()
         
         # Detect Folder Structure section
-        if line_stripped.startswith("## Folder Structure"):
+        if line_stripped.startswith("## 🗂 Repository Index"):
             in_folder_structure = True
             updated_lines.append(line)
             continue
             
         # Stop flag when we reach next major section (e.g. ## Sample Tools or Each folder may contain)
-        if in_folder_structure and line_stripped.startswith("## ") and not "Folder Structure" in line_stripped:
+        if in_folder_structure and line_stripped.startswith("## ") and not "Repository Index" in line_stripped:
             in_folder_structure = False
             
         if in_folder_structure:
