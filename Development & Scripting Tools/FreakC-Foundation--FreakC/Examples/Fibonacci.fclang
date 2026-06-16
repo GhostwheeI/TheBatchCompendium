@@ -1,0 +1,18 @@
+function[] func
+	var[] n1=0
+	var[] n2=1
+	var[] n3=0
+	var[] i=0
+	eq[] end=%~2 - 1
+	while[] %i% LSS %end%
+		eq[] n3=%n1%+%n2%
+		var[] n1=%n2%
+		var[] n2=%n3%
+		eq[] i++
+	endwhile[]
+	var[] %~1=%n3%
+endfunc[]
+
+func[..] "res" "5"
+print[] %res%
+stop[]

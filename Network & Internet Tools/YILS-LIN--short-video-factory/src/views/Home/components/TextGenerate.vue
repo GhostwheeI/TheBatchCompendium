@@ -1,0 +1,271 @@
+<template>
+  <div class="w-full h-full">
+    <v-form class="w-full h-full flex flex-col gap-2" :disabled="disabled">
+      <v-sheet class="h-[200px] p-2 flex gap-2" border rounded>
+        <v-textarea
+          class="h-full"
+          v-model="appStore.prompt"
+          :label="t('features.llm.config.promptLabel')"
+          counter
+          persistent-counter
+          no-resize
+        ></v-textarea>
+        <div class="flex flex-col gap-2">
+          <v-btn
+            v-if="!isGenerating"
+            prepend-icon="mdi-auto-fix"
+            color="deep-purple-accent-3"
+            stacked
+            :disabled="disabled"
+            @click="handleGenerate"
+          >
+            {{ t('common.buttons.generate') }}
+          </v-btn>
+          <v-btn
+            v-else
+            prepend-icon="mdi-stop"
+            color="red"
+            stacked
+            :disabled="disabled"
+            @click="handleStopGenerate"
+          >
+            {{ t('common.buttons.stop') }}
+          </v-btn>
+
+          <v-dialog v-model="configDialogShow" max-width="600" persistent>
+            <template v-slot:activator="{ props: activatorProps }">
+              <v-btn v-bind="activatorProps" :disabled="disabled">
+                {{ t('common.buttons.config') }}
+              </v-btn>
+            </template>
+
+            <v-card
+              prepend-icon="mdi-text-box-edit-outline"
+              :title="t('features.llm.config.configTitle')"
+            >
+              <v-card-text>
+                <v-text-field
+                  :label="t('features.llm.config.modelName')"
+                  v-model="config.modelName"
+                  required
+                  clearable
+                ></v-text-field>
+                <v-text-field
+                  :label="t('features.llm.config.apiUrl')"
+                  v-model="config.apiUrl"
+                  required
+                  clearable
+                ></v-text-field>
+                <v-text-field
+                  :label="t('features.llm.config.apiKey')"
+                  v-model="config.apiKey"
+                  type="password"
+                  required
+                  clearable
+                ></v-text-field>
+                <small class="text-caption text-medium-emphasis">{{
+                  t('features.llm.config.compatibleNote')
+                }}</small>
+              </v-card-text>
+              <v-divider></v-divider>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  :text="t('common.buttons.close')"
+                  variant="plain"
+                  @click="handleCloseDialog"
+                ></v-btn>
+                <v-btn
+                  color="success"
+                  :text="t('common.buttons.test')"
+                  variant="tonal"
+                  :loading="testStatus === TestStatusEnum.LOADING"
+                  @click="handleTestConfig"
+                ></v-btn>
+                <v-btn
+                  color="primary"
+                  :text="t('common.buttons.save')"
+                  variant="tonal"
+                  @click="handleSaveConfig"
+                ></v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </div>
+      </v-sheet>
+      <v-sheet class="h-0 flex-1 p-2" border rounded>
+        <v-textarea
+          class="h-full"
+          v-model="outputText"
+          :label="t('features.llm.config.outputLabel')"
+          counter
+          persistent-counter
+          no-resize
+        ></v-textarea>
+      </v-sheet>
+    </v-form>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { useAppStore } from '@/store'
+import { h, nextTick, ref, toRaw } from 'vue'
+import { createOpenAI } from '@ai-sdk/openai'
+import { generateText, streamText } from 'ai'
+import { useToast } from 'vue-toastification'
+import { useTranslation } from 'i18next-vue'
+import ActionToastEmbed from '@/components/ActionToastEmbed.vue'
+import { formatErrorForCopy } from '@/lib/error-copy'
+
+const toast = useToast()
+const appStore = useAppStore()
+const { t } = useTranslation()
+
+defineProps<{
+  disabled?: boolean
+}>()
+
+// 生成文案
+const outputText = ref('')
+const isGenerating = ref(false)
+const abortController = ref<AbortController | null>(null)
+const handleGenerate = async (options?: { noToast?: boolean }) => {
+  if (!appStore.prompt) {
+    !options?.noToast && toast.warning(t('features.llm.errors.promptRequired'))
+    throw new Error(t('features.llm.errors.promptRequired') as string)
+  }
+
+  const openai = createOpenAI({
+    baseURL: appStore.llmConfig.apiUrl,
+    apiKey: appStore.llmConfig.apiKey,
+  })
+  abortController.value = new AbortController()
+  isGenerating.value = true
+  outputText.value = ''
+  try {
+    const result = streamText({
+      model: openai.chat(appStore.llmConfig.modelName),
+      // system: ``,
+      // 未来也许会设置一个系统提示词，但现在必须注释掉，因为部分接口提交空 system prompt 会报错
+      prompt: appStore.prompt,
+      onError: (error) => {
+        throw error
+      },
+      abortSignal: abortController.value.signal,
+    })
+    for await (const textPart of result.textStream) {
+      outputText.value += textPart
+    }
+    return outputText.value
+  } catch (error: any) {
+    console.log(`error`, error)
+    // @ts-ignore
+    if (error?.name !== 'AbortError' && error?.error?.name !== 'AbortError') {
+      const errorMessage = error?.error?.message || error?.message || error
+      if (!options?.noToast) {
+        toast.error({
+          component: {
+            // 使用vnode方式创建自定义错误弹窗实例，以获得良好的类型提示
+            render: () =>
+              h(ActionToastEmbed, {
+                message: t('features.llm.errors.generateFailed'),
+                detail: String(errorMessage),
+                actionText: t('common.buttons.copyErrorDetail'),
+                onActionTirgger: () => {
+                  navigator.clipboard.writeText(
+                    formatErrorForCopy(
+                      t('features.llm.errors.generateFailed'),
+                      String(errorMessage),
+                    ),
+                  )
+                  toast.success(t('common.messages.success.copySuccess'))
+                },
+              }),
+          },
+        })
+      }
+      throw error
+    }
+  } finally {
+    abortController.value = null
+    isGenerating.value = false
+  }
+}
+const handleStopGenerate = () => {
+  if (abortController.value) {
+    abortController.value.abort()
+  }
+}
+
+// 配置大模型接口
+const config = ref(structuredClone(toRaw(appStore.llmConfig)))
+const configDialogShow = ref(false)
+const resetConfigDialog = () => {
+  config.value = structuredClone(toRaw(appStore.llmConfig))
+}
+const handleCloseDialog = () => {
+  configDialogShow.value = false
+  nextTick(resetConfigDialog)
+}
+const handleSaveConfig = () => {
+  appStore.updateLLMConfig(config.value)
+  configDialogShow.value = false
+}
+
+// 测试大模型连通性
+enum TestStatusEnum {
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  ERROR = 'error',
+}
+const testStatus = ref<TestStatusEnum>()
+const handleTestConfig = async () => {
+  testStatus.value = TestStatusEnum.LOADING
+  const openai = createOpenAI({ baseURL: config.value.apiUrl, apiKey: config.value.apiKey })
+  try {
+    const result = await generateText({
+      model: openai.chat(config.value.modelName),
+      prompt: 'Hello',
+    })
+    console.log(`result`, result)
+    testStatus.value = TestStatusEnum.SUCCESS
+    toast.success(t('features.llm.success.connectionSucceeded'))
+  } catch (error: any) {
+    console.log(error)
+    testStatus.value = TestStatusEnum.ERROR
+    const errorMessage = error?.error?.message || error?.message || error
+    toast.error({
+      component: {
+        // 使用vnode方式创建自定义错误弹窗实例，以获得良好的类型提示
+        render: () =>
+          h(ActionToastEmbed, {
+            message: t('features.llm.errors.connectionFailed'),
+            detail: String(errorMessage),
+            actionText: t('common.buttons.copyErrorDetail'),
+            onActionTirgger: () => {
+              navigator.clipboard.writeText(
+                formatErrorForCopy(t('features.llm.errors.connectionFailed'), String(errorMessage)),
+              )
+              toast.success(t('common.messages.success.copySuccess'))
+            },
+          }),
+      },
+    })
+  }
+}
+
+// 获取当前文案
+const getCurrentOutputText = () => {
+  return outputText.value
+}
+// 清空文案
+const clearOutputText = () => {
+  outputText.value = ''
+}
+
+defineExpose({ handleGenerate, handleStopGenerate, getCurrentOutputText, clearOutputText })
+</script>
+
+<style lang="scss" scoped>
+//
+</style>

@@ -1,0 +1,187 @@
+{
+  "ui_spec": {
+    "theme_name": "retro_windows_flat_minimal",
+    "description": "Windows 95 / Paint / Early Mac - Completely flat, no gradients, monochrome icons, minimal aesthetic",
+
+    "desktop": {
+      "background_color": "#C0C0C0",
+      "icon_style": {
+        "font_family": "MS Sans Serif, Tahoma, Arial, sans-serif",
+        "font_size": 11,
+        "font_color": "#000000",
+        "shadow": false,
+        "icon_size": "32x32",
+        "monochrome": true
+      },
+      "icon_spacing": {
+        "horizontal": 70,
+        "vertical": 80
+      }
+    },
+
+    "window": {
+      "background_color": "#E5E5E5",
+      "border": {
+        "thickness": 1,
+        "color": "#000000"
+      },
+      "inner_border": {
+        "thickness": 1,
+        "color": "#7A7A7A"
+      },
+      "corner_radius": 0,
+      "shadow": false,
+
+      "title_bar": {
+        "height": 20,
+        "background_color_active": "#000080",
+        "background_color_inactive": "#7A7A7A",
+        "text_color_active": "#FFFFFF",
+        "text_color_inactive": "#E0E0E0",
+        "font_family": "MS Sans Serif, Tahoma, Arial, sans-serif",
+        "font_weight": "bold",
+        "font_size": 11,
+        "padding_left": 4,
+        "title_alignment": "left",
+
+        "buttons": {
+          "size": 14,
+          "style": "square",
+          "border_color": "#000000",
+          "icon_color": "#000000",
+          "background_color": "#C0C0C0",
+          "hover_invert": true,
+          "icons": {
+            "close": "pixel_x",
+            "maximize": "pixel_square",
+            "minimize": "pixel_dash"
+          }
+        }
+      }
+    },
+
+    "palette": {
+      "white": "#FFFFFF",
+      "light_gray": "#E5E5E5",
+      "medium_gray": "#C0C0C0",
+      "dark_gray": "#7A7A7A",
+      "black": "#000000",
+      "blue_accent": "#000080",
+      "green_ok": "#00AA00",
+      "red_error": "#CC0000",
+      "yellow_warning": "#E0C000"
+    },
+
+    "buttons": {
+      "default": {
+        "width": 75,
+        "height": 20,
+        "background_color": "#C0C0C0",
+        "border_color": "#000000",
+        "font_family": "MS Sans Serif, Tahoma, Arial, sans-serif",
+        "font_size": 11,
+        "text_color": "#000000",
+        "corner_radius": 0,
+        "pressed_offset": true
+      },
+      "icon_buttons": {
+        "size": 16,
+        "monochrome": true,
+        "border_color": "#000000",
+        "background_color": "#FFFFFF",
+        "active_invert": true
+      }
+    },
+
+    "inputs": {
+      "textbox": {
+        "background_color": "#FFFFFF",
+        "border_color": "#000000",
+        "padding": 2,
+        "font_family": "MS Sans Serif, Tahoma, Arial, sans-serif",
+        "font_size": 11
+      },
+      "dropdown": {
+        "background_color": "#FFFFFF",
+        "border_color": "#000000",
+        "arrow_style": "pixel",
+        "font_family": "MS Sans Serif, Tahoma, Arial, sans-serif",
+        "font_size": 11
+      },
+      "checkbox": {
+        "box_size": 12,
+        "border_color": "#000000",
+        "checkmark_color": "#000000",
+        "background_color": "#FFFFFF",
+        "radius": 0
+      }
+    },
+
+    "icons": {
+      "style": "pixel",
+      "line_thickness": 2,
+      "monochrome": true,
+      "folder_color": "#000000",
+      "system_icons": {
+        "ok": "green_check_pixel",
+        "error": "red_cross_pixel",
+        "warning": "yellow_triangle_pixel"
+      }
+    },
+
+    "scrollbar": {
+      "width": 14,
+      "track_color": "#C0C0C0",
+      "thumb_color": "#FFFFFF",
+      "border_color": "#000000",
+      "button_size": 14,
+      "arrow_color": "#000000",
+      "pixel_arrows": true
+    },
+
+    "menu_bar": {
+      "background_color": "#C0C0C0",
+      "text_color": "#000000",
+      "highlight_background": "#000080",
+      "highlight_text_color": "#FFFFFF",
+      "border_color": "#000000",
+      "font_family": "MS Sans Serif, Tahoma, Arial, sans-serif",
+      "font_size": 11,
+      "padding": {
+        "horizontal": 6,
+        "vertical": 2
+      }
+    },
+
+    "panels": {
+      "toolbox": {
+        "background_color": "#C0C0C0",
+        "border_color": "#000000",
+        "icon_size": 20,
+        "grid_spacing": 4,
+        "pixel_icons": true
+      },
+      "content_frame": {
+        "background_color": "#FFFFFF",
+        "border_color": "#000000"
+      },
+      "status_bar": {
+        "height": 18,
+        "background_color": "#C0C0C0",
+        "border_color": "#000000",
+        "font_family": "MS Sans Serif, Tahoma, Arial, sans-serif",
+        "font_size": 10,
+        "text_color": "#000000",
+        "padding_left": 4
+      }
+    },
+
+    "monochrome_mode": {
+      "enabled": false,
+      "background_color": "#FFFFFF",
+      "foreground_color": "#000000",
+      "dithering": true,
+      "line_thickness": 1
+    }
+  }
+}

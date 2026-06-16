@@ -1,0 +1,7 @@
+{
+  "repository": "FoxP/PNG-to-ICO",
+  "url": "https://github.com/FoxP/PNG-to-ICO",
+  "last_updated": "2026-06-15T23:05:10.208269",
+  "stars": "288",
+  "description": "KISS batch script to easily convert PNG, GIF, BMP, SVG or JPG images to multi-resolution ICO files using ImageMagick."
+}

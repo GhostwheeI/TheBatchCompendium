@@ -67,7 +67,7 @@ print(f'Found {len(existing_dirs)} existing repository directories')
 # Filter out repositories that already exist
 filtered_repos = []
 for repo in discovered_repos:
-    repo_name = repo.get('name', '').replace('/', '_').replace('\\', '_')
+    repo_name = repo.get('name', '').replace('/', '--').replace('\\', '--')
     repo_url = repo.get('url', '')
 
     # Check if repository already exists in CSV

@@ -1,66 +1,97 @@
-# winterfell-collection
+<img src="https://github.com/yasser-alghamdi/winterfell/blob/master/winterfell_logo.jpg" title="winterfell" height="15%" width="35%">
 
-**Owner:** [yasser-alghamdi](https://github.com/yasser-alghamdi)  
-**Repository:** [yasser-alghamdi/winterfell-collection](https://github.com/yasser-alghamdi/winterfell-collection)  
-**Stars:** 52 ⭐  
-**Language:** Batchfile  
-**Category:** Development & Scripting Tools
+# Winterfell
+Winterfell is a group of windows batch scripts to collect windows forensics data and perform efficient, and fast incident response and threat hunting activities.
 
-## Description
+## Winterfell Package
+Winterfell contains various batch scripts which are `Winterfell-System.bat` `Winterfell-Forensics.bat` `Winterfell-Network.bat` `Winterfell-Registry.bat` `Winterfell-Presistance.bat` `Winterfell-Malware.bat` `Winterfell-Web.bat` `Winterfell-Logs.bat` and `Winterfell-Location.bat`
+Most of artifacts are automatically get parsed to ease the investigation by using group of available parsers. In additions, winterfell also collects most of forensics raw data to be processed through any type of fronsics analysis tools such as Magnet Axiom such as `Amcache.hve` `SRUDB.dat` `OBJECTS.DATA` `UsrClass.dat` `NTUSER.DAT` `Windows Logs` `Recent Files` etc.
 
-Winterfell is a group of windows batch scripts to collect Windows forensics data and perform efficient, and fast incident response and threat hunting activities.
+```
+Winterfell-System.bat
 
-## 🔗 Links
+USERNAME AND SID INFORMATION, USER/SESSION INFORMATION, SYSTEM INFORMATION, DOMAIN TRUSTED SIDs, ENVIRONMENT SETTINGS, DIRECTORY LISTING, SEURITY POLICY, AUDIT POLICY, GROUP POLICY, SECURITY PRODUCT INFORMATION, DRIVERS INFORMATION, SHADOWS FILES INFORMATION, HANDLES INFORMATION, and DLLS INFORMATION 
+```
 
-- **GitHub Repository:** [https://github.com/yasser-alghamdi/winterfell-collection](https://github.com/yasser-alghamdi/winterfell-collection)
-- **Owner Profile:** [https://github.com/yasser-alghamdi](https://github.com/yasser-alghamdi)
+```
+Winterfell-Forensics.bat
 
-## 📊 Repository Stats
+USERS TIMELINE, JUMP LIST, PREFETCH FILES, AMCACHE HIVE, SRUDB HIVE, SHELLBAGS FILES, NTFS USNJRNL FILE, WMI PERSISTANCE, RECENT FILES, SYSTEM CONFIGURATION, ALTERNATIVE STREAM FILES, BMC CACHE, RECYCLE BIN FILES, USRCLASS HIVE, and NTUSER HIVE 
+```
 
-- **Stars:** 52
-- **Primary Language:** Batchfile
-- **Category:** Development & Scripting Tools
+```
+Winterfell-Network.bat
 
-## 📝 About This Repository
+NETWORK INFORMATION, SHARING INFORMATION, and FIREWALL CONFIGURATION
+```
 
-This repository is part of [The Batch Compendium](https://github.com/YourUsername/TheBatchCompendium) - a comprehensive collection of Windows batch scripts and tools.
+```
+Winterfell-Registry.bat
 
-### Why This Repository?
+REGISTRY INFORMATION, and USUSPICIOUS REGISTRY KEY VALUES INFORMATION
+```
 
-- ✅ **High Quality:** 52 stars indicate community trust
-- ✅ **Active Project:** Well-maintained and documented
-- ✅ **Batch Scripts:** Contains useful Windows batch files
-- ✅ **Open Source:** Free to use and learn from
+```
+Winterfell-Presistance.bat
 
-## 🚀 Quick Start
+SCHEDULED TASKS, SERVICES, RUNNING PROCESSES, and AUTORUNS INFORMATION
+```
 
-1. Visit the [original repository](https://github.com/yasser-alghamdi/winterfell-collection)
-2. Read the project's documentation
-3. Clone or download the scripts you need
-4. Follow the repository's installation instructions
+```
+Winterfell-Malware.bat
 
-## ⚠️ Important Notes
+LOKI CHECK 
+```
 
-- Always review batch scripts before running them
-- Test scripts in a safe environment first
-- Check for any prerequisites or dependencies
-- Respect the repository's license terms
+```
+Winterfell-Web.bat
 
-## 📄 License
+BROWSING URLS HISTORY, and CACHE FILES 
+```
 
-This repository follows the license terms of the original project. Please check the [original repository](https://github.com/yasser-alghamdi/winterfell-collection) for specific license information.
+```
+Winterfell-Logs.bat
 
-## 🤝 Contributing
+WINDOWS LOG FILES, POWERSHELL HISTORY, POWERSHELL LOGS FILES, SCHEDULE TASK LOG FILE, SECURITY LOG FILE, WINDOWS REMOTE LOG FILE, SMB LOGS FILES, and IIS LOGS Files 
+```
 
-To contribute to the original project:
-1. Visit [https://github.com/yasser-alghamdi/winterfell-collection](https://github.com/yasser-alghamdi/winterfell-collection)
-2. Read their contributing guidelines
-3. Fork, modify, and submit pull requests to their repository
+```
+Winterfell-Location.bat
 
----
+MALICIOUS LOCATIONS
+```
 
-**Discovered:** 2026-06-15  
-**Added to Collection:** Automated discovery system  
-**Last Updated:** 2026-06-15 11:13:35 UTC
+## Winterfell Usage
+Make sure to keep all scripts, and tools folder under Winterfell folder. you can run the package by execute `All-Winterfell-Scripts.bat` through administrator command prompt `cmd.exe` by nevigate to Winterfell folder. the script has the capability to identify the folder location so you can place the folder anywhere in Windows OS.
 
-*This README was automatically generated by The Batch Compendium discovery system.*
+```
+	██╗    ██╗██╗███╗   ██╗████████╗███████╗██████╗ ███████╗███████╗██╗     ██╗     
+	██║    ██║██║████╗  ██║╚══██╔══╝██╔════╝██╔══██╗██╔════╝██╔════╝██║     ██║     
+	██║ █╗ ██║██║██╔██╗ ██║   ██║   █████╗  ██████╔╝█████╗  █████╗  ██║     ██║     
+	██║███╗██║██║██║╚██╗██║   ██║   ██╔══╝  ██╔══██╗██╔══╝  ██╔══╝  ██║     ██║     
+	╚███╔███╔╝██║██║ ╚████║   ██║   ███████╗██║  ██║██║     ███████╗███████╗███████╗
+	╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚══════╝╚══════╝╚══════╝	
+	"+-------------------------------------------------------------------------+
+	"| Winterfell is a windows batch script to collect windows forensics       |
+	"| data and perform threat hunting for Incident Response Investigation.    |
+	"| Created by yAsSeR Al-Ghamdi.                                            |
+	"+-------------------------------------------------------------------------+
+
+----------------------------------------------------
+Command:
+C:\Users\yasser\Desktop\winterfell-master>All-Winterfell-Scripts.bat
+```
+
+## Demo of Execution
+below is to domenstrate a demo of execution of Winterfell package as the following:
+
+**Run Winterfell Package**
+![Run_Winterfell](https://github.com/yasser-alghamdi/winterfell/blob/master/winterfell.gif?raw=true)
+
+## References
+
+https://ericzimmerman.github.io/#!index.md
+
+https://www.nirsoft.net/utils/
+
+https://github.com/Neo23x0/Loki

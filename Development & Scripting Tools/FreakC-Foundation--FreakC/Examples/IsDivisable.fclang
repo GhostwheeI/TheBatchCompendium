@@ -1,0 +1,29 @@
+change_title[] Is Divisable Checker
+change_color[] 0a
+
+label[] menu
+clrscr[]
+
+print[] Dividend:
+inp[] Dividend=
+
+print[] 
+
+print[] Divisor:
+inp[] Divisor=
+
+eq[] Remainder=%Dividend% %% %Divisor%
+
+print[] 
+print[] 
+print[] 
+
+if[] %Remainder% == 0 (
+	print[] It is divisable!
+) el[] (
+	print[] It is not divisable!
+)
+
+stop[] >nul
+
+goto[] menu

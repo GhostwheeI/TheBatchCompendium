@@ -1,66 +1,246 @@
 # Batsh
 
-**Owner:** [batsh-dev-team](https://github.com/batsh-dev-team)  
-**Repository:** [batsh-dev-team/Batsh](https://github.com/batsh-dev-team/Batsh)  
-**Stars:** 4,352 ⭐  
-**Language:** OCaml  
-**Category:** Development & Scripting Tools
+## Notes from maintainers
 
-## Description
+This repo was transferred from the original author @BYVoid,
+and has been upgraded to build on more recent OCaml versions (buildable on at least OCaml 4.08.1).
+You can see the discussion thread which spawned this fork effort
+[here](https://discuss.ocaml.org/t/compiling-batsh/4700/).
 
-A language that compiles to Bash and Windows Batch
+Note that this project is currently in minimum maintenance mode.
+Issues, PR may not be actively dealt with.
 
-## 🔗 Links
+The following sections may contain out of date info as we are still
+in the process of going through the repo
 
-- **GitHub Repository:** [https://github.com/batsh-dev-team/Batsh](https://github.com/batsh-dev-team/Batsh)
-- **Owner Profile:** [https://github.com/batsh-dev-team](https://github.com/batsh-dev-team)
+## Project description
 
-## 📊 Repository Stats
+Batsh is a simple programming language that compiles to Bash and Windows [Batch](http://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/batch.mspx).
+It enables you to write your script once runs on all platforms without **any** additional dependency.
 
-- **Stars:** 4,352
-- **Primary Language:** OCaml
-- **Category:** Development & Scripting Tools
+Both Bash and Batch are messy to read and tricky to write due to historical reasons.
+You have to spend a lot of time learning either of them and write platform-dependent code for each operating system.
+I have wasted lots of time in my life struggling with bizarre syntaxes and unreasonable behaviors of them, and do not want to waste any more.
 
-## 📝 About This Repository
+If you happen to be a maintainer of a cross-platform tool which relies on Bash on Linux/Mac and Batch on Windows as "glue code", and found it painful to "synchronize" between them, you would definitely like to try Batsh.
 
-This repository is part of [The Batch Compendium](https://github.com/YourUsername/TheBatchCompendium) - a comprehensive collection of Windows batch scripts and tools.
+## How to get it
 
-### Why This Repository?
+### The easiest way
 
-- ✅ **High Quality:** 4,352 stars indicate community trust
-- ✅ **Active Project:** Well-maintained and documented
-- ✅ **Batch Scripts:** Contains useful Windows batch files
-- ✅ **Open Source:** Free to use and learn from
+[Try it online: http://batsh.org](http://batsh.org/)
 
-## 🚀 Quick Start
+### Install from OPAM
 
-1. Visit the [original repository](https://github.com/batsh-dev-team/Batsh)
-2. Read the project's documentation
-3. Clone or download the scripts you need
-4. Follow the repository's installation instructions
+Batsh is implemented in OCaml and managed by [OPAM](http://opam.ocaml.org/pkg/batsh/0.0.5/).
 
-## ⚠️ Important Notes
+1. Install OPAM. See [instructions](http://opam.ocaml.org/doc/Install.html).
+2. Switch to the latest version (or at least 4.00.1) of OCaml by running `opam switch`.
+3. Install Batsh: `opam install batsh`
 
-- Always review batch scripts before running them
-- Test scripts in a safe environment first
-- Check for any prerequisites or dependencies
-- Respect the repository's license terms
+### Build from source
 
-## 📄 License
+You have to install OCaml (version 4.00.1 or higher) development environment before compiling Batsh from source code, and follow steps below:
 
-This repository follows the license terms of the original project. Please check the [original repository](https://github.com/batsh-dev-team/Batsh) for specific license information.
+1. Download source code of Batsh from [releases](https://github.com/BYVoid/Batsh/releases) or clone with git.
+2. Uncompress source code tarball.
+3. `make`
+4. `make install`
+5. Run: `batsh`
 
-## 🤝 Contributing
+#### Dependencies
 
-To contribute to the original project:
-1. Visit [https://github.com/batsh-dev-team/Batsh](https://github.com/batsh-dev-team/Batsh)
-2. Read their contributing guidelines
-3. Fork, modify, and submit pull requests to their repository
+If there is any missing dependency, you can install them by running `opam install dune core_kernel ounit dlist cmdliner`
 
----
+* [dune](https://dune.build/): Build framework.
+* [core_kernel](https://github.com/janestreet/core_kernel/): Core_kernel is the system-independent part of Core, Jane Street's industrial-strength alternative to the OCaml standard library.
+* [ounit](http://ounit.forge.ocamlcore.org/): Unit test framework.
+* [dlist](https://github.com/BYVoid/Dlist): A purely functional list-like data structure supporting O(1) concatenation.
+* [cmdliner](http://erratique.ch/software/cmdliner): Command line interfaces parser.
 
-**Discovered:** 2026-06-15  
-**Added to Collection:** Automated discovery system  
-**Last Updated:** 2026-06-15 11:13:35 UTC
+## Syntax
 
-*This README was automatically generated by The Batch Compendium discovery system.*
+The syntax of Batsh is [C-based](https://en.wikipedia.org/wiki/List_of_C-based_programming_languages) (derived from C programming language).
+If you have learned C, Java, C++ or JavaScript, Batsh is quite easy for you.
+
+### Assignment
+
+```javascript
+a = 1;
+b = "string";
+c = [1, 2, "str", true, false];
+```
+
+### Expression
+
+```javascript
+a = 1 + 2;
+b = a * 7;
+c = "Con" ++ "cat";
+d = c ++ b;
+```
+
+### Command
+
+```javascript
+// On UNIX
+output = ls();
+// On Windows
+output = dir();
+// Platform independent
+output = readdir();
+
+// Test existence
+ex = exists("file.txt");
+```
+
+### If condition
+
+```javascript
+a = 3;
+if (a > 2) {
+  println("Yes");
+} else {
+  println("No");
+}
+```
+
+### Loop
+
+```javascript
+// Fibonacci
+n = 0;
+i = 0;
+j = 1;
+while (n < 60) {
+  k = i + j;
+  i = j;
+  j = k;
+  n = n + 1;
+  println(k);
+}
+```
+
+### Function
+
+```javascript
+v1 = "Global V1";
+v2 = "Global V2";
+function func(p) {
+  v1 = "Local " ++ p;
+  global v2;
+  v2 = "V2 Modified.";
+}
+func("Var");
+```
+
+### Recursion
+
+```javascript
+function fibonacci(num) {
+  if (num == 0) {
+    return 0;
+  } else if (num == 1) {
+    return 1;
+  } else {
+    return (fibonacci(num - 2) + fibonacci(num - 1));
+  }
+}
+println(fibonacci(8));
+```
+
+### [More examples](https://github.com/BYVoid/Batsh/tree/master/test_scripts)
+
+### Syntax Highlighting
+
+#### Vim
+
+* [vim-Batsh](https://github.com/vuryleo/vim-Batsh)
+
+#### Emacs
+
+* [batsh-mode](https://github.com/thechampagne/batsh-mode)
+
+## Built-in functions
+
+In order to make script cross-platform, Batsh provided some "built-in" functions that will compile to platform-dependent code. It is assumed that Bash script runs on Linux or Mac OS and Batch script runs on Windows (XP or higher), which means Cygwin or wine are not supported.
+
+### `print(text, ...)`
+
+Prints a text string to console without a newline.
+
+### `println(text, ...)`
+
+Prints a text string to console with a new line (LF for bash, CRLF for batch).
+
+### `call(path, arg, ...)`
+
+Runs command from path through shell.
+
+### `bash(rawStatement)`
+
+Put `rawStatement` into compiled code for Bash. Ignore for Windows Batch.
+
+### `batch(rawStatement)`
+
+Put `rawStatement` into compiled code for Windows Batch. Ignore for Bash.
+
+### `readdir(path)`
+
+Equals to `ls` and `dir /w`.
+
+### `exists(path)`
+
+Test existence of given path. 
+
+## Command Line Usage
+
+```
+NAME
+       batsh - A language that compiles to Bash and Windows Batch
+
+SYNOPSIS
+       batsh COMMAND ...
+
+COMMANDS
+       bash
+           Compile to Bash script.
+
+       batsh
+           Format source file.
+
+       winbat
+           Compile to Windows Batch script.
+
+OPTIONS
+       --help[=FMT] (default=pager)
+           Show this help in format FMT (pager, plain or groff).
+
+       --version
+           Show version information.
+```
+
+## Why not Python/Ruby/Node.js/Lua
+
+Yes you can use any of them as platform-independent glue code. But there are several disadvantages:
+
+1. None of them is **preinstalled on all platforms** (including Windows).
+2. Functionalities like process piping are not convenient to use.
+3. Hard to integrate with existing code written in Bash or Batch.
+
+Those reasons are why I developed Batsh.
+
+## License
+
+[MIT](http://opensource.org/licenses/MIT)
+
+## Contributors
+
+* [Carbo Kuo](https://github.com/BYVoid)
+* [Song Zhang](http://www.linkedin.com/pub/song-zhang/76/632/b51)
+* [Anthony Chan](https://github.com/anthonyhchan)
+* [jeb-de](https://github.com/jeb-de)
+* [Al Ramirez](https://github.com/mirez)
+* [Nixola](https://github.com/Nixola)
+* [Darren Ldl](https://github.com/darrenldl)
+* [Anton Kochkov](https://github.com/XVilka)

@@ -1,0 +1,352 @@
+name: CI-master Failure Chack-Agent PR
+
+on:
+  workflow_run:
+    workflows: ["CI-master_test"]
+    types: [completed]
+
+jobs:
+  chack_agent_fix_master_failure:
+    if: >
+      ${{ github.event.workflow_run.conclusion == 'failure' &&
+          github.event.workflow_run.head_branch == 'master' &&
+          !startsWith(github.event.workflow_run.head_commit.message, 'Fix CI-master failures for run #') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: read
+    env:
+      TARGET_BRANCH: master
+      FIX_BRANCH: chack-agent/ci-master-fix-${{ github.event.workflow_run.id }}
+      CHACK_LOGS_HTTP_URL: ${{ secrets.CHACK_LOGS_HTTP_URL }}
+      CAN_PUSH_WORKFLOWS: ${{ secrets.CHACK_AGENT_FIXER_TOKEN != '' }}
+    steps:
+      - name: Checkout failing commit
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+          persist-credentials: true
+          token: ${{ secrets.CHACK_AGENT_FIXER_TOKEN || github.token }}
+
+      - name: Configure git author
+        run: |
+          git config user.name "chack-agent"
+          git config user.email "chack-agent@users.noreply.github.com"
+
+      - name: Create fix branch
+        run: git checkout -b "$FIX_BRANCH"
+
+      - name: Fetch failure summary and failed-step logs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          failed_logs_file="$(pwd)/chack_failed_steps_logs.txt"
+          if gh run view "$RUN_ID" --repo "${{ github.repository }}" --log-failed > "$failed_logs_file"; then
+            if [ ! -s "$failed_logs_file" ]; then
+              echo "No failed step logs were returned by gh run view --log-failed." > "$failed_logs_file"
+            fi
+          else
+            echo "Failed to download failed step logs with gh run view --log-failed." > "$failed_logs_file"
+          fi
+          echo "FAILED_LOGS_PATH=$failed_logs_file" >> "$GITHUB_ENV"
+
+          gh api -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/actions/runs/$RUN_ID/jobs \
+            --paginate > /tmp/jobs.json
+          python3 - <<'PY'
+          import json
+          import re
+          import subprocess
+
+          data = json.load(open('/tmp/jobs.json'))
+          lines = []
+          failure_evidence = []
+          failure_jobs = []
+          for job in data.get('jobs', []):
+            if job.get('conclusion') == 'failure':
+              job_id = job.get('id')
+              lines.append(f"Job: {job.get('name')} (id {job.get('id')})")
+              lines.append(f"URL: {job.get('html_url')}")
+              for step in job.get('steps', []):
+                if step.get('conclusion') == 'failure':
+                  lines.append(f"  Step: {step.get('name')}")
+              lines.append("")
+              failure_jobs.append((job_id, job.get('name')))
+
+          error_pattern = re.compile(r'error\s+[A-Z]+[0-9]+|: error |Build FAILED\.|##\[error\]', re.IGNORECASE)
+          for job_id, job_name in failure_jobs:
+            try:
+              raw_log = subprocess.check_output(
+                ["gh", "api", f"/repos/${{ github.repository }}/actions/jobs/{job_id}/logs"],
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+              )
+            except subprocess.CalledProcessError as exc:
+              failure_evidence.append(f"Job {job_name} ({job_id}): failed to download raw logs: {exc}")
+              continue
+
+            matches = []
+            for raw_line in raw_log.splitlines():
+              if error_pattern.search(raw_line):
+                line = re.sub(r"^\ufeff?", "", raw_line).strip()
+                matches.append(line)
+
+            failure_evidence.append(f"Job {job_name} ({job_id})")
+            if matches:
+              failure_evidence.extend(matches[:40])
+            else:
+              failure_evidence.append("No compiler/runtime error lines extracted from raw job logs.")
+            failure_evidence.append("")
+
+          summary = "\n".join(lines).strip() or "No failing job details found."
+          with open('chack_failure_summary.txt', 'w') as handle:
+            handle.write(summary)
+
+          evidence = "\n".join(failure_evidence).strip() or "No raw failure evidence extracted."
+          with open('chack_failure_evidence.txt', 'w') as handle:
+            handle.write(evidence)
+          PY
+
+      - name: Create Chack Agent prompt
+        env:
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          {
+            echo "You are fixing a failing CI-master_test run in ${{ github.repository }}."
+            echo "The failing workflow run is: ${RUN_URL}"
+            echo "The failing commit SHA is: ${HEAD_SHA}"
+            echo "The target branch for the final PR is: ${TARGET_BRANCH}"
+            echo ""
+            echo "Failure summary:"
+            cat chack_failure_summary.txt
+            echo ""
+            echo "Extracted raw failure evidence:"
+            cat chack_failure_evidence.txt
+            echo ""
+            echo "Failed-step logs file absolute path (local runner): ${FAILED_LOGS_PATH}"
+            echo "Read that file to inspect the exact failing logs."
+            echo ""
+            echo "Please identify the cause, apply an easy, simple and minimal fix, and update files accordingly."
+            echo "Priority rule: if extracted failure evidence references repository source files or project files, fix those first."
+            echo "Only edit workflow files when the evidence points to the workflow itself (checkout/setup/permissions/event wiring) or when no repository file is implicated."
+            echo "Do not guess from truncated logs when exact compiler/runtime error lines are available."
+            echo "Workflow-file edits are allowed when required to fix the failing run."
+            echo "Do not edit or create any .md or .txt files or any summary file and do not modify build_lists/regexes.yaml. Don't create job or summary files of you actions."
+            echo "Run any fast checks you can locally (no network)."
+            echo "Leave the repo in a state ready to commit; changes will be committed and pushed automatically."
+          } > chack_prompt.txt
+
+      - name: Set up Node.js for Codex
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+
+      - name: Install Codex CLI
+        run: |
+          npm install -g @openai/codex
+          codex --version
+
+      - name: Run Chack Agent
+        id: run_chack
+        uses: carlospolop/chack-agent@master
+        with:
+          provider: codex
+          model_primary: BEST_QUALITY
+          max_turns: 125
+          main_action: peass-ng-master-failure
+          sub_action: CI-master Failure Chack-Agent PR
+          system_prompt: |
+            Diagnose the failing gh actions workflow, propose the minimal and effective safe fix, and implement it.
+            When the provided failure evidence names repository files, treat that as the primary root-cause signal and fix those files before considering workflow edits.
+            Do not make speculative workflow changes when compiler/runtime error lines point to source or project files.
+            Workflow-file edits are allowed when needed to fix the failure.
+            Never edit any .md or .txt files.
+            Never create or modify build_lists/regexes.yaml.
+            Run only fast, local checks (no network). Leave the repo ready to commit.
+          prompt_file: chack_prompt.txt
+          tools_config_json: "{\"exec_enabled\": true}"
+          session_config_json: "{\"long_term_memory_enabled\": false}"
+          agent_config_json: "{\"self_critique_enabled\": false, \"require_task_steps_manager_init_first\": true}"
+          codex_access_token: ${{ secrets.CODEX_ACCESS_TOKEN }}
+          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Commit and push fix branch if changed
+        id: push_fix
+        env:
+          ORIGINAL_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          rm -f chack_failure_summary.txt chack_failure_evidence.txt chack_prompt.txt chack_failed_steps_logs.txt
+
+          pushed=false
+
+          if ! git diff --quiet; then
+            git add -A
+            if [ "$CAN_PUSH_WORKFLOWS" != "true" ]; then
+              # Avoid workflow-file pushes with token scopes that cannot write workflows.
+              git reset -- .github/workflows || true
+              git checkout -- .github/workflows || true
+              git clean -fdx -- .github/workflows || true
+            fi
+            git reset -- chack_failure_summary.txt chack_failure_evidence.txt chack_prompt.txt chack_failed_steps_logs.txt
+            # Never include generated regex list updates in automated fixer commits.
+            git reset -- build_lists/regexes.yaml || true
+            # Never allow the agent to commit generated linpeas artifacts.
+            git reset -- linpeas.sh linpeas_fat.sh || true
+            while IFS= read -r forbidden_file; do
+              git reset -- "$forbidden_file" || true
+            done < <(git diff --name-only --cached | grep -E '(^|/)(linpeas\.sh|linpeas_fat\.sh)$' || true)
+            while IFS= read -r file; do
+              case "$file" in
+                *.txt|*.md)
+                  git reset -- "$file"
+                  ;;
+              esac
+            done < <(git diff --name-only --cached)
+            if [ "$CAN_PUSH_WORKFLOWS" != "true" ] && git diff --cached --name-only | grep -q '^.github/workflows/'; then
+              echo "Workflow-file changes are still staged; skipping push without workflows permission."
+              echo "pushed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if git diff --cached --name-only | grep -Eq '(^|/)(linpeas\.sh|linpeas_fat\.sh)$'; then
+              echo "Forbidden generated linpeas files are still staged; skipping push."
+              echo "pushed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if ! git diff --cached --quiet; then
+              git commit -m "Fix CI-master failures for run #${{ github.event.workflow_run.id }}"
+            fi
+          fi
+
+          after_head="$(git rev-parse HEAD)"
+          if [ "$after_head" = "$ORIGINAL_HEAD_SHA" ]; then
+            echo "No commit produced by Chack Agent."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$CAN_PUSH_WORKFLOWS" = "true" ]; then
+            echo "Sanitizing Chack commit range, preserving workflow fixes."
+            git diff --binary "$ORIGINAL_HEAD_SHA"..HEAD -- \
+              . \
+              ':(exclude)chack_failure_summary.txt' \
+              ':(exclude)chack_failure_evidence.txt' \
+              ':(exclude)chack_prompt.txt' \
+              ':(exclude)chack_failed_steps_logs.txt' \
+              ':(exclude)build_lists/regexes.yaml' \
+              ':(exclude)*.md' \
+              ':(exclude)*.txt' \
+              ':(exclude)**/*.txt' \
+              ':(exclude)**/*.md' > /tmp/chack_sanitized.patch
+          else
+            echo "Sanitizing Chack commit range to non-workflow changes only."
+            git diff --binary "$ORIGINAL_HEAD_SHA"..HEAD -- \
+              . \
+              ':(exclude).github/workflows/**' \
+              ':(exclude)chack_failure_summary.txt' \
+              ':(exclude)chack_failure_evidence.txt' \
+              ':(exclude)chack_prompt.txt' \
+              ':(exclude)chack_failed_steps_logs.txt' \
+              ':(exclude)build_lists/regexes.yaml' \
+              ':(exclude)*.md' \
+              ':(exclude)*.txt' \
+              ':(exclude)**/*.txt' \
+              ':(exclude)**/*.md' > /tmp/chack_sanitized.patch
+            if [ ! -s /tmp/chack_sanitized.patch ]; then
+              echo "Only workflow-file changes were produced; skipping push."
+              echo "pushed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          git reset --hard "$ORIGINAL_HEAD_SHA"
+          git apply --index /tmp/chack_sanitized.patch
+          rm -f chack_failure_summary.txt chack_failure_evidence.txt chack_prompt.txt chack_failed_steps_logs.txt
+          git reset -- chack_failure_summary.txt chack_failure_evidence.txt chack_prompt.txt chack_failed_steps_logs.txt || true
+          git reset -- linpeas.sh linpeas_fat.sh || true
+          while IFS= read -r forbidden_file; do
+            git reset -- "$forbidden_file" || true
+          done < <(git diff --name-only --cached | grep -E '(^|/)(linpeas\.sh|linpeas_fat\.sh)$' || true)
+          if git diff --cached --name-only | grep -Eq '(^|/)(linpeas\.sh|linpeas_fat\.sh)$'; then
+            echo "Forbidden generated linpeas files remain after sanitizing; skipping push."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git diff --cached --quiet; then
+            echo "No sanitized changes left after filtering."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "Fix CI-master failures for run #${{ github.event.workflow_run.id }}"
+
+          if ! git push origin HEAD:"$FIX_BRANCH"; then
+            echo "Push failed (likely token workflow permission limits); skipping PR creation."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          pushed=true
+
+          if [ "$pushed" = "true" ]; then
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create PR to master
+        if: ${{ steps.push_fix.outputs.pushed == 'true' }}
+        id: create_pr
+        env:
+          GH_TOKEN: ${{ secrets.CHACK_AGENT_FIXER_TOKEN || github.token }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          set +e
+          pr_output=$(gh pr create \
+            --title "Fix CI-master_test failure (run #${{ github.event.workflow_run.id }})" \
+            --body "Automated Chack Agent fix for failing CI-master_test run: ${RUN_URL}" \
+            --base "$TARGET_BRANCH" \
+            --head "$FIX_BRANCH" 2>&1)
+          rc=$?
+          set -e
+
+          if [ $rc -eq 0 ]; then
+            echo "url=$pr_output" >> "$GITHUB_OUTPUT"
+            echo "created=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "$pr_output"
+          if echo "$pr_output" | grep -qi "not permitted to create or approve pull requests"; then
+            echo "PR creation blocked by repository Actions policy. Fix branch was pushed: $FIX_BRANCH"
+            echo "url=" >> "$GITHUB_OUTPUT"
+            echo "created=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Unexpected PR creation error."
+          exit $rc
+
+      - name: Comment on created PR with Chack Agent result
+        if: ${{ steps.push_fix.outputs.pushed == 'true' && steps.create_pr.outputs.created == 'true' && steps.run_chack.outputs.final-message != '' }}
+        uses: actions/github-script@v7
+        env:
+          PR_URL: ${{ steps.create_pr.outputs.url }}
+          CHACK_MESSAGE: ${{ steps.run_chack.outputs.final-message }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const prUrl = process.env.PR_URL;
+            const match = prUrl.match(/\/pull\/(\d+)$/);
+            if (!match) {
+              core.info(`Could not parse PR number from URL: ${prUrl}`);
+              return;
+            }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: Number(match[1]),
+              body: process.env.CHACK_MESSAGE,
+            });

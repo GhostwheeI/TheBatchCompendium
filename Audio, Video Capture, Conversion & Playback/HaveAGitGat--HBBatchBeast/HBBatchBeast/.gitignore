@@ -1,0 +1,11 @@
+Config
+Logs
+node_modules
+release-builds
+HBBatchBeast
+translations/translate.js
+test.js
+test2.js
+Dockerfile
+start.sh
+worker1backup.js

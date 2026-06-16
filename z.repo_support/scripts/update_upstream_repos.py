@@ -194,14 +194,14 @@ class UpstreamUpdater:
         Returns:
             Path to repository directory or None if not found
         """
-        repo_name = repo.get('name', '').replace('/', '_').replace('\\', '_')
+        repo_name = repo.get('name', '').replace('/', '--').replace('\\', '--')
         category = repo.get('category', 'Uncategorized')
         
         if not repo_name:
             return None
         
         # Try to find the repository directory
-        category_dir = self.base_path / category.replace(' & ', '_').replace(' ', '_')
+        category_dir = self.base_path / category
         repo_dir = category_dir / repo_name
         
         if repo_dir.exists():

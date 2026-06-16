@@ -1,0 +1,7 @@
+{
+  "repository": "repnz/shellcode2exe",
+  "url": "https://github.com/repnz/shellcode2exe",
+  "last_updated": "2026-06-15T23:05:55.912366",
+  "stars": "89",
+  "description": "Batch script to compile a binary shellcode blob into an exe file"
+}

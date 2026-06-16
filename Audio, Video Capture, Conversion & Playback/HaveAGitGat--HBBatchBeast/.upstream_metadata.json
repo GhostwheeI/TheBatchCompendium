@@ -1,0 +1,7 @@
+{
+  "repository": "HaveAGitGat/HBBatchBeast",
+  "url": "https://github.com/HaveAGitGat/HBBatchBeast",
+  "last_updated": "2026-06-15T23:04:47.628612",
+  "stars": "705",
+  "description": "A free GUI application for HandBrake and FFmpeg/FFprobe with an emphasis on batch conversion (including recursive folder scans and folder watching) -Windows, macOS, Linux & Docker"
+}

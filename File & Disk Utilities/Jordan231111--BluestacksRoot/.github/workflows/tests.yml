@@ -1,0 +1,63 @@
+name: tests
+
+# Runs the PowerShell unit/integration tests on Windows and verifies the single-file build is in
+# sync. No compiling, no auto-releasing -- releases are cut by hand. Replaces the old
+# "Compile and Release" workflow, which built a since-deleted Magisk.cpp and could clobber releases.
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'archive/**'
+      - 'recovered/**'
+      - 'LICENSE'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Windows PowerShell tests
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # The .cmd ships the engine + orchestrator embedded (must match tools\*.ps1) and the Magisk APK
+      # (must match its known SHA-256); make sure none of them have drifted.
+      - name: Embedded build in sync with tools/ (engine, orchestrator, APK)
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Check-Embedded-Sync.ps1
+
+      # Core engine: integrity patch, .bstk disk-mode, conf root flags, su round-trip, bootstrap.
+      # (Invoked via powershell.exe -File exactly as blueStackRoot.cmd does, i.e. Windows PowerShell 5.1.)
+      - name: Engine unit / integration tests
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Tests.ps1
+
+      # Proves the optimized HD-Player integrity patch (Array.IndexOf scan + seek-write) is byte-for-byte
+      # identical to the original byte-by-byte algorithm (frozen oracle) and reports the speedup.
+      # Real HD-Player.exe auto-skips here (no BlueStacks on the runner); synthetic coverage runs.
+      - name: Patch equivalence + speedup (HD-Player integrity bypass)
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Patch-Equivalence.ps1
+
+      # Nothing-hardcoded guarantees: custom install/data paths + adb port (5555 is not assumed).
+      - name: Path + adb-port resolution tests
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Resolve-Tests.ps1
+
+      # Heavy pure-unit coverage for the Magisk orchestrator: candidate-port ordering/shape,
+      # redaction, adb retry classifiers, HD-Player instance matching, and su-inventory parsing.
+      - name: Magisk orchestrator pure unit tests
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Magisk-Unit-Tests.ps1

@@ -1,66 +1,77 @@
-# bget
+# Bget
 
-**Owner:** [jahwi](https://github.com/jahwi)  
-**Repository:** [jahwi/bget](https://github.com/jahwi/bget)  
-**Stars:** 56 ⭐  
-**Language:** Batchfile  
-**Category:** Development & Scripting Tools
+## CMD:
+![Bget screenshot](https://github.com/jahwi/bget-list/blob/master/images/cmdimg.PNG)
 
-## Description
+## Powershell:
+![Bget powershell screenshot](https://github.com/jahwi/bget-list/blob/master/images/psimg.PNG)
 
-A package manager for Windows scripts.
 
-## 🔗 Links
+## Table of Contents
+1. [Introduction](https://github.com/jahwi/bget/blob/master/README.md#introduction)
+2. [Features](https://github.com/jahwi/bget/blob/master/README.md#features)
+3. [Running Bget](https://github.com/jahwi/bget/blob/master/README.md#running-bget)
+4. [Switches](https://github.com/jahwi/bget/blob/master/README.md#switches)
+5. [Methods](https://github.com/jahwi/bget/blob/master/README.md#methods)
+	- Jscript -JS
+	- Visual Basic Script -VBS
+	- Powershell -PS
+	- BITSAdmin -BITS
+	- CURL
 
-- **GitHub Repository:** [https://github.com/jahwi/bget](https://github.com/jahwi/bget)
-- **Owner Profile:** [https://github.com/jahwi](https://github.com/jahwi)
+## INTRODUCTION
+Bget is a batch-file command-line tool for handling Windows scripts. It is built to help script writers and users alike easily download, update and remove scripts. It’s built for scripters, by scripters.
 
-## 📊 Repository Stats
+## Features
+1. Download scripts from the Bget server: These scripts are vetted and sorted by us. We’ve gone about curating some of the most interesting scripts we could find that we think would be interesting and useful to you as well. Choose from over 100 scripts currently indexed by Bget.
+2. Download scripts from Pastebin: Pastebin has long been the coder’s friend, and so we added the ability to fetch scripts from Pastebin. These scripts are not pre-vetted however, but they offer the ability for fast code downloading without waiting for us to vet them.
+3. Update scripts: Rather than manually re-download the latest version of every script, Bget handles that for you, getting the latest version of any script you’ve downloaded.
+4. Easily remove scripts: Don’t like a script you downloaded? Easily remove it with Bget. One command and it’s buh-bye script.
+5. View script info: This allows you to see basic information about a script such as its name, author and description, allowing you to make an informed decision before downloading.
+6. Bget also allows you to list all scripts on the server and list downloaded scripts on the local computer.
+7. Upgrade feature: Bget also updates itself so you always stay up-to-date.
+8. Multiple download methods: Bget has many ways to get a script. These are: Jscript, VBScript, Powershell, BITSAdmin and CURL.
 
-- **Stars:** 56
-- **Primary Language:** Batchfile
-- **Category:** Development & Scripting Tools
+## Running Bget
+A typical Bget command looks like this:
 
-## 📝 About This Repository
+`Bget [-switch] [-method] [ARGUMENT]`
 
-This repository is part of [The Batch Compendium](https://github.com/YourUsername/TheBatchCompendium) - a comprehensive collection of Windows batch scripts and tools.
+Here’s an example:
 
-### Why This Repository?
+Fetching a script named `test` from the server.  The easiest way to do this would be:
 
-- ✅ **High Quality:** 56 stars indicate community trust
-- ✅ **Active Project:** Well-maintained and documented
-- ✅ **Batch Scripts:** Contains useful Windows batch files
-- ✅ **Open Source:** Free to use and learn from
+`BGET -get test`
 
-## 🚀 Quick Start
+You should open a Command Prompt window in Bget's path before running any of the commands. Optionally, you could also add Bget's path as an environment variable.
 
-1. Visit the [original repository](https://github.com/jahwi/bget)
-2. Read the project's documentation
-3. Clone or download the scripts you need
-4. Follow the repository's installation instructions
+## Switches
 
-## ⚠️ Important Notes
+Run `BGET -help -doc` to get a comprehensive list of Bget's switches.
 
-- Always review batch scripts before running them
-- Test scripts in a safe environment first
-- Check for any prerequisites or dependencies
-- Respect the repository's license terms
 
-## 📄 License
+## Methods
+Bget’s  ‘methods’ are the download methods for grabbing resources from Bget's script repository.
+There are currently 5 methods:
+1.	The JS method: It uses a JS download script.
+2.	The VBS method: Uses a download script written in VBS.
+3.	The PS method: uses Powershell to download resources.
+4.	The BITS method: Uses bitsadmin to download resources. It is not compatible with the Pastebin switch.
+5.	The CURL method: Uses curl to download resources.
 
-This repository follows the license terms of the original project. Please check the [original repository](https://github.com/jahwi/bget) for specific license information.
+Usage:
 
-## 🤝 Contributing
+`BGET [-switch] [-method] [script]`
 
-To contribute to the original project:
-1. Visit [https://github.com/jahwi/bget](https://github.com/jahwi/bget)
-2. Read their contributing guidelines
-3. Fork, modify, and submit pull requests to their repository
+Where the methods are: -usejs, -usevbs, -useps, -usebits,  -usecurl.
 
----
+Examples:
 
-**Discovered:** 2026-06-15  
-**Added to Collection:** Automated discovery system  
-**Last Updated:** 2026-06-15 11:13:35 UTC
+1. `BGET -get -usejs test`
+2. `BGET -update -usevbs test`
+3. `BGET -pastebin -useps 1wsBxRs4`
+4. `BGET -list -server -usebits`
+5. `BGET -upgrade -usecurl`
+6. `BGET -info -usejs test`
 
-*This README was automatically generated by The Batch Compendium discovery system.*
+

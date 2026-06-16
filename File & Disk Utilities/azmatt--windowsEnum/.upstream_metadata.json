@@ -1,0 +1,7 @@
+{
+  "repository": "azmatt/windowsEnum",
+  "url": "https://github.com/azmatt/windowsEnum",
+  "last_updated": "2026-06-15T23:05:52.731859",
+  "stars": "91",
+  "description": "Batch file to help automate Windows enumeration for privilege escalation"
+}

@@ -1,0 +1,7 @@
+{
+  "repository": "custom-dev-tools/wampserver-ssl-auto-config",
+  "url": "https://github.com/custom-dev-tools/wampserver-ssl-auto-config",
+  "last_updated": "2026-06-15T23:06:56.743598",
+  "stars": "61",
+  "description": "WampServer SSL Auto Config is a Microsoft Windows batch script designed to automatically generate and configure a fully working Apache SSL / Name Based virtual host development environment."
+}

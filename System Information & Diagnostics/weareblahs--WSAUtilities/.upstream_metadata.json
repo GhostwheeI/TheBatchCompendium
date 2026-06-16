@@ -1,0 +1,7 @@
+{
+  "repository": "weareblahs/WSAUtilities",
+  "url": "https://github.com/weareblahs/WSAUtilities",
+  "last_updated": "2026-06-15T23:05:44.793539",
+  "stars": "109",
+  "description": "CLI-based toolbox for Windows Subsystem for Android. Includes installation of APKs, installation of WSA, and diagnostics."
+}

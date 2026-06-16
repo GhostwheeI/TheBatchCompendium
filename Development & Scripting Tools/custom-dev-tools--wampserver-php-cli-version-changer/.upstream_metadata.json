@@ -1,0 +1,7 @@
+{
+  "repository": "custom-dev-tools/wampserver-php-cli-version-changer",
+  "url": "https://github.com/custom-dev-tools/wampserver-php-cli-version-changer",
+  "last_updated": "2026-06-15T23:07:05.970380",
+  "stars": "54",
+  "description": "WampServer PHP CLI version changer is a Microsoft Windows batch script that allows you to easily add and then change between available WampServer PHP CLI versions using the users environment 'path' variable."
+}

@@ -1,66 +1,105 @@
-# TerabyteTweaker
+<p align="center">
+  <img alt="Version" src="https://img.shields.io/github/v/tag/Kawwabi/TerabyteTweaker?label=Version%3A" />
+  <a href="#" target="_blank">
+    <img alt="License: Apache-2.0" src="https://img.shields.io/github/license/Kawwabi/TerabyteTweaker" />
+  </a>
+  <a><img alt="Downloads:" src="https://img.shields.io/github/downloads/Kawwabi/TerabyteTweaker/total.svg" />
+  </a>
+  <a><img alt="Is Mantained?" src="https://img.shields.io/badge/Mantained:-Maybe-yellow.svg" />
+  </a>
+</p>
+<h1 align="center">
+Terabyte Tweaker
+</h1>
 
-**Owner:** [Kawwabi](https://github.com/Kawwabi)  
-**Repository:** [Kawwabi/TerabyteTweaker](https://github.com/Kawwabi/TerabyteTweaker)  
-**Stars:** 110 ⭐  
-**Language:** Batchfile  
-**Category:** Uncategorized
+<p align="center">
+ <img src="https://github.com/Kawwabi/TerabyteTweaker/blob/main/images/favicon.png?raw=true" width="200">
+</p>
 
-## Description
+## 📋 Table of Contents
 
-Terabyte Tweaker is a program written in batch that allows your PC to run at better speeds, it transforms a "Bad PC" onto a "Medium PC", and turns a "Medium PC" into a monster.
+- [About](#about)
+- [Getting Started](#getting_started)
+- [Installing](#installing)
+- [Configurating](#installing)
+- [Uninstalling](#uninstalling)
+- [Contributing](#contributing)
+- [Warning](#warning)
 
-## 🔗 Links
+## ⚠️ About <a name = "about"></a>
 
-- **GitHub Repository:** [https://github.com/Kawwabi/TerabyteTweaker](https://github.com/Kawwabi/TerabyteTweaker)
-- **Owner Profile:** [https://github.com/Kawwabi](https://github.com/Kawwabi)
+Terabyte Tweaker is an program that optimizes your Windows PC, allowing it to run faster and smoother.
 
-## 📊 Repository Stats
+I strongly recommend you to use this app in your low end desktop computer, as it will give you an extra FPS boost to your PC, at the moment, im focused in making Minecraft's FPS higher, and in the tests that i've peformed, my FPS practically tripled, it went from 60 to 180 FPS (can vary from PC to PC).
+Most tweaks may not be reccomended in high end computers but feel free to try, if you desire to remove the app afterwards then refer to [Uninstalling](#uninstalling).
 
-- **Stars:** 110
-- **Primary Language:** Batchfile
-- **Category:** Uncategorized
+## Getting Started <a name = "getting_started"></a>
+### 🛑 Prerequisites
 
-## 📝 About This Repository
+This application works on both Windows 10 and 11, I have not tested it in lower versions, and i do **NOT** recommend using it on them, as it may cause damage to the system when tweaking Regedit.
+Even though all my regedit tweaks are harmless, I do not want any chance of damage to your system, so don't come crying to me if your Windows Vista got problems after using it.
 
-This repository is part of [The Batch Compendium](https://github.com/YourUsername/TheBatchCompendium) - a comprehensive collection of Windows batch scripts and tools.
+**Warning: For the app to run, you NEED to have a connection to the internet.**
 
-### Why This Repository?
+### ✨ Features <a name = "features"></a>
+- Debloater (Remove unnecessary features)
+- Cache + Log Cleaning
+- RAM, CPU and GPU Optimization Tweaks
+- Internet Tweaks (DNS+MTU / Allow faster internet connections + Lower Ping)
+- Timer Resolution Services
+- Power Plan Tweak
+- Regedit Tweaks
+- Game Specific Tweaks (Minecraft, Brawlhalla and VALORANT)
+- Better VRAM Creation
+- Server Changer (Change your server from Microsoft to Google for faster connection)
+- System Bugfixes
+- Services Optimization
+- Automatic Installation
+- Incredibily Small File Size
 
-- ✅ **High Quality:** 110 stars indicate community trust
-- ✅ **Active Project:** Well-maintained and documented
-- ✅ **Batch Scripts:** Contains useful Windows batch files
-- ✅ **Open Source:** Free to use and learn from
 
-## 🚀 Quick Start
+![](https://github.com/Teramanbr/TerabyteTweaker/blob/main/images/ingles.png?raw=true)
 
-1. Visit the [original repository](https://github.com/Kawwabi/TerabyteTweaker)
-2. Read the project's documentation
-3. Clone or download the scripts you need
-4. Follow the repository's installation instructions
+## ⚙️ Installing <a name = "installing"></a>
 
-## ⚠️ Important Notes
+Running downloaded Batch files triggers a [Microsoft SmartScreen](https://docs.microsoft.com/pt-br/windows/security/threat-protection/microsoft-defender-smartscreen/microsoft-defender-smartscreen-overview) prompt, even if the Batch file is not a security threat.
+Also, [here](https://www.virustotal.com/gui/file/ec0bba5208ca4e036b4820f30205e2011cf0b07f9050ef635ecf0a295692e329?nocache=1) is the VirusTotal report:
+![](https://github.com/Kawwabi/TerabyteTweaker/blob/main/images/VirusTotal.png?raw=true)
+I would reccomend turning off your antivirus before running the program.
 
-- Always review batch scripts before running them
-- Test scripts in a safe environment first
-- Check for any prerequisites or dependencies
-- Respect the repository's license terms
+- [Download](https://github.com/Kawwabi/TerabyteTweaker/releases/latest/download/Terabyte.Tweaker.bat) the application.
+- Run the app as Administrator.
+- Press <kbd>Y</kbd> and enter to install the application with default settings (Recommended).
 
-## 📄 License
+## 🔨 Configurating <a name = "Configurating"></a>
 
-This repository follows the license terms of the original project. Please check the [original repository](https://github.com/Kawwabi/TerabyteTweaker) for specific license information.
+Terabyte Tweaker includes an configuration option, which makes it possible for you to Disable/Enable certain tweaks if you don't wish to install them
+Here is how to Disable/Enable any of the settings:
 
-## 🤝 Contributing
+- Run the app as Administrator.
+- Press <kbd>C</kbd> and enter to see the Settings Menu.
+- Select a number to disable/enable the corresponding setting
+![](https://github.com/Kawwabi/TerabyteTweaker/blob/main/images/Settings.png?raw=true)
+- Press <kbd>X</kbd> to go back to main menu and <kbd>Y</kbd> to run the program using only the selected settings.
 
-To contribute to the original project:
-1. Visit [https://github.com/Kawwabi/TerabyteTweaker](https://github.com/Kawwabi/TerabyteTweaker)
-2. Read their contributing guidelines
-3. Fork, modify, and submit pull requests to their repository
+## 🗑 Uninstalling <a name = "uninstalling"></a>
 
----
+- Terabyte Tweaker will automatically create a restore point so you can restore your system to its original state, if desired.
 
-**Discovered:** 2026-06-15  
-**Added to Collection:** Automated discovery system  
-**Last Updated:** 2026-06-15 11:13:35 UTC
+### 🤝 Contributing <a name = "contributing"></a>
 
-*This README was automatically generated by The Batch Compendium discovery system.*
+Contributions, issues and feature requests are welcome!<br />Feel free to check the [issues page](https://github.com/Kawwabi/TerabyteTweaker/issues). 
+If you can't contribute to the app by sending bug reports, forks or feature requests, you can contribute to me instead, by subscribing to my [YouTube channel](https://www.youtube.com/channel/UCIj-jcplOl9RqTfjXQ30JXA?sub_confirmation=1&via=tb).
+
+To contact me directly, send me a message on my discord: [`Kawwabi`](https://discord.com/channels/@me/397437604880187403)
+
+I plan to remake this app in another programming language, but im still studying rust, so it will take a while.
+I tested this app **piece by piece** on my computers and didn't need to use VMs, beacuse none of the features are able to damage your system.
+
+### 📢 Warning! <a name = "warning"></a>
+
+Terabyte Tweaker is COMPLETELY FREE. If someone claims you need to pay them, they are trying to scam you.
+Here are some examples of a scammer trying to sell Terabyte Tweaker (He copied the whole code):
+![image](https://github.com/Kawwabi/TerabyteTweaker/assets/71410827/ad205532-62ab-4b62-804a-a41b50374310)
+![image](https://github.com/Kawwabi/TerabyteTweaker/assets/71410827/7c3d56dd-4bd6-443a-95e6-9f048ce5d171)
+

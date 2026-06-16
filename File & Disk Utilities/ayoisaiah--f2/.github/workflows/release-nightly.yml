@@ -1,0 +1,79 @@
+name: Release nightly
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  create_nightly_tag:
+    name: Create nightly tag for master branch
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'branch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Load .env file
+        run: grep -v '^#' .env | sed 's/"//g' >> $GITHUB_ENV
+
+      - name: Update nightly tag
+        run: |
+          git tag -d ${{ env.NIGHTLY_TAG }} || true
+          git push origin :refs/tags/${{ env.NIGHTLY_TAG }} || true
+          git tag ${{ env.NIGHTLY_TAG }}
+          git push origin ${{ env.NIGHTLY_TAG }}
+
+  release_nightly:
+    needs: create_nightly_tag
+    name: Release nightly version
+    runs-on: ubuntu-latest
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Load .env file
+        run: grep -v '^#' .env | sed 's/"//g' >> $GITHUB_ENV
+
+      - name: Set up Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            go.sum
+            tools.sum
+
+      - name: Delete existing nightly release
+        run: |
+          gh release delete nightly --yes || true
+
+      - name: Create nightly release
+        run: |
+          gh release create ${{ env.NIGHTLY_TAG }} \
+            --title "Development build (master)" \
+            --notes "This build is directly sourced from the \`master\` branch in active development. As such, it may include experimental features and potential bugs." \
+            --prerelease
+
+      - name: Install Just
+        uses: taiki-e/install-action@just
+
+      - name: Build assets with Goreleaser
+        run: just release-snapshot
+
+      - name: Upload assets to nightly release
+        run: gh release upload ${{ env.NIGHTLY_TAG }} dist/{*.tar.gz,*.zip,*.tar.zst,*.deb,*.rpm,*.apk,checksums.txt} --clobber

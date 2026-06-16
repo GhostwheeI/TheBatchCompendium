@@ -1,0 +1,72 @@
+name: UI Modification
+description: Request a change to the user interface
+title: "[UI]: "
+labels: ["ui", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a UI improvement! Please describe your idea in detail.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What UI change would you like to see? What problem does it solve?
+      placeholder: Add a search bar to quickly filter software by name...
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current Behavior
+      description: Describe how the current UI works (if applicable)
+      placeholder: Currently, users have to scroll through categories to find software...
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposed-behavior
+    attributes:
+      label: Proposed Behavior
+      description: Describe how the UI should work after your proposed change
+      placeholder: A search input at the top filters software in real-time as users type...
+    validations:
+      required: true
+
+  - type: textarea
+    id: mockup
+    attributes:
+      label: Mockup or Screenshot
+      description: |
+        If you have a mockup, sketch, or screenshot showing your idea, please attach it.
+        You can drag and drop images here.
+      placeholder: Drag and drop images here or describe visually...
+    validations:
+      required: false
+
+  - type: textarea
+    id: affected-components
+    attributes:
+      label: Affected Components
+      description: |
+        If you know which components might be affected, list them here.
+        Check `src/components/` for component names.
+      placeholder: |
+        - SoftwareSelector
+        - Header
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this change to you?
+      options:
+        - Nice to have
+        - Important
+        - Critical for usability
+    validations:
+      required: true

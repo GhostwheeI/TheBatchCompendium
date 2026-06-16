@@ -1,0 +1,84 @@
+{
+  "name": "short-video-factory",
+  "description": "短视频工厂，一键生成产品营销与泛内容短视频，AI批量自动剪辑",
+  "version": "1.2.2",
+  "author": {
+    "name": "YILS",
+    "developer": "YILS",
+    "email": "yils_lin@163.com",
+    "url": "https://yils.blog/"
+  },
+  "homepage": "https://github.com/YILS-LIN/short-video-factory",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "cross-env VITE_CJS_IGNORE_WARNING=true vite",
+    "build": "vue-tsc && cross-env VITE_CJS_IGNORE_WARNING=true vite build && electron-builder",
+    "preview": "vite preview",
+    "format": "prettier --write .",
+    "preinstall": "npx only-allow pnpm",
+    "postinstall": "node build/scripts/post-install.js",
+    "lipo-ffmpeg": "node build/scripts/lipo-ffmpeg.js"
+  },
+  "dependencies": {
+    "axios": "^1.11.0",
+    "better-sqlite3": "9.6.0",
+    "ffmpeg-static": "^5.2.0",
+    "i18next": "^25.4.0",
+    "i18next-fs-backend": "^2.3.2",
+    "music-metadata": "^11.7.3",
+    "subtitle": "4.2.2-alpha.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@ai-sdk/openai": "^3.0.26",
+    "@mdi/font": "^7.4.47",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^16.18.126",
+    "@types/wicg-file-system-access": "^2023.10.6",
+    "@types/ws": "^8.18.1",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "@vueuse/core": "^13.5.0",
+    "ai": "^6.0.77",
+    "cross-env": "^7.0.3",
+    "electron": "^22.3.27",
+    "electron-builder": "^24.13.3",
+    "i18next-http-backend": "^3.0.2",
+    "i18next-vue": "^5.3.0",
+    "mitt": "^3.0.1",
+    "pinia": "^3.0.3",
+    "pinia-plugin-persistedstate": "^4.4.1",
+    "prettier": "^3.6.2",
+    "random": "^5.4.1",
+    "sass": "^1.89.2",
+    "typescript": "5.6.2",
+    "unocss": "^66.3.3",
+    "vite": "^7.0.3",
+    "vite-plugin-electron": "^0.29.0",
+    "vite-plugin-electron-renderer": "^0.14.6",
+    "vite-plugin-vue-devtools": "^7.7.7",
+    "vue": "^3.5.17",
+    "vue-router": "^4.5.1",
+    "vue-toastification": "2.0.0-rc.5",
+    "vue-tsc": "3.0.1",
+    "vuetify": "^3.11.5"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "better-sqlite3",
+      "ffmpeg-static"
+    ],
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "bufferutil",
+      "electron",
+      "esbuild",
+      "utf-8-validate",
+      "vue-demi"
+    ]
+  },
+  "packageManager": "pnpm@10.12.4",
+  "engines": {
+    "node": ">=22.17.0",
+    "pnpm": ">=10.12.4"
+  }
+}

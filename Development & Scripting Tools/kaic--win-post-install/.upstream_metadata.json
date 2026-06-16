@@ -1,0 +1,7 @@
+{
+  "repository": "kaic/win-post-install",
+  "url": "https://github.com/kaic/win-post-install",
+  "last_updated": "2026-06-15T23:05:06.965767",
+  "stars": "334",
+  "description": "A web-based tool that generates customized Windows post-installation batch scripts. Select from 100+ software applications and 80+ system configurations to create a personalized Windows setup script."
+}

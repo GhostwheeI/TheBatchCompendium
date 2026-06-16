@@ -1,0 +1,7 @@
+{
+  "repository": "m2nlight/WindowsServerToWindowsDesktop",
+  "url": "https://github.com/m2nlight/WindowsServerToWindowsDesktop",
+  "last_updated": "2026-06-15T23:05:38.154697",
+  "stars": "125",
+  "description": "A bat script to auto config Windows Server 2016 to \"Windows Desktop\""
+}

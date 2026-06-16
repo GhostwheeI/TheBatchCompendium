@@ -1,0 +1,7 @@
+{
+  "repository": "bequiet11/autodesk-complete-uninstaller",
+  "url": "https://github.com/bequiet11/autodesk-complete-uninstaller",
+  "last_updated": "2026-06-15T23:05:45.614857",
+  "stars": "106",
+  "description": "Single-file Windows batch tool to fully detect, uninstall, and deep-clean all Autodesk products (2015\u20132026+). Achieves verified zero-remnant clean without reboot. Handles ODIS, MSI, BitRock installers. 16-point verification. Windows 10/11."
+}

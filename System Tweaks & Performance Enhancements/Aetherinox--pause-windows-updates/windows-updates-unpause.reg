@@ -1,0 +1,69 @@
+Windows Registry Editor Version 5.00
+
+;   @script       windows-updates-unpause.reg
+;   @author       Aetherinox
+;   @url          https://github.com/Aetherinox/pause-windows-updates
+;
+;   A script to re-activate Windows Updates.
+;
+;   User can re-pause updates by running the associated .reg file
+;       windows-updates-pause.reg
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings]
+"PauseFeatureUpdatesStartTime"=-
+"PauseFeatureUpdatesEndTime"=-
+"PauseQualityUpdatesStartTime"=-
+"PauseQualityUpdatesEndTime"=-
+"PauseUpdatesStartTime"=-
+"PauseUpdatesExpiryTime"=-
+"ActiveHoursStart"=dword:0000000d
+"ActiveHoursEnd"=dword:00000007
+"FlightSettingsMaxPauseDays"=dword:00002727
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc]
+"Start"=dword:00000003
+"FailureActions"=hex:84,03,00,00,00,00,00,00,00,00,00,00,03,00,00,00,14,00,00,\
+  00,01,00,00,00,c0,d4,01,00,01,00,00,00,e0,93,04,00,00,00,00,00,00,00,00,00
+
+; AUOptions
+;
+; @ref        https://learn.microsoft.com/en-us/windows/deployment/update/waas-wu-settings#configuring-automatic-updates-by-editing-the-registry
+; @options    1: Keep my computer up to date is disabled in Automatic Updates.
+;             2: Notify of download and installation.
+;             3: Automatically download and notify of installation.
+;             4: Automatically download and scheduled installation.
+;             5: Allow local admin to select the configuration mode. This option isn't available for Windows 10 or later versions.
+;             7: Notify for install and notify for restart. (Windows Server 2016 and later only)
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU]
+"AUOptions"=dword:00000004
+"NoAutoUpdate"=dword:00000000
+"NoAUShutdownOption"=dword:00000000
+"AlwaysAutoRebootAtScheduledTime"=dword:00000000
+"NoAutoRebootWithLoggedOnUsers"=dword:00000001
+"AutoInstallMinorUpdates"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings]
+"PausedFeatureStatus"=dword:00000000
+"PausedQualityStatus"=dword:00000000
+"PausedQualityDate"=-
+"PausedFeatureDate"=-
+
+; @target     Optional / Driver Updates
+; @desc       Disable optional updates
+; @ref        https://github.com/Aetherinox/pause-windows-updates/issues/18
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\current\device\Update]
+"ExcludeWUDriversInQualityUpdate"=dword:00000000
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\default\Update]
+"ExcludeWUDriversInQualityUpdate"=dword:00000000
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings]
+"ExcludeWUDriversInQualityUpdate"=dword:00000000
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate]
+"ExcludeWUDriversInQualityUpdate"=dword:00000000
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\default\Update\ExcludeWUDriversInQualityUpdate]
+"value"=dword:00000000

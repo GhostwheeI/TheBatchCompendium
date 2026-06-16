@@ -1,0 +1,7 @@
+{
+  "repository": "AliceDzindzik/menu-do-suporte",
+  "url": "https://github.com/AliceDzindzik/menu-do-suporte",
+  "last_updated": "2026-06-15T23:06:58.980290",
+  "stars": "57",
+  "description": "Script batch (.bat) interativo para otimizar suporte t\u00e9cnico no Windows, automatizando rein\u00edcio do sistema, limpeza de tempor\u00e1rios, diagn\u00f3stico de rede, corre\u00e7\u00e3o de erros comuns de impress\u00e3o e ajustes de compartilhamento entre Windows 10 e 11 via PowerShell, aumentando a efici\u00eancia e reduzindo erros humanos."
+}

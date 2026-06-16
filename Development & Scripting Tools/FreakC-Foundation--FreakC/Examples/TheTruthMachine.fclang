@@ -1,0 +1,13 @@
+change_title[] The truth machine
+
+inp[] inp=
+
+if[] %inp% == 0 (
+	print[] 0
+) el[] if[] %inp% == 1 (
+	label[] loop
+	print[] %inp%
+	goto[] loop
+)
+
+inf_loop[]

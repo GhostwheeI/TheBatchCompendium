@@ -1,0 +1,83 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Control Panel\Desktop]
+;Binary sets (5) of "UserPreferencesMask"
+;     9   ?+0    ?+1 ?+2       0  ?+3       8     0       1  ?+0
+;1001ABC0 00D1EF10 00000G11 10000000 000100H0
+; (A) Smooth-scroll list boxes = 1
+; (B) Slide open combo boxes  = 1
+; (C) Fade or slide menus into view = 0
+; (D) Show shadows under mouse pointer = 0
+; (E) Fade or slide ToolTips into view = 0
+; (F) Fade out menu items after clicking = 0
+; (G) Show shadows under windows = 0
+; (H) Animate controls and elements inside windows = 1
+;
+;10011100 00010010 00000011 10000000 00010000
+;           9C            12            03             80            12
+"UserPreferencesMask"=hex:9c,12,03,80,12,00,00,00
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Control Panel\Desktop\WindowMetrics]
+"MinAnimate"="0"
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+"TaskbarAnimations"=dword:00000000
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects]
+"VisualFXSetting"=dword:00000003
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\AnimateMinMax]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ComboBoxAnimation]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ControlAnimations]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\CursorShadow]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DragFullWindows]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DropShadow]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DWMAeroPeekEnabled]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DWMEnabled]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DWMSaveThumbnailEnabled]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\FontSmoothing]
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListBoxSmoothScrolling]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewAlphaSelect]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewShadow]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\MenuAnimation]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\SelectionFade]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\TaskbarAnimations]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\Themes]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ThumbnailsOrIcon]
+"DefaultApplied"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\tmp_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\TooltipAnimation]
+"DefaultApplied"=dword:00000001

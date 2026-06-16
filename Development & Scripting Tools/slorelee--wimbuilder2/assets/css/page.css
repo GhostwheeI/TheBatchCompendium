@@ -1,0 +1,45 @@
+.content_page {
+    padding: 1rem 0px 0px 1rem;
+}
+
+.pre-button, .next-button {
+  margin-top: 1rem;
+  background-color:#c23501;
+  color:#fff;
+}
+
+.next-button {
+  background-color:#0078e7;
+}
+
+div.tab {
+display:none;
+}
+
+div.tab-active {
+display:block;
+}
+
+.project-button {
+    min-width: 14rem;
+    margin-bottom: 5px;
+}
+
+.project-selected {
+    background-color: red;
+    color: #fff;
+}
+
+#build_stdout {
+    height: 20em;
+    width: 95%;
+    background-color: #000000;
+    color: #fff;
+}
+
+#adv_cmdtext {
+    height: 24em;
+    width: 95%;
+    background-color: #000000;
+    color: #fff;
+}

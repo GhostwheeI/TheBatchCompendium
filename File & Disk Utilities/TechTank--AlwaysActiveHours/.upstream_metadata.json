@@ -1,0 +1,7 @@
+{
+  "repository": "TechTank/AlwaysActiveHours",
+  "url": "https://github.com/TechTank/AlwaysActiveHours",
+  "last_updated": "2026-06-15T23:06:15.940879",
+  "stars": "79",
+  "description": "A tool, written as a batch file, used to shift your PC's active hour configuration to prevent Windows from shutting down automatically after installing updates."
+}

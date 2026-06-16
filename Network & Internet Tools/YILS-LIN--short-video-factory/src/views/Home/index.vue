@@ -1,0 +1,345 @@
+<template>
+  <div class="w-full h-full flex flex-col">
+    <div
+      class="w-full h-[40px] relative border-b"
+      :class="isMac ? 'title-bar' : 'window-drag'"
+      @mousedown="handleTitleBarMouseDown"
+      @dblclick="handleTitleBarDoubleClick"
+    >
+      <div class="window-control-bar-no-drag-mask" @mousedown.stop @dblclick.stop></div>
+    </div>
+
+    <div class="w-full h-0 flex-1 flex box-border gap-2 py-2 px-3">
+      <div class="w-1/3 h-full">
+        <TextGenerate
+          ref="TextGenerateInstance"
+          :disabled="appStore.renderStatus === RenderStatus.GenerateText"
+        />
+      </div>
+      <div class="w-1/3 h-full">
+        <VideoManage
+          ref="VideoManageInstance"
+          :disabled="appStore.renderStatus === RenderStatus.SegmentVideo"
+        />
+      </div>
+      <div class="w-1/3 h-full min-w-0 min-h-0 flex flex-col gap-3">
+        <div class="h-0 flex-1 min-h-0">
+          <TtsControl
+            ref="TtsControlInstance"
+            :disabled="appStore.renderStatus === RenderStatus.SynthesizedSpeech"
+          />
+        </div>
+        <VideoRender
+          class="shrink-0"
+          @render-video="handleRenderVideo"
+          @cancel-render="handleCancelRender"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import TextGenerate from './components/TextGenerate.vue'
+import VideoManage from './components/VideoManage.vue'
+import TtsControl from './components/TtsControl.vue'
+import VideoRender from './components/VideoRender.vue'
+
+import { h, onBeforeUnmount, ref } from 'vue'
+import { RenderStatus, useAppStore } from '@/store'
+import { useTranslation } from 'i18next-vue'
+import { useToast } from 'vue-toastification'
+import type { ListFilesFromFolderRecord } from '~/electron/types'
+import ActionToastEmbed from '@/components/ActionToastEmbed.vue'
+import random from 'random'
+import { formatErrorForCopy } from '@/lib/error-copy'
+
+const toast = useToast()
+const appStore = useAppStore()
+const { t } = useTranslation()
+const isMac = window.electron.platform === 'darwin'
+
+const buildStatPayload = (title: string) => ({
+  title,
+  language: navigator.language,
+  screen: `${window.screen.width}x${window.screen.height}`,
+  userAgent: navigator.userAgent,
+})
+
+const trackStat = (title: string) => {
+  window.electron.statTrack(buildStatPayload(title)).catch(() => {})
+}
+
+let dragState: {
+  startMouseX: number
+  startMouseY: number
+  startClientX: number
+  startWindowX: number
+  startWindowY: number
+  dragging: boolean
+  preparing: boolean
+} | null = null
+
+const clearTitleBarDragListeners = () => {
+  window.removeEventListener('mousemove', handleTitleBarMouseMove)
+  window.removeEventListener('mouseup', handleTitleBarMouseUp)
+}
+
+const handleTitleBarMouseMove = async (event: MouseEvent) => {
+  if (!isMac || !dragState) return
+
+  const deltaX = event.screenX - dragState.startMouseX
+  const deltaY = event.screenY - dragState.startMouseY
+  if (!dragState.dragging && Math.hypot(deltaX, deltaY) < 2) return
+
+  if (!dragState.dragging) {
+    if (dragState.preparing) return
+    dragState.preparing = true
+
+    const dragInfo = await window.electron.prepareWindowDrag()
+    if (!dragState || !dragInfo) return
+
+    let initialX = dragInfo.bounds.x
+    let initialY = dragInfo.bounds.y
+    if (dragInfo.wasMaximized) {
+      const pointerRatio = dragState.startClientX / window.innerWidth
+      initialX = event.screenX - dragInfo.bounds.width * pointerRatio
+      initialY = Math.max(0, event.screenY - 20)
+      window.electron.setWindowPosition(initialX, initialY)
+    }
+
+    dragState.startMouseX = event.screenX
+    dragState.startMouseY = event.screenY
+    dragState.startWindowX = initialX
+    dragState.startWindowY = initialY
+  }
+
+  dragState.dragging = true
+  window.electron.setWindowPosition(
+    dragState.startWindowX + event.screenX - dragState.startMouseX,
+    dragState.startWindowY + event.screenY - dragState.startMouseY,
+  )
+}
+
+const handleTitleBarMouseUp = () => {
+  dragState = null
+  clearTitleBarDragListeners()
+}
+
+const handleTitleBarMouseDown = async (event: MouseEvent) => {
+  if (!isMac) return
+  if (event.button !== 0 || event.detail > 1) return
+
+  const bounds = await window.electron.getWindowBounds()
+  if (!bounds) return
+
+  dragState = {
+    startMouseX: event.screenX,
+    startMouseY: event.screenY,
+    startClientX: event.clientX,
+    startWindowX: bounds.x,
+    startWindowY: bounds.y,
+    dragging: false,
+    preparing: false,
+  }
+  clearTitleBarDragListeners()
+  window.addEventListener('mousemove', handleTitleBarMouseMove)
+  window.addEventListener('mouseup', handleTitleBarMouseUp)
+}
+
+const handleTitleBarDoubleClick = () => {
+  if (!isMac) return
+  dragState = null
+  clearTitleBarDragListeners()
+  window.electron.toggleWindowMaximize()
+}
+
+onBeforeUnmount(() => {
+  clearTitleBarDragListeners()
+})
+
+// 渲染合成视频
+const TextGenerateInstance = ref<InstanceType<typeof TextGenerate> | null>()
+const VideoManageInstance = ref<InstanceType<typeof VideoManage> | null>()
+const TtsControlInstance = ref<InstanceType<typeof TtsControl> | null>()
+const handleRenderVideo = async () => {
+  if (!appStore.renderConfig.outputFileName) {
+    toast.warning(t('features.render.errors.outputFileNameRequired'))
+    return
+  }
+  if (!appStore.renderConfig.outputPath) {
+    toast.warning(t('features.render.errors.outputPathRequired'))
+    return
+  }
+  if (!appStore.renderConfig.outputSize?.width || !appStore.renderConfig.outputSize?.height) {
+    toast.warning(t('features.render.errors.outputSizeRequired'))
+    return
+  }
+
+  let randomBgm: ListFilesFromFolderRecord | undefined = undefined
+  if (appStore.renderConfig.bgmPath) {
+    try {
+      const bgmList = (
+        await window.electron.listFilesFromFolder({
+          folderPath: appStore.renderConfig.bgmPath.replace(/\\/g, '/'),
+        })
+      ).filter((asset) => asset.name.toLowerCase().endsWith('.mp3'))
+      console.log('获取到的背景音乐列表', bgmList)
+      if (bgmList.length > 0) {
+        randomBgm = random.choice(bgmList)
+        console.log('随机选取的背景音乐', randomBgm)
+      }
+    } catch (error: any) {
+      console.log('获取背景音乐列表失败', error)
+      const errorMessage = error?.error?.message || error?.message || error
+      toast.error({
+        component: {
+          // 使用vnode方式创建自定义错误弹窗实例，以获得良好的类型提示
+          render: () =>
+            h(ActionToastEmbed, {
+              message: t('features.render.errors.bgmListFailed'),
+              detail: String(errorMessage),
+              actionText: t('common.buttons.copyErrorDetail'),
+              onActionTirgger: () => {
+                navigator.clipboard.writeText(
+                  formatErrorForCopy(
+                    t('features.render.errors.bgmListFailed'),
+                    String(errorMessage),
+                  ),
+                )
+                toast.success(t('common.messages.success.copySuccess'))
+              },
+            }),
+        },
+      })
+      return
+    }
+  }
+
+  try {
+    trackStat('开始渲染视频')
+
+    // 获取文案
+    appStore.updateRenderStatus(RenderStatus.GenerateText)
+    const text =
+      TextGenerateInstance.value?.getCurrentOutputText() ||
+      (await TextGenerateInstance.value?.handleGenerate())!
+
+    // TTS合成语音
+    // @ts-ignore
+    if (appStore.renderStatus !== RenderStatus.GenerateText) {
+      return
+    }
+    appStore.updateRenderStatus(RenderStatus.SynthesizedSpeech)
+    const ttsResult = await TtsControlInstance.value?.synthesizedSpeechToFile({
+      text,
+      withCaption: true,
+    })
+    if (ttsResult?.duration === undefined) {
+      throw new Error(t('features.tts.errors.fileCorrupt'))
+    }
+    if (ttsResult?.duration === 0) {
+      throw new Error(t('features.tts.errors.zeroDuration'))
+    }
+
+    // 获取视频片段
+    // @ts-ignore
+    if (appStore.renderStatus !== RenderStatus.SynthesizedSpeech) {
+      return
+    }
+    appStore.updateRenderStatus(RenderStatus.SegmentVideo)
+    const videoSegments = await VideoManageInstance.value?.getVideoSegments({
+      duration: ttsResult.duration,
+    })!
+    await new Promise((resolve) => setTimeout(resolve, random.integer(1000, 3000)))
+
+    // 合成视频
+    // @ts-ignore
+    if (appStore.renderStatus !== RenderStatus.SegmentVideo) {
+      return
+    }
+    appStore.updateRenderStatus(RenderStatus.Rendering)
+    await window.electron.renderVideo({
+      ...videoSegments,
+      audioFiles: {
+        bgm: randomBgm?.path,
+      },
+      outputSize: {
+        width: appStore.renderConfig.outputSize.width,
+        height: appStore.renderConfig.outputSize.height,
+      },
+      outputDuration: String(ttsResult.duration),
+      outputPath:
+        appStore.renderConfig.outputPath.replace(/\\/g, '/') +
+        '/' +
+        appStore.renderConfig.outputFileName +
+        appStore.renderConfig.outputFileExt,
+    })
+
+    toast.success(t('features.render.success.succeeded'))
+    trackStat('视频渲染成功')
+    appStore.updateRenderStatus(RenderStatus.Completed)
+
+    if (appStore.autoBatch) {
+      toast.info(t('features.render.info.batchNext'))
+      TextGenerateInstance.value?.clearOutputText()
+      handleRenderVideo()
+    }
+  } catch (error: any) {
+    console.error('视频合成失败:', error)
+    trackStat('视频渲染失败')
+    if (appStore.renderStatus === RenderStatus.None) return
+    const errorMessage = error?.error?.message || error?.message || error
+    toast.error({
+      component: {
+        // 使用vnode方式创建自定义错误弹窗实例，以获得良好的类型提示
+        render: () =>
+          h(ActionToastEmbed, {
+            message: t('features.render.errors.failed'),
+            detail: String(errorMessage),
+            actionText: t('common.buttons.copyErrorDetail'),
+            onActionTirgger: () => {
+              navigator.clipboard.writeText(
+                formatErrorForCopy(t('features.render.errors.failed'), String(errorMessage)),
+              )
+              toast.success(t('common.messages.success.copySuccess'))
+            },
+          }),
+      },
+    })
+    appStore.updateRenderStatus(RenderStatus.Failed)
+  }
+}
+const handleCancelRender = () => {
+  console.log('视频合成终止')
+  if (appStore.renderStatus !== RenderStatus.None) {
+    trackStat('视频渲染取消')
+  }
+  switch (appStore.renderStatus) {
+    case RenderStatus.GenerateText:
+      TextGenerateInstance.value?.handleStopGenerate()
+      break
+
+    case RenderStatus.SynthesizedSpeech:
+      break
+
+    case RenderStatus.SegmentVideo:
+      break
+
+    case RenderStatus.Rendering:
+      window.ipcRenderer.send('cancel-render-video')
+      break
+
+    default:
+      break
+  }
+  appStore.updateRenderStatus(RenderStatus.None)
+  toast.info(t('features.render.info.canceled'))
+}
+</script>
+
+<style lang="scss" scoped>
+.title-bar {
+  user-select: none;
+}
+</style>

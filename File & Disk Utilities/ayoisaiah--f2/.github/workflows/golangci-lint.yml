@@ -1,0 +1,38 @@
+name: Lint code
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Load .env file
+        run: grep -v '^#' .env | sed 's/"//g' >> $GITHUB_ENV
+
+      - name: Setup Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            go.sum
+            tools.sum
+
+      - name: Install Just
+        uses: taiki-e/install-action@just
+
+      - name: golangci-lint
+        run: just lint

@@ -1,66 +1,140 @@
-# AlwaysActiveHours
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/07f95c28-ddda-483d-90f1-4b17dc89133a" alt="logo">
+</p>
 
-**Owner:** [TechTank](https://github.com/TechTank)  
-**Repository:** [TechTank/AlwaysActiveHours](https://github.com/TechTank/AlwaysActiveHours)  
-**Stars:** 79 ⭐  
-**Language:** Batchfile  
-**Category:** File & Disk Utilities
+## Overview
 
-## Description
+**Always Active Hours.bat** is a self-contained Windows batch script that manages and continually adjusts your **Windows Active Hours** and related update behaviour. Its goal is simple:
+<br>
+<p align="center">
+<strong>Reduce the chance of Windows Update restarting your PC while you are actively using it.</strong>
+</p>
+<br>
 
-A tool, written as a batch file, used to shift your PC's active hour configuration to prevent Windows from shutting down automatically after installing updates.
+The script:
 
-## 🔗 Links
+- Keeps your system safely inside Windows’ allowed **Active Hours** window.
+- Shifts Active Hours as time passes so you remain near the **middle** of the allowed span.
+- Sets and maintains update/restart policies via the Registry and Task Scheduler.
+- Offers optional controls for update deadlines and restart behaviour on supported editions of Windows.
+- Installs and removes itself cleanly with no external dependencies.
+<br>
+Everything is implemented in a single `.bat` file using built-in Windows commands and registry edits.
 
-- **GitHub Repository:** [https://github.com/TechTank/AlwaysActiveHours](https://github.com/TechTank/AlwaysActiveHours)
-- **Owner Profile:** [https://github.com/TechTank](https://github.com/TechTank)
+No services, no extra executables, no third-party tools.
 
-## 📊 Repository Stats
+<br>
 
-- **Stars:** 79
-- **Primary Language:** Batchfile
-- **Category:** File & Disk Utilities
+## How It Works
 
-## 📝 About This Repository
+### Execution Modes
 
-This repository is part of [The Batch Compendium](https://github.com/YourUsername/TheBatchCompendium) - a comprehensive collection of Windows batch scripts and tools.
+<br>
 
-### Why This Repository?
+**Interactive Mode:**
 
-- ✅ **High Quality:** 79 stars indicate community trust
-- ✅ **Active Project:** Well-maintained and documented
-- ✅ **Batch Scripts:** Contains useful Windows batch files
-- ✅ **Open Source:** Free to use and learn from
+When run manually, the script displays an interactive console menu that allows you to:
 
-## 🚀 Quick Start
+- Enable or disable the scheduled task
+- Shift Active Hours immediately
+- Toggle reboot protection policies
+- Configure or clear aggressive update delays
+- View pending reboot conditions
 
-1. Visit the [original repository](https://github.com/TechTank/AlwaysActiveHours)
-2. Read the project's documentation
-3. Clone or download the scripts you need
-4. Follow the repository's installation instructions
+<br>
 
-## ⚠️ Important Notes
+**Scheduled Task Mode:**
 
-- Always review batch scripts before running them
-- Test scripts in a safe environment first
-- Check for any prerequisites or dependencies
-- Respect the repository's license terms
+When run with the `/task` parameter (used by the scheduled task), the script operates silently and automatically shifts active hours without any user interaction.
 
-## 📄 License
+<br>
 
-This repository follows the license terms of the original project. Please check the [original repository](https://github.com/TechTank/AlwaysActiveHours) for specific license information.
+**Command Line Switches:**
+```
+Always Active Hours.bat                  :: Interactive menu (default)
+Always Active Hours.bat /install         :: Install script + scheduled task, then exit
+Always Active Hours.bat /enable          :: Alias for /install
 
-## 🤝 Contributing
+Always Active Hours.bat /uninstall       :: Remove scheduled task + installed copy
+Always Active Hours.bat /disable         :: Alias for /uninstall
 
-To contribute to the original project:
-1. Visit [https://github.com/TechTank/AlwaysActiveHours](https://github.com/TechTank/AlwaysActiveHours)
-2. Read their contributing guidelines
-3. Fork, modify, and submit pull requests to their repository
+Always Active Hours.bat /task            :: Scheduled task mode (silent, no UI)
+Always Active Hours.bat /q               :: Quiet mode; shift Active Hours, then exit
+Always Active Hours.bat /quiet           :: Alias for /q
+```
+
+<br>
+
+## Installation & Removal
+
+### Enabling the Task
+
+When enabled, the script:
+
+1. Copies itself to: `%ProgramData%\AlwaysActiveHours\Always Active Hours.bat`
+2. Assigns secure SYSTEM-level permissions to the installation directory.
+3. Creates a hidden scheduled task that runs:
+  - At system startup
+  - Once per hour
+  - On specific power-related system events
+
+From this point on, Active Hours are maintained automatically in the background.
 
 ---
 
-**Discovered:** 2026-06-15  
-**Added to Collection:** Automated discovery system  
-**Last Updated:** 2026-06-15 11:13:35 UTC
+### Disabling the Task
 
-*This README was automatically generated by The Batch Compendium discovery system.*
+When disabled, the script:
+
+- Removes the scheduled task
+- Deletes the installed copy of the script
+- Removes the installation directory if it is empty
+- Restores any temporary permission changes
+
+No files are left behind.
+
+<br>
+
+## Active Hours Adjustment
+
+Each automatic or manual shift performs the following steps:
+
+- Reads the current Active Hours values from the registry.
+- Reads the system’s configured Active Hours maximum range.
+- Calculates a new range centred around the current system time.
+- Writes the following values back to the registry:
+  - `ActiveHoursStart`
+  - `ActiveHoursEnd`
+  - `UserChoiceActiveHoursStart`
+  - `UserChoiceActiveHoursEnd`
+- Forces `SmartActiveHoursState = 0` to prevent Windows from overriding the values automatically.
+
+The result is a continuously sliding Active Hours window that keeps your active time safely inside the allowed reboot-free period.
+
+<br>
+
+## System Requirements
+
+- Windows 10 or Windows 11
+- Administrator privileges are required for:
+- Task Scheduler access
+- Registry modification
+- Installation under `%ProgramData%`
+
+> Note: On domain-managed or heavily policy-restricted systems, Group Policy may override some settings.
+
+<br>
+
+## Transparency & Safety
+
+- No background services are installed.
+- No network access is used.
+- All configuration changes are limited to documented Windows Update and Active Hours registry keys.
+- The entire script is plain text and fully auditable.
+- A built-in self-repair routine automatically corrects line-ending corruption if the file is edited incorrectly.
+
+<br>
+
+## Author
+
+Created by [Brogan Scott Houston McIntyre (TechTank)](https://github.com/TechTank)

@@ -1,0 +1,16 @@
+# Directory from Git repositories
+- .git/
+# Windows thumbnail cache
+- [tT]humbs.db
+# Windows custom folders
+- [dD]esktop.ini
+# Mac OS custom folders
+- .DS_Store
+# Windows Media Player Album Art
+- AlbumArt*.jpg
+# rclone log file
+- rclone-*-log.txt
+# Cemu emulator
+- cemu/shaderCache/precompiled/*
+- cemu/mlc01/usr/title/*/
+- cemu/log.txt

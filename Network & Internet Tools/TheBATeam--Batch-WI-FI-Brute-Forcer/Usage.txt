@@ -1,0 +1,16 @@
+[Commands]
+
+ - help             : Displays this page
+ - wordlist         : Provide a wordlist file     
+ - scan             : Performs a WI-FI scan       
+ - interface        : Open Interface Management   
+ - attack           : Attacks selected WI-FI      
+ - counter          : Sets the attack counter     
+ - exit             : Close the program
+
+[Example Usage]
+
+1. An interface is detected if there is only one; otherwise, pick an interface
+2. Scan for networks with "scan" command.
+3. Attack the selected network with "attack" command.
+

@@ -1,0 +1,17 @@
+change_title[] Odd or Even checker
+
+clrscr[]
+
+inp[] inp=
+
+eq[] ans=%inp% %% 2
+
+if[] %ans% == 0 (
+	print[] Is even
+) el[] (
+	print[] Is odd
+)
+
+stop[]
+
+inf_loop[]

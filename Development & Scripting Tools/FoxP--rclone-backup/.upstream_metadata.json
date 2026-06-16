@@ -1,0 +1,7 @@
+{
+  "repository": "FoxP/rclone-backup",
+  "url": "https://github.com/FoxP/rclone-backup",
+  "last_updated": "2026-06-15T23:07:00.549855",
+  "stars": "56",
+  "description": "Just my rclone Windows batch scripts to backup / sync the second hard drive of my computer to pCloud (encrypted)."
+}

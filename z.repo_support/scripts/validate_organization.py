@@ -32,14 +32,14 @@ validation_errors = []
 validation_success = []
 
 for repo in new_repos:
-    repo_name = repo.get('name', '').replace('/', '_').replace('\\', '_')
+    repo_name = repo.get('name', '').replace('/', '--').replace('\\', '--')
     category = repo.get('category', 'Uncategorized')
 
     if not repo_name:
         continue
 
     # Check directory structure
-    category_dir = base_path / category.replace(' & ', '_').replace(' ', '_')
+    category_dir = base_path / category
     repo_dir = category_dir / repo_name
     readme_path = repo_dir / 'README.md'
 

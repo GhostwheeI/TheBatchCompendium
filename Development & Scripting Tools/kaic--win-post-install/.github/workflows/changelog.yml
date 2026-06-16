@@ -1,0 +1,76 @@
+name: Update Changelog
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Generate changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Get all commits with email and hash in descending order (newest first), excluding changelog bot commits
+          git log --pretty=format:'%ad|%s|%an|%ae|%H' --date=short | grep -v '\[skip ci\]' > /tmp/commits.txt
+
+          # Generate changelog content grouped by date
+          echo "" > /tmp/changelog_content.md
+          current_date=""
+
+          while IFS='|' read -r date message author email commit_hash; do
+            if [ "$date" != "$current_date" ]; then
+              if [ -n "$current_date" ]; then
+                echo "" >> /tmp/changelog_content.md
+              fi
+              echo "### $date" >> /tmp/changelog_content.md
+              echo "" >> /tmp/changelog_content.md
+              current_date="$date"
+            fi
+
+            # Get GitHub username from commit using gh CLI (has higher rate limits)
+            github_user=$(gh api "/repos/kaic/win-post-install/commits/${commit_hash}" --jq '.author.login' 2>/dev/null || echo "")
+
+            if [ -n "$github_user" ] && [ "$github_user" != "null" ]; then
+              author_link="[@${author}](https://github.com/${github_user})"
+            else
+              author_link="@${author}"
+            fi
+
+            # Check if message is a merge commit (contains PR number)
+            if [[ "$message" =~ Merge\ pull\ request\ \#([0-9]+) ]] || [[ "$message" =~ \(#([0-9]+)\)$ ]]; then
+              pr_number="${BASH_REMATCH[1]}"
+              pr_link="[#${pr_number}](https://github.com/kaic/win-post-install/pull/${pr_number})"
+              # Replace both formats: "Merge pull request #123" or "(#123)" at end
+              message=$(echo "$message" | sed "s|Merge pull request #${pr_number}|${pr_link}|" | sed "s|(#${pr_number})$|(${pr_link})|")
+            fi
+
+            echo "- $message (${author_link})" >> /tmp/changelog_content.md
+          done < /tmp/commits.txt
+
+          # Update CHANGELOG.md between markers
+          head -n $(grep -n "CHANGELOG_START" CHANGELOG.md | cut -d: -f1) CHANGELOG.md > /tmp/changelog_new.md
+          echo "" >> /tmp/changelog_new.md
+          cat /tmp/changelog_content.md >> /tmp/changelog_new.md
+          echo "" >> /tmp/changelog_new.md
+          tail -n +$(grep -n "CHANGELOG_END" CHANGELOG.md | cut -d: -f1) CHANGELOG.md >> /tmp/changelog_new.md
+
+          mv /tmp/changelog_new.md CHANGELOG.md
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --staged --quiet || git commit -m "docs: update changelog [skip ci]"
+          git push

@@ -1,0 +1,709 @@
+@import "tailwindcss";
+
+/* ================================================== */
+/* Windows 95 / Paint - FLAT MINIMAL THEME           */
+/* No gradients • 1px borders • Monochrome • Retro   */
+/* ================================================== */
+
+:root {
+  /* Win95 Flat Color Palette - No gradients! */
+  --win95-white: #FFFFFF;
+  --win95-light-gray: #E5E5E5;
+  --win95-medium-gray: #C0C0C0;
+  --win95-dark-gray: #7A7A7A;
+  --win95-black: #000000;
+  --win95-text-inverse: #FFFFFF;
+
+  /* Accent Colors - Flat */
+  --win95-blue: #000080;
+  --win95-green: #00AA00;
+  --win95-red: #CC0000;
+  --win95-yellow: #E0C000;
+
+  /* Typography */
+  --win95-font: 'MS Sans Serif', 'Tahoma', 'Arial', sans-serif;
+  --win95-font-size: 11px;
+
+  /* Legacy XP/Win98 variables - mapped to Win95 for compatibility */
+  --xp-window-bg: #E5E5E5;
+  --xp-text-black: #000000;
+  --xp-text-white: #FFFFFF;
+  --win98-gray-light: #E5E5E5;
+  --win98-gray-medium: #7A7A7A;
+  --win98-gray-dark: #7A7A7A;
+  --win98-blue-dark: #000080;
+  --win98-black: #000000;
+}
+
+/* ================================================== */
+/* GLOBAL RESET                                       */
+/* ================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--win95-medium-gray);
+  font-family: var(--win95-font);
+  font-size: var(--win95-font-size);
+  color: var(--win95-black);
+  overflow-x: hidden;
+  line-height: 1.3;
+}
+
+/* ================================================== */
+/* WINDOW CONTAINER - FLAT                            */
+/* ================================================== */
+
+.win95-window,
+.xp-window {
+  background-color: var(--win95-light-gray);
+  border: 1px solid var(--win95-black);
+  border-radius: 0; /* NO BORDER RADIUS - FLAT! */
+  box-shadow: none; /* NO SHADOWS - FLAT! */
+  overflow: hidden;
+}
+
+/* ================================================== */
+/* TITLE BAR - FLAT                                   */
+/* ================================================== */
+
+.win95-title-bar,
+.xp-title-bar {
+  height: 20px;
+  background-color: var(--win95-blue); /* FLAT COLOR - NO GRADIENT */
+  color: var(--win95-text-inverse);
+  font-weight: bold;
+  font-size: var(--win95-font-size);
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  border-bottom: 1px solid var(--win95-black);
+}
+
+.win95-title-bar-inactive,
+.xp-title-bar-inactive {
+  background-color: var(--win95-dark-gray); /* FLAT - NO GRADIENT */
+  color: var(--win95-light-gray);
+}
+
+/* Title Bar Icon */
+.win95-title-icon,
+.xp-title-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  filter: grayscale(100%); /* MONOCHROME */
+}
+
+/* ================================================== */
+/* TITLE BAR BUTTONS - FLAT SQUARES                   */
+/* ================================================== */
+
+.win95-title-buttons,
+.xp-title-buttons {
+  display: flex;
+  gap: 2px;
+}
+
+.win95-title-button,
+.xp-title-button {
+  width: 14px;
+  height: 14px;
+  border-radius: 0; /* SQUARE - NO RADIUS */
+  border: 1px solid var(--win95-black);
+  background-color: var(--win95-medium-gray); /* FLAT - NO GRADIENT */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: bold;
+  color: var(--win95-black);
+  transition: none; /* NO TRANSITIONS - INSTANT */
+}
+
+.win95-title-button-minimize,
+.win95-title-button-maximize,
+.xp-title-button-minimize,
+.xp-title-button-maximize {
+  background-color: var(--win95-medium-gray);
+}
+
+.win95-title-button-close,
+.xp-title-button-close {
+  background-color: var(--win95-medium-gray); /* Same as others - minimal */
+}
+
+.win95-title-button:hover,
+.xp-title-button:hover {
+  background-color: var(--win95-white); /* FLAT INVERT */
+  filter: none;
+}
+
+.win95-title-button:active,
+.xp-title-button:active {
+  background-color: var(--win95-dark-gray); /* FLAT PRESSED */
+  filter: none;
+  transform: translateY(1px);
+}
+
+/* ================================================== */
+/* BUTTONS - FLAT SQUARES                             */
+/* ================================================== */
+
+.win95-button,
+.xp-button {
+  min-width: 75px;
+  height: 20px;
+  padding: 0 8px;
+  background-color: var(--win95-medium-gray); /* FLAT - NO GRADIENT */
+  border: 1px solid var(--win95-black);
+  border-radius: 0; /* SQUARE - NO RADIUS */
+  box-shadow: none; /* NO SHADOWS */
+  font-family: var(--win95-font);
+  font-size: var(--win95-font-size);
+  color: var(--win95-black);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  transition: none;
+}
+
+.win95-button:hover:not(:disabled),
+.xp-button:hover:not(:disabled) {
+  background-color: var(--win95-dark-gray);
+  color: var(--win95-text-inverse);
+  border-color: var(--win95-black);
+}
+
+.win95-button:active:not(:disabled),
+.xp-button:active:not(:disabled) {
+  background-color: var(--win95-dark-gray);
+  color: var(--win95-text-inverse);
+  transform: translateY(1px); /* PRESSED OFFSET */
+}
+
+.win95-button:disabled,
+.xp-button:disabled {
+  color: var(--win95-dark-gray);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ================================================== */
+/* PRIMARY BUTTON (Blue) - FLAT                       */
+/* ================================================== */
+
+.win95-button-primary,
+.xp-button-primary {
+  background-color: var(--win95-blue); /* FLAT BLUE */
+  color: var(--win95-text-inverse);
+  font-weight: bold;
+  border-color: var(--win95-black);
+}
+
+.win95-button-primary:hover:not(:disabled),
+.xp-button-primary:hover:not(:disabled) {
+  background-color: #000060; /* Darker blue */
+}
+
+.win95-button-primary:active:not(:disabled),
+.xp-button-primary:active:not(:disabled) {
+  background-color: #000060; /* Darker blue */
+  transform: translateY(1px);
+}
+
+/* ================================================== */
+/* DANGER BUTTON - FLAT                               */
+/* ================================================== */
+
+.win95-button-danger,
+.xp-button-danger {
+  background-color: var(--win95-red); /* FLAT RED */
+  color: var(--win95-text-inverse);
+  font-weight: bold;
+  border-color: var(--win95-black);
+}
+
+.win95-button-danger:hover:not(:disabled),
+.xp-button-danger:hover:not(:disabled) {
+  background-color: #990000; /* Darker red */
+}
+
+.win95-button-danger:active:not(:disabled),
+.xp-button-danger:active:not(:disabled) {
+  background-color: #990000;
+  transform: translateY(1px);
+}
+
+/* ================================================== */
+/* INPUTS - FLAT                                      */
+/* ================================================== */
+
+.win95-input,
+.xp-input {
+  background-color: var(--win95-white);
+  border: 1px solid var(--win95-black);
+  border-radius: 0; /* SQUARE */
+  font-family: var(--win95-font);
+  font-size: var(--win95-font-size);
+  padding: 2px 4px;
+  color: var(--win95-black);
+  transition: none;
+  box-shadow: none;
+}
+
+.win95-input:focus,
+.xp-input:focus {
+  outline: 1px dotted var(--win95-black);
+  outline-offset: -2px;
+  border-color: var(--win95-black);
+  box-shadow: none;
+}
+
+/* ================================================== */
+/* CHECKBOX - FLAT MINIMAL                            */
+/* ================================================== */
+
+.win95-checkbox,
+.xp-checkbox {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background-color: var(--win95-white);
+  border: 1px solid var(--win95-black);
+  border-radius: 0; /* SQUARE */
+  cursor: pointer;
+  position: relative;
+  transition: none;
+}
+
+.win95-checkbox:hover,
+.xp-checkbox:hover {
+  background-color: var(--win95-light-gray);
+}
+
+.win95-checkbox:checked,
+.xp-checkbox:checked {
+  background-color: var(--win95-white);
+  border-color: var(--win95-black);
+}
+
+.win95-checkbox:checked::after,
+.xp-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -3px;
+  left: 0px;
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--win95-black);
+}
+
+.win95-checkbox:focus,
+.xp-checkbox:focus {
+  outline: 1px dotted var(--win95-black);
+  outline-offset: 2px;
+}
+
+/* ================================================== */
+/* PANELS - FLAT                                      */
+/* ================================================== */
+
+.win95-inset,
+.xp-inset {
+  border: 1px solid var(--win95-black);
+  border-radius: 0;
+  background-color: var(--win95-white);
+  box-shadow: none; /* NO SHADOWS */
+}
+
+.win95-raised,
+.xp-raised {
+  border: 1px solid var(--win95-black);
+  border-radius: 0;
+  background-color: var(--win95-medium-gray);
+  box-shadow: none;
+}
+
+/* ================================================== */
+/* SELECTION HIGHLIGHT - FLAT                         */
+/* ================================================== */
+
+.win95-selected,
+.xp-selected {
+  background-color: var(--win95-blue); /* FLAT BLUE */
+  color: var(--win95-text-inverse);
+  border-color: var(--win95-black);
+}
+
+/* ================================================== */
+/* MENU/DROPDOWN - FLAT                               */
+/* ================================================== */
+
+.win95-menu,
+.xp-menu {
+  background-color: var(--win95-medium-gray);
+  border: 1px solid var(--win95-black);
+  border-radius: 0;
+  box-shadow: none; /* NO SHADOWS */
+}
+
+.win95-menu-item,
+.xp-menu-item {
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: none;
+}
+
+.win95-menu-item:hover,
+.xp-menu-item:hover {
+  background-color: var(--win95-blue);
+  color: var(--win95-text-inverse);
+}
+
+/* ================================================== */
+/* SCROLLBAR - FLAT PIXELS                            */
+/* ================================================== */
+
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--win95-medium-gray);
+  border: 1px solid var(--win95-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--win95-white);
+  border: 1px solid var(--win95-black);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--win95-light-gray);
+}
+
+::-webkit-scrollbar-button {
+  background-color: var(--win95-medium-gray);
+  border: 1px solid var(--win95-black);
+  height: 14px;
+  width: 14px;
+}
+
+::-webkit-scrollbar-button:hover {
+  background-color: var(--win95-light-gray);
+}
+
+/* Pixel arrows - monochrome */
+::-webkit-scrollbar-button:vertical:decrement {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M4 2L1 6h6z' fill='%23000'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+::-webkit-scrollbar-button:vertical:increment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M4 6L1 2h6z' fill='%23000'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* ================================================== */
+/* UTILITY CLASSES                                    */
+/* ================================================== */
+
+.win95-text-black { color: var(--win95-black); }
+.win95-text-white { color: var(--win95-text-inverse); }
+.win95-text-gray { color: var(--win95-dark-gray); }
+.win95-bg-window { background-color: var(--win95-light-gray); }
+.win95-bg-white { background-color: var(--win95-white); }
+.win95-bg-gray { background-color: var(--win95-medium-gray); }
+.win95-bg-blue { background-color: var(--win95-blue); }
+
+/* Legacy XP utility classes - mapped to Win95 */
+.xp-text-black { color: var(--win95-black); }
+.xp-text-white { color: var(--win95-text-inverse); }
+.xp-text-gray { color: var(--win95-dark-gray); }
+.xp-bg-window { background-color: var(--win95-light-gray); }
+.xp-bg-white { background-color: var(--win95-white); }
+.xp-bg-blue { background-color: var(--win95-blue); }
+
+/* ================================================== */
+/* SPACING HELPERS                                    */
+/* ================================================== */
+
+.win95-p-1, .xp-p-1 { padding: 4px; }
+.win95-p-2, .xp-p-2 { padding: 8px; }
+.win95-p-3, .xp-p-3 { padding: 12px; }
+.win95-m-1, .xp-m-1 { margin: 4px; }
+.win95-m-2, .xp-m-2 { margin: 8px; }
+.win95-m-3, .xp-m-3 { margin: 12px; }
+.win95-gap-1, .xp-gap-1 { gap: 4px; }
+.win95-gap-2, .xp-gap-2 { gap: 8px; }
+.win95-gap-3, .xp-gap-3 { gap: 12px; }
+
+/* ================================================== */
+/* LEGACY WIN98 CLASSES - ALIAS TO WIN95              */
+/* ================================================== */
+
+.win98-window {
+  background-color: var(--win95-light-gray);
+  border: 1px solid var(--win95-black);
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.win98-button {
+  min-width: 75px;
+  height: 20px;
+  padding: 0 8px;
+  background-color: var(--win95-medium-gray);
+  border: 1px solid var(--win95-black);
+  border-radius: 0;
+  box-shadow: none;
+  font-family: var(--win95-font);
+  font-size: var(--win95-font-size);
+  color: var(--win95-black);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  transition: none;
+}
+
+.win98-button:hover:not(:disabled) {
+  background-color: var(--win95-dark-gray);
+  color: var(--win95-text-inverse);
+  border-color: var(--win95-black);
+}
+
+.win98-button:active:not(:disabled) {
+  background-color: var(--win95-dark-gray);
+  color: var(--win95-text-inverse);
+  transform: translateY(1px);
+}
+
+.win98-button-primary {
+  background-color: var(--win95-blue);
+  color: var(--win95-text-inverse);
+  font-weight: bold;
+  border-color: var(--win95-black);
+}
+
+.win98-button-primary:hover:not(:disabled) {
+  background-color: #000060; /* Darker blue */
+}
+
+.win98-button-danger {
+  background-color: var(--win95-red);
+  color: var(--win95-text-inverse);
+  font-weight: bold;
+  border-color: var(--win95-black);
+}
+
+.win98-button-danger:hover:not(:disabled) {
+  background-color: #990000; /* Darker red */
+}
+
+.win98-checkbox {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background-color: var(--win95-white);
+  border: 1px solid var(--win95-black);
+  border-radius: 0;
+  cursor: pointer;
+  position: relative;
+  transition: none;
+}
+
+.win98-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -3px;
+  left: 0px;
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--win95-black);
+}
+
+.win98-inset {
+  border: 1px solid var(--win95-black);
+  border-radius: 0;
+  background-color: var(--win95-white);
+  box-shadow: none;
+}
+
+.win98-raised {
+  border: 1px solid var(--win95-black);
+  border-radius: 0;
+  background-color: var(--win95-medium-gray);
+  box-shadow: none;
+}
+
+.win98-selected {
+  background-color: var(--win95-blue);
+  color: var(--win95-text-inverse);
+  border-color: var(--win95-black);
+}
+
+/* Category description hover effect */
+.win98-button:hover .category-description {
+  color: #fff !important;
+}
+
+/* Larger action buttons */
+.win98-button-primary,
+.win98-button-danger {
+  font-size: 12px;
+  padding: 6px 12px;
+  min-height: 32px;
+}
+
+/* ================================================== */
+/* ACCESSIBILITY - KEYBOARD FOCUS INDICATORS         */
+/* ================================================== */
+
+/* Focus visible for buttons */
+.win98-button:focus-visible {
+  outline: 2px solid var(--win95-black);
+  outline-offset: 2px;
+}
+
+/* Focus visible for cards */
+[role="button"]:focus-visible {
+  outline: 2px solid var(--win95-black);
+  outline-offset: 2px;
+}
+
+/* Focus visible for inputs */
+input:focus-visible {
+  outline: 2px solid var(--win95-black);
+  outline-offset: 2px;
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--win95-blue);
+  color: var(--win95-text-inverse);
+  padding: 8px;
+  text-decoration: none;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ================================================== */
+/* DARK MODE - WIN95 AESTHETIC                        */
+/* ================================================== */
+
+.dark {
+  /* Dark Win95 Flat Color Palette */
+  --win95-white: #1a1a1a;
+  --win95-light-gray: #2d2d2d;
+  --win95-medium-gray: #3d3d3d;
+  --win95-dark-gray: #a0a0a0;
+  --win95-black: #e0e0e0;
+  --win95-text-inverse: #ffffff;
+
+  /* Accent Colors - Adjusted for dark mode contrast */
+  --win95-blue: #4040c0;
+  --win95-green: #00cc00;
+  --win95-red: #ff4444;
+  --win95-yellow: #ffdd00;
+
+  /* Legacy XP/Win98 variables - dark mode */
+  --xp-window-bg: #2d2d2d;
+  --xp-text-black: #e0e0e0;
+  --xp-text-white: #1a1a1a;
+  --win98-gray-light: #2d2d2d;
+  --win98-gray-medium: #505050;
+  --win98-gray-dark: #a0a0a0;
+  --win98-blue-dark: #4040c0;
+  --win98-black: #e0e0e0;
+  --win98-white: #1a1a1a;
+}
+
+/* Subtle icon outline for dark mode visibility */
+.dark .software-icon svg {
+  filter: drop-shadow(0 0 0.75px rgba(255, 255, 255, 0.6));
+}
+
+/* Dark mode body background */
+.dark body,
+body.dark {
+  background-color: #1a1a1a;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background-color: #2d2d2d;
+  border-color: #505050;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: #505050;
+  border-color: #606060;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: #606060;
+}
+
+.dark ::-webkit-scrollbar-button {
+  background-color: #3d3d3d;
+  border-color: #505050;
+}
+
+/* Dark mode scrollbar arrows */
+.dark ::-webkit-scrollbar-button:vertical:decrement {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M4 2L1 6h6z' fill='%23e0e0e0'/%3E%3C/svg%3E");
+}
+
+.dark ::-webkit-scrollbar-button:vertical:increment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M4 6L1 2h6z' fill='%23e0e0e0'/%3E%3C/svg%3E");
+}
+
+/* ================================================== */
+/* WIN-STYLE DIALOGS                                  */
+/* ================================================== */
+
+.win-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 9999;
+}
+
+.win-dialog {
+  max-width: calc(100vw - 32px);
+}
+
+/* Match button sizing inside dialogs */
+.win-dialog .win98-button {
+  height: auto;
+  min-height: 32px;
+  padding: 6px 12px;
+  font-size: 12px;
+}

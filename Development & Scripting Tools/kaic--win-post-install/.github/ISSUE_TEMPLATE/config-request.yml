@@ -1,0 +1,89 @@
+name: Configuration Request
+description: Request a new Windows configuration/tweak to be added
+title: "[Config]: "
+labels: ["catalog", "new-config", "enhancement", ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new configuration! Please provide as much detail as possible.
+
+  - type: input
+    id: config-name
+    attributes:
+      label: Configuration Name
+      description: A short, descriptive name for this configuration
+      placeholder: e.g., Disable Cortana
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this configuration do? What problem does it solve?
+      placeholder: Disables Cortana to improve privacy and reduce background resource usage...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Which category does this configuration belong to?
+      options:
+        - File Explorer
+        - Performance
+        - Gaming Optimizations
+        - Privacy
+        - Visual Customization
+        - Windows Update
+        - Start Menu & Taskbar
+        - Network & Internet
+        - Cleanup
+    validations:
+      required: true
+
+  - type: textarea
+    id: commands
+    attributes:
+      label: Registry/Command Details
+      description: |
+        Provide the registry keys or PowerShell/CMD commands needed for this configuration.
+        Use code blocks for better readability.
+      placeholder: |
+        ```batch
+        reg add "HKCU\Software\..." /v ValueName /t REG_DWORD /d 1 /f
+        ```
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: requirements
+    attributes:
+      label: Requirements
+      description: Check all that apply
+      options:
+        - label: Requires administrator privileges
+        - label: Requires system restart
+        - label: Reversible (can be undone)
+
+  - type: textarea
+    id: warnings
+    attributes:
+      label: Warnings or Side Effects
+      description: Are there any side effects or warnings users should know about?
+      placeholder: e.g., This may break Windows Search functionality...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Verification
+      description: Please verify the following before submitting
+      options:
+        - label: I have tested this configuration on Windows 10 or 11
+          required: true
+        - label: This configuration is not already in the catalog
+          required: true

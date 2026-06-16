@@ -1,0 +1,7 @@
+{
+  "repository": "Pyenb/Outlook-desktop-ad-blocker",
+  "url": "https://github.com/Pyenb/Outlook-desktop-ad-blocker",
+  "last_updated": "2026-06-15T23:05:37.438958",
+  "stars": "127",
+  "description": "A simple script that patches your systems hosts file to stop the Outlook desktop client from displaying ads in your inbox."
+}

@@ -1,0 +1,368 @@
+[help]
+  [help.usage]
+    text = """
+f2 DRAPEAUX [OPTIONS] [CHEMINS VERS LES FICHIERS ET RÉPERTOIRES...]
+  commande | f2 DRAPEAUX [OPTIONS]"""
+
+    heading = "UTILISATION"
+  [help.positional_args]
+    heading = "ARGUMENTS POSITIONNELS"
+
+    text = """
+Fournissez éventuellement un ou plusieurs fichiers et répertoires pour rechercher des correspondances.
+    Si omis, il recherche uniquement dans le répertoire courant. Notez également que
+    les répertoires ne sont pas parcourus récursivement sauf si --recursive/-R est utilisé."""
+
+  [help.options]
+    heading = "OPTIONS"
+
+  [help.short]
+    text = """
+L'outil de renommage par lots que vous apprécierez vraiment d'utiliser.
+
+{{.Usage}}
+  {{.UsageText}}
+
+{{.Examples}}
+  $ f2 -f 'jpeg' -r 'jpg'
+  $ f2 -r '{id3.artist}/{id3.album}/${1}_{id3.title}{ext}'
+
+{{.LearnMore}}
+  Utilisez f2 --help pour afficher les options de ligne de commande.
+  Lisez le manuel sur https://f2.freshman.tech"""
+
+  [help.learn_more]
+    heading = "EN SAVOIR PLUS"
+
+    text = "Lisez le manuel sur https://f2.freshman.tech"
+  [help.env]
+    heading = "VARIABLES D'ENVIRONNEMENT"
+
+    text = """
+Remplacez les options par défaut selon vos préférences. Par exemple,
+    vous pouvez activer le mode d'exécution et ignorer les extensions de fichiers par défaut :
+
+    export F2_DEFAULT_OPTS=--exec --ignore-ext"""
+
+  [help.color]
+    text = "Définissez n'importe quelle valeur pour désactiver la sortie colorée."
+
+  [help.examples]
+    heading = "EXEMPLES"
+
+
+[error]
+  default_opts_parsing = "Erreur F2_DEFAULT_OPTS : drapeau non pris en charge '%s'"
+  pipe_read            = "erreur de lecture du pipe"
+  invalid_submatches   = "Nombre de sous-correspondances invalide"
+  exiftool_init        = "Échec de l'initialisation d'exiftool: %w"
+  invalid_argument            = "nécessite l'un des arguments suivants : -f, -r, --csv, ou -u. Exécutez f2 --help pour l'utilisation"
+  invalid_sort                = "le tri '%s' fourni est invalide"
+  invalid_sort_variable       = "la variable de tri '%s' fournie est invalide"
+  invalid_target_dir          = "le chemin cible '%s' existe mais n'est pas un répertoire"
+  parsing_fix_conflicts_pattern = "le --fix-conflicts-pattern '%s' fourni est invalide"
+  rename_failed = "Certains fichiers n'ont pas pu être renommés"
+  eval_invalid_args = "arguments invalides"
+  search_eval_failed = "échec de la recherche conditionnelle"
+
+[flag]
+  heading = "DRAPEAUX"
+
+  [flag.csv]
+   usage = """
+
+    Charge un fichier CSV et renomme en fonction de son contenu."""
+
+  [flag.find]
+    usage = """
+
+    Un motif d'expression régulière utilisé pour faire correspondre les fichiers et les répertoires.
+    Il accepte la syntaxe définie par la norme RE2 et est par défaut .*
+		si omis, ce qui correspond au nom complet du fichier/répertoire.
+
+		Lorsque -s/--string-mode est utilisé, ce motif est traité comme une chaîne littérale."""
+  [flag.replace]
+    usage = """
+
+    La chaîne de remplacement qui remplace chaque correspondance dans le nom de fichier.
+    Elle prend en charge les variables de capture, les variables intégrées et les variables exiftool.
+    Si omise, elle est par défaut une chaîne vide."""
+  [flag.undo]
+    usage = """
+
+    Annule la dernière opération de renommage effectuée dans le répertoire de travail courant."""
+  [flag.allowOverwrites]
+    usage = """
+
+		Permet à l'opération de renommage d'écraser les fichiers existants.
+		Attention : L'utilisation de cette option peut entraîner une perte de données irrécupérable."""
+  [flag.clean]
+    usage = """
+
+    Nettoie les répertoires vides qui ont été parcourus lors d'une opération de renommage."""
+  [flag.dt]
+    usage = """
+
+    Définit la variable de date et d'heure par défaut pour votre modèle de
+    remplacement afin que vous n'ayez pas à répéter le chemin complet de la
+    variable pour chaque jeton. Par exemple, les deux commandes suivantes
+    produisent le même résultat, mais la seconde est nettement plus facile à taper :
+
+    $ f2 -r '{xt.DateTimeOriginal.dt.YYYY}-{xt.DateTimeOriginal.dt.MM}-{xt.DateTimeOriginal.DD}T{xt.DateTimeOriginal.dt.H}{xt.DateTimeOriginal.dt.MM}{xt.DateTimeOriginal.dt.ss}'
+
+    $ f2 -r '{YYYY}-{MM}-{DD}T{H}{MM}{ss}' --dt 'xt.DateTimeOriginal'"""
+  [flag.exclude]
+    usage = """
+
+		Exclut les fichiers et les répertoires qui correspondent à l'expression régulière fournie.
+		Ce drapeau peut être répété pour spécifier plusieurs motifs d'exclusion.
+
+		Exemple :
+			-E 'json' -E 'yml' (filtre les fichiers JSON et YAML)
+			-E 'json|yaml' (équivalent à ce qui précède)
+
+		Note :
+			Cela n'empêche pas la récursion dans les répertoires correspondants (utilisez
+			--exclude-dir à la place)."""
+  [flag.excludeDir]
+    usage = """
+
+		Empêche F2 de parcourir récursivement les répertoires qui correspondent au motif
+		d'expression régulière fourni."""
+  [flag.exec]
+    usage = """
+
+    Exécute l'opération de renommage et applique les modifications au système de fichiers."""
+  [flag.exiftoolOpts]
+    usage = """
+
+		Fournit des options pour personnaliser la sortie d'Exiftool lors de l'utilisation de
+		variables ExifTool dans les motifs de remplacement.
+
+		Options prises en charge:
+			--api
+			--charset
+			--coordFormat
+			--dateFormat
+			--extractEmbedded
+
+		Exemple :
+			$ f2 -r '{xt.GPSDateTime}' --exiftool-opts '--dateFormat %Y-%m-%d' """
+  [flag.fixConflicts]
+    usage = """
+
+    Corrige automatiquement les conflits de renommage à l'aide de règles prédéfinies."""
+  [flag.fixConflictsPattern]
+    usage = """
+
+		Spécifie un motif personnalisé pour renommer les fichiers en cas de conflits.
+		Le motif doit être une chaîne de format Go valide contenant un seul
+		espace réservé '%d' pour l'index de conflit.
+
+		Exemple : '_%02d'  (génère _01, _02, etc.)
+
+		S'il n'est pas spécifié, le motif par défaut '(%d)' est utilisé."""
+  [flag.hidden]
+    usage = """
+
+		Inclut les fichiers et répertoires cachés dans le processus de recherche et de renommage.
+
+		Sous Linux et macOS, les fichiers cachés sont ceux qui commencent par un point.
+		Sous Windows, seuls les fichiers avec l'attribut 'caché' sont considérés comme cachés.
+
+		Pour faire correspondre également les répertoires cachés, combinez ceci avec le drapeau
+		-d/--include-dir."""
+  [flag.include]
+    usage = """
+
+		N'inclut que les fichiers qui correspondent à l'expression régulière fournie au lieu de
+		tous les fichiers correspondants au drapeau --find.
+
+		Ce drapeau peut être répété pour spécifier plusieurs motifs d'inclusion.
+
+		Exemple :
+			-I 'json' -I 'yml' (n'inclut que les fichiers JSON et YAML)"""
+  [flag.includeDir]
+    usage = """
+
+		Inclut les répertoires correspondants dans l'opération de renommage (ils sont exclus
+		par défaut)."""
+  [flag.ignoreCase]
+    usage = """
+
+    Ignore la sensibilité à la casse lors de la recherche de correspondances."""
+  [flag.ignoreExt]
+    usage = """
+
+    Ignore l'extension de fichier lors de la recherche de correspondances."""
+  [flag.json]
+    usage = """
+
+		Produit une sortie JSON, à l'exception des messages d'erreur qui sont envoyés à
+		l'erreur standard."""
+  [flag.maxDepth]
+    usage = """
+
+    Limite la profondeur de la recherche récursive. Définissez à 0 (par défaut) pour aucune limite."""
+  [flag.noColor]
+    usage = """
+
+    Désactive la sortie colorée."""
+  [flag.onlyDir]
+    usage = """
+
+    Renomme uniquement les répertoires, pas les fichiers (implique -d/--include-dir)."""
+  [flag.pair]
+    usage = """
+
+		Activez le renommage par paires pour renommer les fichiers portant le même nom (mais des
+		extensions différentes) dans le même répertoire avec le même nouveau nom. En mode paire,
+		les extensions de fichiers sont ignorées.
+
+		Exemple :
+			Avant : DSC08533.ARW DSC08533.JPG DSC08534.ARW DSC08534.JPG
+
+			$ f2 -r "Photo_{%03d}" --pair -x
+
+			Après : Photo_001.ARW Photo_001.JPG Photo_002.ARW Photo_002.JPG"""
+  [flag.pairOrder]
+    usage = """
+
+		Ordonnez les fichiers appariés en fonction de leur extension. Cela vous aide à contrôler
+		le fichier à renommer en premier, et dont les métadonnées doivent être extraites lors de
+		l'utilisation de variables.
+
+		Exemple :
+		  --pair-order 'dng,jpg' # renommer les fichiers dng avant les jpg
+		  --pair-order 'xmp,arw' # renommer les fichiers xmp avant les arw"""
+  [flag.quiet]
+    usage = """
+
+		N'imprime rien sur stdout. Si aucune correspondance n'est trouvée, f2 se terminera avec
+	  un code d'erreur au lieu du code de succès normal sans ce drapeau.
+		Les erreurs continueront d'être écrites sur stderr."""
+  [flag.recursive]
+    usage = """
+
+    Parcourt récursivement les répertoires lors de la recherche de correspondances."""
+  [flag.replaceLimit]
+    usage = """
+
+		Limite le nombre de remplacements effectués sur chaque fichier correspondant. 0 (par défaut)
+		signifie remplacer toutes les correspondances. Les valeurs négatives remplacent à partir de la fin du
+		nom de fichier."""
+  [flag.replaceRange]
+    usage = """
+
+    Remplace une correspondance spécifique ou une plage de correspondances à l'aide d'un index.
+
+    Exemple:
+      --replace-range 1..3 # remplace les 3 premières correspondances
+      --replace-range 2 # remplace uniquement la 2e correspondance
+      --replace-range 1;-2 # remplace la première et l'avant-dernière correspondance"""
+  [flag.resetIndexPerDir]
+    usage = """
+
+		Réinitialise l'index à incrémentation automatique lors de l'entrée dans un nouveau répertoire pendant une
+		opération récursive."""
+  [flag.sort]
+    usage = """
+
+		Trie les correspondances par ordre croissant en fonction des critères fournis.
+
+    Valeurs autorisées :
+      * 'default'    : Ordre lexicographique.
+      * 'size'       : Trier par taille de fichier.
+      * 'natural'    : Trier selon l'ordre naturel.
+      * 'mtime'      : Trier par heure de dernière modification du fichier.
+      * 'btime'      : Trier par heure de création du fichier.
+      * 'atime'      : Trier par heure de dernier accès au fichier.
+      * 'ctime'      : Trier par heure de dernière modification des métadonnées du fichier.
+      * 'time_var'   : Trier par variable de temps.
+      * 'int_var'    : Trier par variable entière.
+      * 'string_var' : Trier lexicographiquement par variable de chaîne."""
+  [flag.sortr]
+    usage = """
+
+    Accepte les mêmes valeurs que --sort mais trie les correspondances par ordre décroissant."""
+  [flag.sortPerDir]
+    usage = """
+
+    Garantit que le tri est effectué séparément dans chaque répertoire plutôt que globalement."""
+  [flag.sortVar]
+    usage = """
+
+		Actif lors de l'utilisation de --sort/--sortr avec time_var, int_var ou string_var.
+		Fournissez une variable prise en charge pour trier les fichiers en fonction des métadonnées du fichier.
+		Voir https://f2.freshman.tech/guide/sorting pour plus de détails."""
+  [flag.stringMode]
+    usage = """
+
+		Traite le motif de recherche (spécifié par -f/--find) comme une chaîne littérale
+		au lieu d'une expression régulière."""
+  [flag.targetDir]
+    usage = """
+
+    Spécifiez un répertoire cible pour déplacer les fichiers renommés et réorganiser votre système de fichiers."""
+  [flag.timeZone]
+    usage = """
+
+    Lors de l'utilisation de variables de date et d'heure, ceci définit le fuseau
+    horaire cible pour le formatage de l'horodatage. Il gère correctement l'heure
+    d'été (DST) et garantit que les horodatages reflètent l'heure locale
+    ("murale") d'un emplacement spécifique.
+
+    L'argument <zone> doit être un nom valide de la base de données des fuseaux
+    horaires IANA (par ex., "America/New_York", "Europe/London", "Africa/Kigali",
+    "UTC").
+
+    Par défaut, le fuseau horaire intégré au fichier est utilisé. Si le fichier
+    ne contient aucune information de fuseau horaire, le fuseau horaire local de
+    votre système est utilisé comme solution de repli.
+
+    Exemples :
+      # Renommer les photos en utilisant l'heure locale de Tokyo (JST, UTC+9)
+      $ f2 -f '*.dng' -r '{xt.DateTimeOriginal.dt}' --timezone 'Asia/Tokyo'"""
+  [flag.verbose]
+    usage = """
+
+    Active la sortie détaillée pendant l'opération de renommage."""
+
+[app]
+  usage = """
+f2 renomme en masse les fichiers et les répertoires, en faisant correspondre les fichiers à un motif spécifié.
+Il emploie des contrôles de sécurité pour empêcher les écrasements accidentels et
+offre plusieurs options pour un contrôle précis du processus de renommage.
+"""
+
+[report]
+  error = "erreur"
+  backup_failed = "échec de la sauvegarde"
+  backup_cleanup_failed = "échec du nettoyage du fichier de sauvegarde"
+  non_existent_file = "saut du fichier source inexistant à la ligne"
+  no_matches = "les critères de recherche n'ont correspondu à aucun fichier"
+  no_matches_csv = "aucun candidat au renommage trouvé dans le fichier CSV"
+  no_matches_undo = "rien à annuler"
+  dry_run = "simulation"
+  commit_changes = "valider les modifications ci-dessus avec le drapeau -x/--exec"
+  renamed = "renommé"
+  default_opt = "option par défaut '--%s' appliquée depuis l'environnement : %s"
+
+[status]
+  ok                         = "ok"
+  unchanged                  = "inchangé"
+  overwriting                = "écrasement en cours"
+  empty_filename             = "nom de fichier vide"
+  trailing_periods_present   = "points en fin de nom présents"
+  target_exists              = "la cible existe déjà"
+  overwriting_new_path       = "écrasement du nouveau chemin"
+  forbidden_characters_present = "caractères interdits présents"
+  filename_too_long          = "nom de fichier trop long"
+  source_already_renamed     = "source déjà renommée"
+  source_not_found           = "source non trouvée"
+  ignored                    = "ignoré"
+
+[table]
+  original = "ORIGINAL"
+  renamed = "RENOMMÉ"
+  status = "STATUT"

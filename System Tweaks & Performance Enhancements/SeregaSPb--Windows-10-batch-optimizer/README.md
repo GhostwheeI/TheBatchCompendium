@@ -1,66 +1,85 @@
-# Windows-10-batch-optimizer
+# Windows 10 batch optimizer.
+## Fast! Easy! Secure!
+## <a href="http://seregaspb.ru/blog/avtonastrojka-windows-10" target="_blank">Oficial page</a>
+##### Help or assist me to become better! Have any ideas or solutions - you can share!
+##### You can easy disable automatic updates Windows 10 and more tricks!
+##### Remove unwanted junks and tune up tweaks!
 
-**Owner:** [SeregaSPb](https://github.com/SeregaSPb)  
-**Repository:** [SeregaSPb/Windows-10-batch-optimizer](https://github.com/SeregaSPb/Windows-10-batch-optimizer)  
-**Stars:** 84 ⭐  
-**Language:** Batchfile  
-**Category:** System Tweaks & Performance Enhancements
+0. Intro
+1. List functions
+2. How to
+3. About
 
-## Description
+### If you are - paranoid, it does not mean that you are not being spying.
 
-Autotuner Windows 10 for awesome perfomance setting, privacy and security.
+### The list of functions in the performance.
 
-## 🔗 Links
+This program will help you:
 
-- **GitHub Repository:** [https://github.com/SeregaSPb/Windows-10-batch-optimizer](https://github.com/SeregaSPb/Windows-10-batch-optimizer)
-- **Owner Profile:** [https://github.com/SeregaSPb](https://github.com/SeregaSPb)
+* Make a copy of the register in the C: /RegBackup/Backup.reg
+* Disable UAC
+* Disable Windows 10 to restore itself from the Windows Update
+* Customize privacy
+* Tweaks registry - Delete keys start clutter
+* Disable unwanted group policies
+* Remove telemetry data collection disables Cortana
+* Disconnect and remove the service
+* Disable and remove internet search bing and indices
+* Disable unnecessary task scheduler
+* Block unwanted Web sites to the hosts file
+* Delete Demo content
+* Disable unwanted features
+* Remove OneDrive and other applications
+* Remove 3D objects
+* Remove CameraRollLibrary
+* Remove from the menu MyComputer Music, Pictures, Videos, Documents, Downloads, Desktop
+* Rename the computer
+* Set automatic logon
+* Remove wallpaper on the login screen
+* Show a Computer shortcut on your desktop
+* Underline keyboard shortcuts and access keys
+* Set Windows Explorer to start
+* Hide search window from the taskbar
+* Disable XAML lists of applications in the Start menu
+* Show file extensions
+* Show hidden extension
+* Use the Photo Viewer, to open the photo files
+* Turn off Sticky Keys by pressing SHIFT 5 times
+* Disable Filter Keys when SHIFT is pressed for 8 seconds
+* Change the hour and date format 24 hours, the metric system
+* Google - Search Default
+* Upgrading Windows - only receive directly from Microsoft
+* AutoUpdate Windows - ask to download and install (you can disable the automatic update)
+* Disable shared resources Wi-Fi network
+* Open to the current folder in the left pane in Windows Explorer
+* Prevent the creation of shortcuts in the Recent folder
+* Remove Previous Versions tab that appears when you right-click the file> Properties
+* Delay pop-up taskbar - 10 seconds
+* Disable Notification Center
+* Runs in the form of a cleaning operation, recovery and reset the database - all installed Windows updates are permanent and can not be removed
+* Clear temporary files
+* Clear autostart registry
+* Clear the Startup folder
+* Reloading
 
-## 📊 Repository Stats
+### Possible bugs:
 
-- **Stars:** 84
-- **Primary Language:** Batchfile
-- **Category:** System Tweaks & Performance Enhancements
+Skype may not work
 
-## 📝 About This Repository
+### How to
 
-This repository is part of [The Batch Compendium](https://github.com/YourUsername/TheBatchCompendium) - a comprehensive collection of Windows batch scripts and tools.
+Run as administrator!  
+During the program do not do anything. Reboot follow automatically.  
+Do not pay attention to an error in the console - the way it should be, for example, the code can be written several times removing the same function in different ways to be sure.  
 
-### Why This Repository?
+Some functions may not work or partially work not at all, the code is fairly crude. But it gives excellent results and save a lot of time. Programme of 2-5 minutes is enough to set up Windows 10 on the level of the programmer. Manually setting this would take several hours, even an experienced master.
 
-- ✅ **High Quality:** 84 stars indicate community trust
-- ✅ **Active Project:** Well-maintained and documented
-- ✅ **Batch Scripts:** Contains useful Windows batch files
-- ✅ **Open Source:** Free to use and learn from
+### About
 
-## 🚀 Quick Start
+How to set up privacy in Windows 10? Why not turn off the automatic updates? Now, in the system we should to look advertising and corporations keep track of each button is pressed by us? You can certainly enjoy the tested older software, but better understanding and configure the new!
 
-1. Visit the [original repository](https://github.com/SeregaSPb/Windows-10-batch-optimizer)
-2. Read the project's documentation
-3. Clone or download the scripts you need
-4. Follow the repository's installation instructions
-
-## ⚠️ Important Notes
-
-- Always review batch scripts before running them
-- Test scripts in a safe environment first
-- Check for any prerequisites or dependencies
-- Respect the repository's license terms
-
-## 📄 License
-
-This repository follows the license terms of the original project. Please check the [original repository](https://github.com/SeregaSPb/Windows-10-batch-optimizer) for specific license information.
-
-## 🤝 Contributing
-
-To contribute to the original project:
-1. Visit [https://github.com/SeregaSPb/Windows-10-batch-optimizer](https://github.com/SeregaSPb/Windows-10-batch-optimizer)
-2. Read their contributing guidelines
-3. Fork, modify, and submit pull requests to their repository
-
----
-
-**Discovered:** 2026-06-15  
-**Added to Collection:** Automated discovery system  
-**Last Updated:** 2026-06-15 11:13:35 UTC
-
-*This README was automatically generated by The Batch Compendium discovery system.*
+##### Help or assist me to become better! Have any ideas or solutions - you can share!
+* <a href="http://www.facebook.com/SeregaSPb.ru" title="facebook" target="_blank">Facebook</a>
+* <a href="http://vk.com/id393811">VKontakte</a> 
+* <a href="http://seregaspb.ru/kontakty" title="my site" target="_blank">SeregaSPb.ru</a>
+<img alt="SeregaSPb" src="http://seregaspb.ru/img/serega.png">

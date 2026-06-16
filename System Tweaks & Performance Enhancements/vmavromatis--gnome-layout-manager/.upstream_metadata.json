@@ -1,0 +1,7 @@
+{
+  "repository": "vmavromatis/gnome-layout-manager",
+  "url": "https://github.com/vmavromatis/gnome-layout-manager",
+  "last_updated": "2026-06-15T23:05:00.986727",
+  "stars": "401",
+  "description": "A bash script that batch installs and tweaks GNOME extensions as well as GTK/Shell themes. There are currently three options available: Unity, Windows and macOS."
+}

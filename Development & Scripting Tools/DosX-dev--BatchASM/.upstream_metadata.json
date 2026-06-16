@@ -1,0 +1,7 @@
+{
+  "repository": "DosX-dev/BatchASM",
+  "url": "https://github.com/DosX-dev/BatchASM",
+  "last_updated": "2026-06-15T23:06:42.037942",
+  "stars": "74",
+  "description": "BatchASM - primitive virtual machine (high level assembly language) for executing instructions in programming language environment Windows Batch."
+}

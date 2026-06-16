@@ -1,0 +1,39 @@
+REM set your variables here!
+REM you can find args here: https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#usage-and-options
+REM [DO NOT USE A SPACE BETWEEN THE ":" AND THE ARG OR CODEC!] 
+
+REM Audio codec for audio (Doesn't seem to affect MP3 for some reason, but does affect MP4) DEFAULT: mp3
+acodec:mp3
+
+REM Video codec DEFAULT: h264
+vcodec:h264
+
+REM Music codec DEFAULT: flac
+mcodec:flac
+
+REM Select the default download locations here!
+REM Audio DL location. DEFAULT: Downloads\Audio
+alocation:Downloads\Audio
+
+REM Video DL location. DEFAULT: Downloads\Video
+vlocation:Downloads\Video
+
+REM Music DL location. DEFAULT: Downloads\Music
+mlocation:Downloads\Music
+
+REM Enable the manual resolution selector (chooses the nearest available resolution, but not above the chosen one).
+REM change "no" to "yes" to enable it. DEFAULT: no
+reschooser:no
+
+
+REM Additional args below, CHECK THE run.bat SO THAT YOU DON'T USE ONE THAT IS ALREADY BEING USED!
+REM I have included some example args that you may want to use.
+
+REM Extra Audio (a) args
+aargs:--embed-chapters --embed-metadata --embed-thumbnail
+
+REM Extra Video (v) args
+vargs:--embed-chapters --embed-metadata --embed-thumbnail
+
+REM Extra Music (m) args
+margs: --sponsorblock-remove "music_offtopic"

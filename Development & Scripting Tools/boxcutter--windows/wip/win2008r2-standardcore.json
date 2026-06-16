@@ -1,0 +1,110 @@
+{
+  "variables": {
+    "cpus": "1",
+    "memory": "768",
+    "disk_size": "40960",
+    "guest_additions_url": "",
+    "version": "0.1.0",
+    "cm": "chef",
+    "cm_version": "",
+    "iso_url": "iso/en_windows_server_2008_r2_with_sp1_vl_build_x64_dvd_617403.iso",
+    "iso_checksum": "7e7e9425041b3328ccf723a0855c2bc4f462ec57",
+    "update": "true"
+  },
+  "builders": [
+    {
+      "type": "vmware-iso",
+      "iso_url": "{{ user `iso_url` }}",
+      "iso_checksum": "{{ user `iso_checksum` }}",
+      "floppy_files": [
+        "floppy/win2008r2-standardcore/Autounattend.xml",
+        ".windows/provisions/wget.exe",
+        "floppy/00-run-all-scripts.cmd",
+        "floppy/01-install-powershell.cmd",
+        "floppy/01-install-wget.cmd",
+        "floppy/_download.cmd",
+        "floppy/_packer_config.cmd",
+        "floppy/install-winrm.cmd",
+        "floppy/openssh.bat",
+        "floppy/passwordchange.bat",
+        "floppy/powerconfig.bat",
+        "floppy/zz-start-transports.cmd"
+      ],
+      "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c Packer_Shutdown",
+      "guest_os_type": "windows7srv-64",
+      "tools_upload_flavor": "windows",
+      "cpus": "{{ user `cpus` }}",
+      "cores": 1,
+      "memory": "{{ user `memory` }}",
+      "disk_size": "{{ user `disk_size` }}",
+      "vm_name": "win2008r2-standardcore",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_timeout": "10000s"
+    },
+    {
+      "type": "virtualbox-iso",
+      "iso_url": "{{ user `iso_url` }}",
+      "iso_checksum": "{{ user `iso_checksum` }}",
+      "floppy_files": [
+        "floppy/win2008r2-standardcore/Autounattend.xml",
+        ".windows/provisions/wget.exe",
+        "floppy/00-run-all-scripts.cmd",
+        "floppy/01-install-powershell.cmd",
+        "floppy/01-install-wget.cmd",
+        "floppy/_download.cmd",
+        "floppy/_packer_config.cmd",
+        "floppy/install-winrm.cmd",
+        "floppy/openssh.bat",
+        "floppy/passwordchange.bat",
+        "floppy/powerconfig.bat",
+        "floppy/zz-start-transports.cmd"
+      ],
+      "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c Packer_Shutdown",
+      "guest_os_type": "Windows2008_64",
+      "cpus": "{{ user `cpus` }}",
+      "memory": "{{ user `memory` }}",
+      "disk_size": "{{ user `disk_size` }}",
+      "vm_name": "win2008r2-standardcore",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_timeout": "10000s"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "remote_path": "/tmp/script.bat",
+      "environment_vars": [
+        "CM={{user `cm`}}",
+        "CM_VERSION={{user `cm_version`}}",
+        "UPDATE={{user `update`}}"
+      ],
+      "execute_command": "{{.Vars}} cmd /c C:/Windows/Temp/script.bat",
+      "scripts": [
+        "script/vagrant.bat",
+        "script/cmtool.bat",
+        "script/vmtool.bat",
+        "script/clean.bat",
+        "script/ultradefrag.bat",
+        "script/uninstall-7zip.bat",
+        "script/sdelete.bat"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "rm -f /tmp/script.bat"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "keep_input_artifact": false,
+      "compression_level": 1,
+      "vagrantfile_template": "tpl/vagrantfile-win2008r2-standardcore.tpl",
+      "output": "box/{{.Provider}}/win2008r2-standardcore-{{user `cm`}}{{user `cm_version`}}-{{user `version`}}.box"
+    }
+  ]
+}

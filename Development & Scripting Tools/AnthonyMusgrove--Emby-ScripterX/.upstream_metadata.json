@@ -1,0 +1,7 @@
+{
+  "repository": "AnthonyMusgrove/Emby-ScripterX",
+  "url": "https://github.com/AnthonyMusgrove/Emby-ScripterX",
+  "last_updated": "2026-06-15T23:05:52.078609",
+  "stars": "91",
+  "description": "Run custom external application or script (batch/bash/powershell/php/python/node.js/custom) on various events within the Emby Server."
+}

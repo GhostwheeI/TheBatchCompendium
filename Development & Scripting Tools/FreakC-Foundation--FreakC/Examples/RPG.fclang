@@ -1,0 +1,52 @@
+change_title[] RPG DEMO
+change_color[] 2f
+change_mode[] con cols=70 lines=20
+
+eq[] ehp=100
+eq[] hp=100
+
+label[] Battle
+clrscr[]
+
+if[] %ehp% LEQ 0 goto[] win
+if[] %hp% LEQ 0 goto[] lose
+
+print[] 
+print[] 
+print[] 
+print[]                             Goblin: %ehp% HP
+print[]                             You: %hp% HP
+print[] 
+print[] 
+print[] 
+print[] 
+print[]                               Moves:
+print[] 
+print[]                  1. Punch               2. Flee
+print[] 
+
+key[] 12
+
+if_el[] 2 goto[] Flee
+if_el[] 1 goto[] Punch
+
+label[] Punch
+eq[] ehp-=20
+eq[] hp-=10
+goto[] Battle
+
+label[] Flee
+clrscr[]
+print[]                         You fleed from battle!
+stop[] >nul
+quit[]
+
+label[] win
+print[]                                You win!
+stop[] >nul
+quit[]
+
+label[] lose
+print[]                    By somehow you lose, but okay...
+stop[] >nul
+quit[]

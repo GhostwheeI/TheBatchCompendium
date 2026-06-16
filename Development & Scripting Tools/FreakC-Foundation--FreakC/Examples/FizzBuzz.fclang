@@ -1,0 +1,20 @@
+change_title[] FizzBuzz
+
+eq[] count=1
+while[] %count% LSS 101
+	eq[] fizzbuzz=%count% %% 15
+	eq[] fizz=%count% %% 3
+	eq[] buzz=%count% %% 5
+
+	if[] %fizzbuzz% == 0 (
+		print[] FizzBuzz
+	) elif[] %fizz% == 0 (
+		print[] Fizz
+	) elif[] %buzz% == 0 (
+		print[] Buzz
+	) el[] (
+		print[] %count%
+	)
+	eq[] count++
+endwhile[]
+stop[] >nul

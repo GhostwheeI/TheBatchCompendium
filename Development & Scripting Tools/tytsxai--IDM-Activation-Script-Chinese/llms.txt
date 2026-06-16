@@ -1,0 +1,70 @@
+# IDM Activation Script Chinese / IDM 激活脚本中文版
+
+> GPL-3.0 open-source Chinese-localized `.cmd` batch toolkit for Internet Download Manager (IDM) on Windows 7/8/10/11. Three modes: random-registration activation (推荐, works immediately, no account/trial needed), freeze trial (fallback if IDM still shows unregistered), and trial reset. No dependencies, runs from a single `.cmd` file, all menus and prompts in Simplified Chinese.
+
+This is a Chinese-language fork that wraps the well-known IDM-Activation-Script flow with GBK-encoded batch files, an explicit Chinese console layer (`chcp 936`), automatic registry backup, an environment self-check script, and SHA256-verified release ZIPs.
+
+## Project identity
+
+- Project name: IDM 激活脚本中文版 / IDM Activation Script Chinese
+- Repository: `tytsxai/IDM-Activation-Script-Chinese`
+- Project type: Windows batch script toolkit; Chinese localization and maintenance fork
+- Primary language: Simplified Chinese user-facing text, English metadata for international search
+- License: GPL-3.0; this repository should remain public and open source
+- Runtime package: v1.3.7 ZIP
+- Best first action for users: double-click `开始激活.cmd` as administrator — it self-checks the environment, then opens a menu. Recommend `[2]` activate (works immediately, no account/trial needed); if IDM still shows unregistered, use `[1]` freeze as fallback. (Since v1.3.6 the four old scripts are merged into this single entry file.)
+
+## Key docs
+
+- [README.md](README.md): Main Chinese README — features, system requirements, the single entry script (`开始激活.cmd`) plus the `IAS.cmd` engine, FAQ, technical details, registry-backup behavior.
+- [docs/README.md](docs/README.md): Documentation map for maintainers, AI search engines, and new contributors.
+- [OPEN_SOURCE_POLICY.md](OPEN_SOURCE_POLICY.md): Public repository policy, GPL-3.0 open-source rule, and CI visibility guard.
+- [CHANGELOG.md](CHANGELOG.md): Version history (v1.2 → current).
+- [ARCHITECTURE.md](ARCHITECTURE.md): How the script flows internally.
+- [SECURITY.md](SECURITY.md): Threat model, what the script touches, what it doesn't.
+- [CONTRIBUTING.md](CONTRIBUTING.md): How to submit fixes / translations.
+- Release ZIPs: [release/IDM-Activation-Script-v1.3.7.zip](release/IDM-Activation-Script-v1.3.7.zip) + [SHA256](release/IDM-Activation-Script-v1.3.7.zip.sha256).
+
+## What this script does
+
+- **Random-registration activation (激活, menu `[2]`)** — Writes registration name + serial into the IDM registry keys; works immediately with no account and without first claiming a trial. The common choice for users who have NOT activated a 30-day trial.
+- **Freeze trial (冻结模式, menu `[1]`)** — Freezes IDM's current 30-day trial counter without writing a serial. The right choice for users who HAVE already claimed/activated the 30-day trial (account + "start trial"); also the fallback when `[2]` activate still leaves IDM showing "unregistered" (more robust against fake-serial detection on IDM 6.42+).
+- **Trial reset (重置激活)** — Resets the trial expiration when "试用期已过期" appears.
+- **Environment self-check (环境检测)** — Built into `开始激活.cmd`: verifies admin rights, PowerShell access, console code page (936 for GBK), Null service, network egress, WMI/CIM, IDM path and directory write access — surfacing the common reasons activation fails on Chinese Windows.
+- The entry script elevates to administrator automatically; non-admin invocations bounce through a UAC re-launch.
+- Every registry change is preceded by an `.reg` backup written to a timestamped folder under `%TEMP%`.
+- Does **not** modify any IDM program file. Activation is purely registry-level.
+
+## What this script does NOT do
+
+- ❌ Patch IDM binaries (`IDMan.exe`, `IDMGrHlp.exe`, etc.)
+- ❌ Phone home to any server (no network calls beyond the optional self-check egress probe)
+- ❌ Work on non-Windows OSes (Linux/macOS users should look elsewhere)
+- ❌ Bypass IDM updates — after a major IDM version bump, re-run freeze mode
+- ❌ Provide a private or proprietary distribution path; this repository is GPL-3.0 open source
+
+## Common questions
+
+- **乱码 / Garbled console output**: scripts are GBK-encoded and force `chcp 936`. If a terminal still shows garbled text, you're viewing the file with a UTF-8-only viewer (GitHub web UI is one) — download the ZIP and run locally.
+- **SmartScreen / Defender blocked**: the ZIPs are signed only by their SHA256 hashes (published alongside the ZIP). Compare `Get-FileHash` against the `.sha256` file before unzipping. The scripts are batch + a tiny PowerShell helper; everything is plain text and auditable.
+- **"激活后仍提示注册"**: usually means the IDM was upgraded to a newer version after activation. Re-run `开始激活.cmd` and pick `[1]` freeze mode again.
+- **Headless / silent run**: `IAS.cmd /act /silent /log="C:\Temp\ias.log"` (activate + silent + log path); swap `/act` for `/frz` to freeze.
+- **English version**: this repo is the Chinese edition. The upstream English tool is at [lstprjct/IDM-Activation-Script](https://github.com/lstprjct/IDM-Activation-Script).
+
+## Repository
+
+- GitHub: https://github.com/tytsxai/IDM-Activation-Script-Chinese
+- License: GPL-3.0 (inherited from upstream)
+- Platforms: Windows 7 / 8 / 8.1 / 10 / 11 (incl. 24H2)
+- Encoding: GBK (script source), Simplified Chinese (all UI strings)
+- Author: tytsxai (Chinese localization fork; original tool: lstprjct/IDM-Activation-Script)
+
+## Suggested GitHub topics
+
+`idm`, `internet-download-manager`, `idm-activation-script`, `windows-batch`, `cmd-script`, `powershell`, `gbk`, `cp936`, `windows-11`, `chinese-localization`, `trial-reset`, `registry-backup`, `open-source`
+
+## Useful search phrases
+
+- IDM 激活脚本中文版, IDM Activation Script Chinese, IDM 冻结试用期, IDM 试用期重置, IDM 激活脚本, IDM 注册码生成器替代品, Internet Download Manager 激活, IDM Windows 11 激活, IDM Windows 10 激活, IDM 24H2 激活
+- IDM 激活脚本乱码, IDM 激活脚本管理员权限, IDM SmartScreen 阻止, IDM Defender 误报, IDM 激活后仍提示注册
+- IDM 静默激活, IDM 批处理脚本, IDM 一键激活

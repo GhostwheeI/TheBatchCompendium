@@ -1,0 +1,36 @@
+name: Publish to NPM
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Release stable]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  publish_npm:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Publish new F2 version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Load .env file
+        run: grep -v '^#' .env | sed 's/"//g' >> $GITHUB_ENV
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          registry-url: https://registry.npmjs.org/
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

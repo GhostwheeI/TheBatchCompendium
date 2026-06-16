@@ -1,0 +1,22 @@
+change_title[] Love Tester
+change_color[] 0a
+
+label[] game
+clrscr[]
+
+print[] Person 1:
+inp[] person1=
+
+print[] Person 2:
+inp[] person2=
+
+goto[] test
+
+label[] test
+
+eq[] test=%random% %% 100 + 0
+print[] %test% percents of love
+
+stop[]
+
+goto[] game

@@ -1,0 +1,10 @@
+function[] Dog
+    var[] %~1.age=%~2
+    var[] %~1.weight=%~3
+    print[] print[] %%~1>%~1.says.bat
+endfunc[]
+
+Dog[..] "Mary" "3" "4kg"
+print[] Age: %Mary.age%
+print[] Weight: %Mary.weight%
+Mary.says[..] "Woof woof"

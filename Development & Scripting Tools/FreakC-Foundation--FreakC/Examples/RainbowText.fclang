@@ -1,0 +1,23 @@
+change_title[] Rainbow Text
+
+label[] rainbowtext
+
+change_color[] 0a
+print[] Hello, World^!
+
+change_color[] 0b
+print[] Hello, World^!
+
+change_color[] 0c
+print[] Hello, World^!
+
+change_color[] 0d
+print[] Hello, World^!
+
+change_color[] 0e
+print[] Hello, World^!
+
+change_color[] 0f
+print[] Hello, World^!
+
+goto[] rainbowtext

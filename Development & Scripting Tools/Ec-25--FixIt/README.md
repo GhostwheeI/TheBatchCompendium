@@ -1,66 +1,90 @@
-# FixIt
+# FIXIT 2.1.2
 
-**Owner:** [Ec-25](https://github.com/Ec-25)  
-**Repository:** [Ec-25/FixIt](https://github.com/Ec-25/FixIt)  
-**Stars:** 85 ⭐  
-**Language:** Batchfile  
-**Category:** Development & Scripting Tools
+![FIXIT Banner](https://user-images.githubusercontent.com/57842821/209219699-82159c0b-37a2-4084-ba1f-cb823b010013.png)
 
-## Description
+## Overview
 
-A simple Script capable of optimizing and repairing almost any error that may occur on your Windows computer
+FIXIT is a lightweight and user-friendly tool designed to optimize and repair Windows operating systems. It provides direct access to system tools and elements, making it easy to perform repairs and enhancements. The project is open-source under the MIT license and primarily targets Windows 10 and later versions, with some functionalities tested on Windows 7 and above.
 
-## 🔗 Links
+## Features
 
-- **GitHub Repository:** [https://github.com/Ec-25/FixIt](https://github.com/Ec-25/FixIt)
-- **Owner Profile:** [https://github.com/Ec-25](https://github.com/Ec-25)
+- **fixit.bat**: The main tool for system repair and optimization.
+- **packet_handler.bat**: Facilitates access to system tools and enhances system functionality.
 
-## 📊 Repository Stats
+## How to Use
 
-- **Stars:** 85
-- **Primary Language:** Batchfile
-- **Category:** Development & Scripting Tools
+1. Clone or download the repository to your local machine.
+2. Open Command Prompt as an administrator.
+3. Navigate to the directory where FIXIT is located.
+4. Run `fixit.bat` or `packet_handler.bat` based on your needs.
+5. Follow the on-screen menu to select and execute desired actions.
 
-## 📝 About This Repository
+**if you need help use follow command: `fixit.bat` or `packet_handler.bat` -help**
 
-This repository is part of [The Batch Compendium](https://github.com/YourUsername/TheBatchCompendium) - a comprehensive collection of Windows batch scripts and tools.
+## Menu Structure
 
-### Why This Repository?
+### FIXIT
+- **AUTO**
+  - Quick Repair
+  - Quick Clean
+  - Scheduled Tasks
+    - Repair System Monthly
+    - Clean The System Monthly
+- **ADVANCED**
+  - System Tools
+    - System file check
+    - Check repair files
+    - System Image Restore
+    - Analysis of the data structure on disk (reboot required)
+    - Convert MBR Disk to GPT (Not Recommended)
+    - Force System Updates
+    - Defrag Main drive
+  - Web Tools
+    - Internal DNS cleanup
+    - DNS testing
+    - Internal DNS selector
+    - View WiFi Password
+  - Clean Tools
+    - System Cleanup
+    - Custom Cleanup
+    - Clean Windows Defender
+    - Clear Recent Files List
 
-- ✅ **High Quality:** 85 stars indicate community trust
-- ✅ **Active Project:** Well-maintained and documented
-- ✅ **Batch Scripts:** Contains useful Windows batch files
-- ✅ **Open Source:** Free to use and learn from
+### Packet Handler
+- System Tools Shortcuts (19 shortcuts available)
+- Process and Services
+  - Stop Unnecessary Services
+  - Stop Xbox Services
+  - Recover Deleted Files
+  - Disable Telemetry Collection
+  - Disable Automatic Updates (Windows Update)
+  - Activate Automatic Updates (Windows Update)
+- System Settings
+  - Activate Old Photo Viewer
+  - Add security layer against Malware Execution
+  - Remove security layer against Malware Execution
+  - Remove the New Menu Design from Windows 11
+  - Return to the New Windows 11 Menu Design
+  - Disable All Web Extensions (Chrome and Edge)
+  - Disable Execution of Unsigned PS Scripts
+  - EXTRA settings
+- Packages
+  - Uninstall a Third-Party Application
+  - Uninstall Windows Apps
+  - Uninstall Microsoft Office
+  - Uninstall OneDrive
+  - Install All WindowsApps
+  - Install Selection of WindowsApps
+  - Install HEVC (H.265) Video Codec
+  - Install Office 2021 (without license)
+  - PowerToys
+  - Update All Apps
+- Debloat (remove all unnecessary packages that Windows installs by default)
 
-## 🚀 Quick Start
+## Contributing
 
-1. Visit the [original repository](https://github.com/Ec-25/FixIt)
-2. Read the project's documentation
-3. Clone or download the scripts you need
-4. Follow the repository's installation instructions
+Feel free to contribute to FIXIT by submitting pull requests or reporting issues on the GitHub repository.
 
-## ⚠️ Important Notes
+## License
 
-- Always review batch scripts before running them
-- Test scripts in a safe environment first
-- Check for any prerequisites or dependencies
-- Respect the repository's license terms
-
-## 📄 License
-
-This repository follows the license terms of the original project. Please check the [original repository](https://github.com/Ec-25/FixIt) for specific license information.
-
-## 🤝 Contributing
-
-To contribute to the original project:
-1. Visit [https://github.com/Ec-25/FixIt](https://github.com/Ec-25/FixIt)
-2. Read their contributing guidelines
-3. Fork, modify, and submit pull requests to their repository
-
----
-
-**Discovered:** 2026-06-15  
-**Added to Collection:** Automated discovery system  
-**Last Updated:** 2026-06-15 11:13:35 UTC
-
-*This README was automatically generated by The Batch Compendium discovery system.*
+FIXIT is licensed under the MIT License. See [LICENSE](LICENSE) for more details.

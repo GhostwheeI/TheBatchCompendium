@@ -1,0 +1,15 @@
+# Exclude downloaded APK files during test
+/temp/*.apk
+# Made before the commit of that rewrite of InstallWSA.py
+/temp/WSA.msixbundle
+# Exclude XAPK test files
+*.xapk
+/xapktemp/*
+# Exclude APKM test files
+*.apkm
+# Exclude downloaded platform-tools
+/winadb/*
+# Exclude platform-tools temp file
+platform-tools_temp.zip
+# Exclude pre-release temp folder
+/releasefiles_root/*

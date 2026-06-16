@@ -1,0 +1,30 @@
+change_title[] Calculator Made With FreakC
+change_color[] 8f
+change_mode[] con cols=60 lines=20
+
+label[] menu
+clrscr[]
+
+print[]   ========================================================
+print[]                       FreakC Calculator 
+print[]  
+print[]                           "+" Plus
+print[]  
+print[]                          "-" Minus
+print[]  
+print[]                         "*" Multiply
+print[]  
+print[]                          "/" Divide
+print[]  
+print[]  
+print[]       Enter your Math problem:
+
+inp[] prob=
+:: If you want to get the number fixed, you can replace the line below with PoopInt[fnc] ans=%prob%
+scan_strs[] %%i in (' ps[] %prob% ') do var[] ans=%%i
+
+print[] Answer: %ans%
+
+stop[]
+
+goto[] menu

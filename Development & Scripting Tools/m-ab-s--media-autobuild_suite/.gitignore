@@ -1,0 +1,43 @@
+#################
+## media-autobuild_suite
+#################
+
+## ignore media-autobuild_suite folders and local specific files
+
+/build/*
+/local32/
+/local64/
+/msys64/
+/msys32/
+
+mintty.lnk
+update_suite.sh
+!build/bash.ps1
+!build/*.sh
+!build/patches/
+!build/extras/
+/build/media-suite_deps_extra.sh
+/build/post_suite.sh
+
+## VS Code
+.vscode
+
+#############
+## Windows detritus
+#############
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Mac crap
+.DS_Store
+
+# Ignore extra files
+*_extra.sh

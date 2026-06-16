@@ -1,0 +1,7 @@
+{
+  "repository": "sim0n00ps/L3-Dumping",
+  "url": "https://github.com/sim0n00ps/L3-Dumping",
+  "last_updated": "2026-06-15T23:05:46.886570",
+  "stars": "101",
+  "description": "Batch scripts to dump L3 CDM using frida-server and wvdumper"
+}

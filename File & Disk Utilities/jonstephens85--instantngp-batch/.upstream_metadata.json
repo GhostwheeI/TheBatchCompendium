@@ -1,0 +1,7 @@
+{
+  "repository": "jonstephens85/instantngp-batch",
+  "url": "https://github.com/jonstephens85/instantngp-batch",
+  "last_updated": "2026-06-15T23:05:38.660714",
+  "stars": "122",
+  "description": "Batch files to quickly prepare images and train a NeRF using Instant-NGP. This project only works for Instant-NGP Binaries on Windows."
+}

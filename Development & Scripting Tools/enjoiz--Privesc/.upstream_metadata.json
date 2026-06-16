@@ -1,0 +1,7 @@
+{
+  "repository": "enjoiz/Privesc",
+  "url": "https://github.com/enjoiz/Privesc",
+  "last_updated": "2026-06-15T23:04:48.413164",
+  "stars": "683",
+  "description": "Windows batch script that finds misconfiguration issues which can lead to privilege escalation."
+}

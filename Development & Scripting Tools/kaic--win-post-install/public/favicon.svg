@@ -1,0 +1,22 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Windows 98 style icon -->
+  <defs>
+    <linearGradient id="winGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0080FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0040A0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Outer border -->
+  <rect x="2" y="2" width="28" height="28" fill="url(#winGrad)" stroke="#000080" stroke-width="1"/>
+
+  <!-- Window panes (4 quadrants) -->
+  <rect x="6" y="6" width="9" height="9" fill="#87CEEB" opacity="0.8"/>
+  <rect x="17" y="6" width="9" height="9" fill="#87CEEB" opacity="0.8"/>
+  <rect x="6" y="17" width="9" height="9" fill="#87CEEB" opacity="0.8"/>
+  <rect x="17" y="17" width="9" height="9" fill="#87CEEB" opacity="0.8"/>
+
+  <!-- Window cross dividers -->
+  <rect x="15" y="6" width="2" height="20" fill="#FFFFFF"/>
+  <rect x="6" y="15" width="20" height="2" fill="#FFFFFF"/>
+</svg>

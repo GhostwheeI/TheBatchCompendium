@@ -1,0 +1,82 @@
+name: Software Request
+description: Request a new software to be added to the catalog
+title: "[Software]: "
+labels: ["catalog", "new-software", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new software! Please fill out the information below.
+
+  - type: input
+    id: software-name
+    attributes:
+      label: Software Name
+      description: The official name of the software
+      placeholder: e.g., Visual Studio Code
+    validations:
+      required: true
+
+  - type: input
+    id: winget-id
+    attributes:
+      label: Winget ID
+      description: |
+        The winget package ID. You can find it by running `winget search <software-name>`.
+        Make sure to verify the ID is correct.
+      placeholder: e.g., Microsoft.VisualStudioCode
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Which category does this software belong to?
+      options:
+        - Browsers
+        - Communication
+        - Media Players
+        - Productivity
+        - Development Tools
+        - Media Creation
+        - Gaming
+        - Security & Privacy
+        - Cloud Storage
+        - System Utilities
+        - Antivirus & Protection
+        - Drivers
+        - Runtimes & Libraries
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A brief description of what the software does
+      placeholder: A lightweight, open-source code editor with built-in Git support...
+    validations:
+      required: true
+
+  - type: input
+    id: website
+    attributes:
+      label: Official Website
+      description: Link to the software's official website
+      placeholder: https://code.visualstudio.com
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Verification
+      description: Please verify the following before submitting
+      options:
+        - label: I have verified the winget ID is correct by running `winget search`
+          required: true
+        - label: This software is not already in the catalog
+          required: true
+        - label: This software is free or has a free tier
+          required: false

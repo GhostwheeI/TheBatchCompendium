@@ -1,66 +1,61 @@
-# HBBatchBeast
+# HBBatchBeast for HandBrake and FFmpeg/FFprobe (Windows, macOS, Linux & Docker)
 
-**Owner:** [HaveAGitGat](https://github.com/HaveAGitGat)  
-**Repository:** [HaveAGitGat/HBBatchBeast](https://github.com/HaveAGitGat/HBBatchBeast)  
-**Stars:** 705 ⭐  
-**Language:** HTML  
-**Category:** Audio & Video Capture, Conversion & Playback
+[![Reddit](https://img.shields.io/badge/Reddit-HBBatchBeast-FF5700.svg?style=flat-square)](https://www.reddit.com/r/HBBatchBeast/)     [![paypal](https://img.shields.io/badge/-donate-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=L5MWTNDLLB6AC&source=url)    [![Discord](https://img.shields.io/badge/Discord-Chat-green.svg)](https://discord.gg/X4khmE96hS)    [![Docker](https://img.shields.io/badge/docker%20build-passing-green.svg)](https://hub.docker.com/r/haveagitgat/hbbatchbeast)    
 
-## Description
 
-A free GUI application for HandBrake and FFmpeg/FFprobe with an emphasis on batch conversion (including recursive folder scans and folder watching) -Windows, macOS, Linux & Docker
+<h2>
+<a class="gumroad-button" href="https://github.com/HaveAGitGat/HBBatchBeast/wiki/2-Installation">Setup/Installation</a>
+</h2>  
 
-## 🔗 Links
 
-- **GitHub Repository:** [https://github.com/HaveAGitGat/HBBatchBeast](https://github.com/HaveAGitGat/HBBatchBeast)
-- **Owner Profile:** [https://github.com/HaveAGitGat](https://github.com/HaveAGitGat)
+![Screenshot](https://i.imgur.com/pSNJFSj.png)
 
-## 📊 Repository Stats
+Demo video - https://youtu.be/mHMXfInoqfE
 
-- **Stars:** 705
-- **Primary Language:** HTML
-- **Category:** Audio & Video Capture, Conversion & Playback
 
-## 📝 About This Repository
+Discord: https://discord.gg/X4khmE96hS
 
-This repository is part of [The Batch Compendium](https://github.com/YourUsername/TheBatchCompendium) - a comprehensive collection of Windows batch scripts and tools.
+A free GUI application for HandBrake and FFmpeg/FFprobe on Windows, macOS and Linux (+ Linux Docker image) with an emphasis on multi HandBrake/FFmpeg instance batch conversion (including recursive folder scans and folder watching). The destination folder structure is kept the same as the source folder structure. Media in subfolders is also converted. Multiple folders can be monitored and different conversion presets can be specified for each folder. Also included:
 
-### Why This Repository?
+-Remote monitoring feature to monitor batch file conversions in any browser
 
-- ✅ **High Quality:** 705 stars indicate community trust
-- ✅ **Active Project:** Well-maintained and documented
-- ✅ **Batch Scripts:** Contains useful Windows batch files
-- ✅ **Open Source:** Free to use and learn from
+-Basic h265 benchmarking
 
-## 🚀 Quick Start
+-Health check feature which can scan for corrupt video files using HandBrake (quick scan) or FFmpeg (thorough scan), although this is not always accurate. Attempt repair file feature included too. 
 
-1. Visit the [original repository](https://github.com/HaveAGitGat/HBBatchBeast)
-2. Read the project's documentation
-3. Clone or download the scripts you need
-4. Follow the repository's installation instructions
+This is a standalone program on Windows but requires HandBrakeCLI to be installed on Linux and Mac. For a server application with similar functionality please see [Tdarr](https://github.com/HaveAGitGat/Tdarr). 
 
-## ⚠️ Important Notes
 
-- Always review batch scripts before running them
-- Test scripts in a safe environment first
-- Check for any prerequisites or dependencies
-- Respect the repository's license terms
 
-## 📄 License
+Settings help is available by pressing the blue ? diamond icons spread throughout the program:
 
-This repository follows the license terms of the original project. Please check the [original repository](https://github.com/HaveAGitGat/HBBatchBeast) for specific license information.
+![Screenshot](https://i.imgur.com/qwxlJkX.png)
 
-## 🤝 Contributing
 
-To contribute to the original project:
-1. Visit [https://github.com/HaveAGitGat/HBBatchBeast](https://github.com/HaveAGitGat/HBBatchBeast)
-2. Read their contributing guidelines
-3. Fork, modify, and submit pull requests to their repository
+The program scans the source folders for all files. It then compares the source folder files with the destination folder files to see if any of the source files exist in the destination folder already. If not, the program queues the files for conversion.
+ 
+4 worker modules (default number) then work through the conversion queue. If periodic scanning is enabled then the program will run at the chosen interval.
 
----
+After it a bit more testing it seems that weird things can happen if you monitor a folder which is being downloaded to. It seems sometimes conversions start before a file has fully downloaded. To solve this, I recommend using a temporary download folder before moving completed files into your HBBB source folder.
 
-**Discovered:** 2026-06-15  
-**Added to Collection:** Automated discovery system  
-**Last Updated:** 2026-06-15 11:13:35 UTC
+If you use a download program which has an 'incomplete downloads' folder etc, do not put that folder inside your main source folder else you may end up converting each file twice.
 
-*This README was automatically generated by The Batch Compendium discovery system.*
+The program won't work properly if you put the destination folder in a folder inside the source folder because the program is recreating the source folder structure inside the destination folder. It will cause an infinite loop of creating more and more sub-folders each time you run the program. So it will NOT work properly if you do something like this:
+
+Source:
+
+D:\Videos
+
+Destination:
+
+D:\Videos\Converted
+
+It will work properly if you do something like this etc:
+
+Source:
+
+D:\Videos
+
+Destination:
+
+D:\Converted

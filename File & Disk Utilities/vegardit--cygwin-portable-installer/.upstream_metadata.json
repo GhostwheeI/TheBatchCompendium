@@ -1,0 +1,7 @@
+{
+  "repository": "vegardit/cygwin-portable-installer",
+  "url": "https://github.com/vegardit/cygwin-portable-installer",
+  "last_updated": "2026-06-15T23:05:14.580439",
+  "stars": "211",
+  "description": "Windows batch file to perform unattended installations of a portable Cygwin environment."
+}

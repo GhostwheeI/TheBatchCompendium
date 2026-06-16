@@ -1,0 +1,52 @@
+name: Release stable
+
+env:
+  GORELEASER_GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  FURY_PUSH_TOKEN: ${{ secrets.FURY_PUSH_TOKEN }}
+  FURY_USERNAME: ${{ secrets.FURY_USERNAME }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [release_stable]
+
+permissions:
+  contents: write
+
+jobs:
+  release_stable:
+    name: Release stable version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Load .env file
+        shell: bash
+        run: grep -v '^#' .env | sed 's/"//g' >> $GITHUB_ENV
+
+      - name: Set up Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            go.sum
+            tools.sum
+
+      - name: Create stable release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ github.event.client_payload.tag_name }} \
+            --title "${{ github.event.client_payload.tag_name }}" \
+            --notes "${{ env.CHANGELOG }}" \
+            --generate-notes
+
+      - name: Install Just
+        uses: taiki-e/install-action@just
+
+      - name: Run Goreleaser
+        run: just release

@@ -1,66 +1,106 @@
-# winPE
+# Deprecated, please find an updated version of this script in https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite
 
-**Owner:** [carlospolop](https://github.com/carlospolop)  
-**Repository:** [carlospolop/winPE](https://github.com/carlospolop/winPE)  
-**Stars:** 90 ⭐  
-**Language:** Batchfile  
-**Category:** Uncategorized
+# Windows Privilege Escalation
 
-## Description
+## Windows PE using CMD (.bat)
 
-Windows privilege escalation with cmd
+If you want to search for files and registry that could contain passwords, set to *yes* the *long* variable at the beginning of the script.
 
-## 🔗 Links
+The script will use acceschk.exe if it is available (with that name). But it is not necessary, it also uses wmic + icacls.
 
-- **GitHub Repository:** [https://github.com/carlospolop/winPE](https://github.com/carlospolop/winPE)
-- **Owner Profile:** [https://github.com/carlospolop](https://github.com/carlospolop)
+Some of the tests in this script were extracted from **[here](https://github.com/enjoiz/Privesc/blob/master/privesc.bat)** and from **[here](https://github.com/codingo/OSCP-2/blob/master/Windows/WinPrivCheck.bat)**
 
-## 📊 Repository Stats
 
-- **Stars:** 90
-- **Primary Language:** Batchfile
-- **Category:** Uncategorized
+### Main checks
 
-## 📝 About This Repository
+- [x] Systeminfo --SO version and patches-- (windows suggester)
+- [x] Common known exploits (2K, XP, 2K3, 2K8, Vista, 7)
+- [x] UAC?? 
+- [x] AV??
+- [x] Mounted disks
+- [x] WSUS vuln?? 
+- [x] SCCM installed??
+- [x] Interesting file permissions of binaries being executed 
+- [x] Interesting file permissions of binaries run at startup
+- [x] AlwaysInstallElevated??
+- [x] Network info (see below)
+- [x] Users info (see below)
+- [x] Current user privileges 
+- [x] Service binary permissions 
+- [x] Check if permissions to modify any service registy
+- [x] Unquoted Service paths  
+- [x] Search for interesting writable files
+- [x] Saved credentials  
+- [x] Search for known files to have passwords inside
+- [x] Search for known registry to have passwords inside
+- [x] If *long*, search files with passwords inside 
+- [x] If *long*, search registry with passwords inside 
 
-This repository is part of [The Batch Compendium](https://github.com/YourUsername/TheBatchCompendium) - a comprehensive collection of Windows batch scripts and tools.
+### More enumeration
 
-### Why This Repository?
+- [x] Date & Time
+- [x] Env
+- [x] Installed Software
+- [x] Running Processes 
+- [x] Current Shares 
+- [x] Network Interfaces
+- [x] Used Ports
+- [x] Firewall
+- [x] ARP
+- [x] Routes
+- [x] Hosts
+- [x] Cached DNS
+- [x] Info about current user (PRIVILEGES)
+- [x] List groups (info about administrators)
+- [x] Current logon users 
 
-- ✅ **High Quality:** 90 stars indicate community trust
-- ✅ **Active Project:** Well-maintained and documented
-- ✅ **Batch Scripts:** Contains useful Windows batch files
-- ✅ **Open Source:** Free to use and learn from
+### Understanding icacls permissions
 
-## 🚀 Quick Start
+Icacls is the program used to check the rights that groups and users have in a file or folder.
 
-1. Visit the [original repository](https://github.com/carlospolop/winPE)
-2. Read the project's documentation
-3. Clone or download the scripts you need
-4. Follow the repository's installation instructions
+Iclals is the main binary used here to check permissions.
 
-## ⚠️ Important Notes
+Its output is not intuitive so if you are not familiar with the command, continue reading. Take into account that in XP you need administrators rights to use icacls (for this OS is very recommended to upload sysinternals accesschk.exe to enumerate rights).
 
-- Always review batch scripts before running them
-- Test scripts in a safe environment first
-- Check for any prerequisites or dependencies
-- Respect the repository's license terms
+**Interesting rights**
 
-## 📄 License
+```
+D - Delete access
+F - Full access (Edit_Permissions+Create+Delete+Read+Write)
+N - No access
+M - Modify access (Create+Delete+Read+Write)
+RX - Read and eXecute access
+R - Read-only access
+W - Write-only access
+```
 
-This repository follows the license terms of the original project. Please check the [original repository](https://github.com/carlospolop/winPE) for specific license information.
+We will focus in **F** (full), **M** (Modify access) and **W** (write).
 
-## 🤝 Contributing
+**Use of Icacls by wniPE**
 
-To contribute to the original project:
-1. Visit [https://github.com/carlospolop/winPE](https://github.com/carlospolop/winPE)
-2. Read their contributing guidelines
-3. Fork, modify, and submit pull requests to their repository
+When checking rights of a file or a folder the script search for the strings: *(F)* or *(M)* or *(W)* and the string ":\" (so the path of the file being checked will appear inside the output).
 
----
+It also checks that the found right (F, M or W) can be exploited by the current user.
 
-**Discovered:** 2026-06-15  
-**Added to Collection:** Automated discovery system  
-**Last Updated:** 2026-06-15 11:13:35 UTC
+A typical output where you dont have any nice access is:
+```
+C:\Windows\Explorer.EXE NT SERVICE\TrustedInstaller:(F)
+```
 
-*This README was automatically generated by The Batch Compendium discovery system.*
+An output where you have some interesting privilege will be like:
+```
+C:\Users\john\Desktop\desktop.ini NT AUTHORITY\SYSTEM:(I)(F)
+                                MYDOMAIN\john:(I)(F)
+```
+
+Here you can see that the privileges of user *NT AUTHORITY\SYSTEM* appears in the output because it is in the same line as the path of the binary. However, in the next line, you can see that our user (john) has full privileges in that file. 
+
+This is the kind of outpuf that you have to look for when usnig the winPE.bat script.
+
+[More info about icacls here](https://ss64.com/nt/icacls.html)
+
+# Binaries
+
+Some interesting precompiled binaries for privesc in Windows.
+
+By Polop(TM)

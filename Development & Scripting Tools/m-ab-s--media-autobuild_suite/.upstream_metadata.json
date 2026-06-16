@@ -1,0 +1,7 @@
+{
+  "repository": "m-ab-s/media-autobuild_suite",
+  "url": "https://github.com/m-ab-s/media-autobuild_suite",
+  "last_updated": "2026-06-15T23:04:27.519910",
+  "stars": "1797",
+  "description": "This Windows Batchscript helps setup a Mingw-w64 compiler environment for building ffmpeg and other media tools under Windows."
+}
