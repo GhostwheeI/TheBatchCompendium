@@ -34,14 +34,14 @@ if not new_repos:
 print(f'Processing {len(new_repos)} repositories for organization...')
 
 for repo in new_repos:
-    repo_name = repo.get('name', '').replace('/', '_').replace('\\', '_')
+    repo_name = repo.get('name', '').replace('/', '--').replace('\\', '--')
     category = repo.get('category', 'Uncategorized')
 
     if not repo_name:
         continue
 
     # Create category directory
-    category_dir = base_path / category.replace(' & ', '_').replace(' ', '_')
+    category_dir = base_path / category
     # Create repository directory
     repo_dir = category_dir / repo_name
     

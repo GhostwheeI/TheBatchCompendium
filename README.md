@@ -4,7 +4,7 @@
 
 # 🎯 The Largest Batch Script Collection 🎯
 
-## 📊 **2,047 BATCH SCRIPTS** 📊
+## 📊 **2,050 BATCH SCRIPTS** 📊
 
 ### *The ultimate compendium of Windows batch automation*
 
@@ -13,7 +13,7 @@
 ---
 
 ![Windows](https://img.shields.io/badge/platform-Windows-blue)
-![Scripts](https://img.shields.io/badge/scripts-2047-green)
+![Scripts](https://img.shields.io/badge/scripts-2050-green)
 ![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 
 # The Batch Compendium
@@ -89,6 +89,14 @@ Scripts and imported toolkits are organized by purpose:
 </details>
 
 <details>
+  <summary>Audio, Video Capture, Conversion & Playback</summary>
+
+- HaveAGitGat--HBBatchBeast/
+- WWILLV--you-get-ffmpeg/
+- README.md
+</details>
+
+<details>
   <summary>Automation & Installers</summary>
 
 - README.md
@@ -101,25 +109,154 @@ Scripts and imported toolkits are organized by purpose:
 </details>
 
 <details>
+  <summary>Development & Scripting Tools</summary>
+
+- abbodi1406--BatUtil/
+- AliceDzindzik--menu-do-suporte/
+- AnonKryptiQuz--I-Espresso/
+- AnthonyMusgrove--Emby-ScripterX/
+- Archive-projects--Batch-File-examples/
+- AveYo--MediaCreationTool.bat/
+- batsh-dev-team--Batsh/
+- boxcutter--windows/
+- C0nw0nk--SteamCMD-AutoUpdate-Any-Gameserver/
+- custom-dev-tools--wampserver-php-cli-version-changer/
+- custom-dev-tools--wampserver-ssl-auto-config/
+- danielj0nes--Activate-Windows10-Pro-Script/
+- davidmarble--virtualenvwrapper-win/
+- dend--windows-dev-box/
+- dfkt--win-cmd-tools/
+- diogo-fernan--ir-rescue/
+- DosX-dev--BatchASM/
+- Ec-25--FixIt/
+- enjoiz--Privesc/
+- faizul726--matject/
+- FoxP--PNG-to-ICO/
+- FoxP--rclone-backup/
+- FreakC-Foundation--FreakC/
+- geekcomputers--Batch/
+- HadiKhoirudin--Qualcomm-Tool/
+- happy05dz--Batch-Script-Collection/
+- Hishiro64--av1an-win-script/
+- illsk1lls--ZipRipper/
+- jahwi--bget/
+- JaredCabot--OneDrive-Uninstaller/
+- K3V1991--ADBKit/
+- kaic--win-post-install/
+- KnightDanila--BAT_FFMPEG/
+- m-ab-s--media-autobuild_suite/
+- m2nlight--WindowsServerToWindowsDesktop/
+- ManuelGil--Script-Reset-Windows-Update-Tool/
+- mrblomblo--yt-dlp-usage-script/
+- NabiKAZ--video2gif/
+- npocmaka--batch.scripts/
+- PassingTheKnowledge--Batchography/
+- peass-ng--PEASS-ng/
+- ph33nx--WinMasterBlocker/
+- prestonsn--windows-10-activation-script/
+- Pyenb--Outlook-desktop-ad-blocker/
+- repnz--shellcode2exe/
+- Serede--mkvtoolnix-batch/
+- ShadowWhisperer--Remove-MS-Edge/
+- shoober420--windows11-scripts/
+- sim0n00ps--L3-Dumping/
+- skidaim--TJprojMain-explorer.exe-remover/
+- slorelee--wimbuilder2/
+- TarikSeyceri--Windows-10-Update-Disabler.bat/
+- tytsxai--IDM-Activation-Script-Chinese/
+- vogeljo--reset-vassistx/
+- warengonzaga--wifi-passview/
+- wizz13150--PDQ_Repo/
+- yasser-alghamdi--winterfell-collection/
+- YasserDRIF--Toggle-Tweaker/
+- README.md
+</details>
+
+<details>
+  <summary>File & Disk Utilities</summary>
+
+- amakvana--Bat-2-Exec/
+- ayoisaiah--f2/
+- azmatt--windowsEnum/
+- bequiet11--autodesk-complete-uninstaller/
+- edinsuta--youtube-dl-batch/
+- Espionage724--Windows/
+- jonstephens85--instantngp-batch/
+- Jordan231111--BluestacksRoot/
+- K3V1991--ADB-and-FastbootPlusPlus/
+- matej137--OutlookRemover/
+- rossy--mpv-install/
+- TechTank--AlwaysActiveHours/
+- vegardit--cygwin-portable-installer/
+- README.md
+</details>
+
+<details>
   <summary>File, Media & Conversion Tools</summary>
 
+- abbodi1406--BatUtil/
 - AndrewHazelden--MultiMesh-Scripting/
+- anonymlol--Encoding_automation_scripts/
+- ardyan69--wa/
+- auspbro--batch-snippets/
+- AveYo--MediaCreationTool.bat/
+- AxtMueller--Windows-Batch-Deployment/
+- ayoisaiah--f2/
+- batsh-dev-team--Batsh/
+- blackrosezy--build-libcurl-windows/
 - C0nw0nk--qBittorrent/
+- C0nw0nk--SteamCMD-AutoUpdate-Any-Gameserver/
+- chsliu--batch/
+- conan513--TrinityBuilder/
+- daniel-sc--bash-shell-to-bat-converter/
+- davidmarble--virtualenvwrapper-win/
+- dehoisted--Bat2Exe/
+- describe19--check-video/
+- eddex--aseprite-windows-docker-build/
+- edinsuta--youtube-dl-batch/
+- fengyunkkx--FolderIconTool/
 - FoxP--PNG-to-ICO/
+- GDX-X--PFS-BatchKit-Manager/
+- HaveAGitGat--HBBatchBeast/
 - Honguito98--enctool-batch/
+- ibrahimtonca--35-Different-Commands-to-Make-IT-Professionals-Work-Easier-All-in-One-Bat-File-/
 - ImGuiNET--ImGui.NET-nativebuild/
 - JonnyBanana--BatchMan-e-Robby/
+- jpalbert--webcam-settings-dialog-windows/
+- K3V1991--ADB-and-FastbootPlusPlus/
 - K3V1991--ADBKit/
+- KingKDot--SomalifuscatorV2/
 - KnightDanila--BAT_FFMPEG/
+- Kreijstal--BatchProjects/
+- m-ab-s--media-autobuild_suite/
 - ManzDev--video-converter-scripts/
 - Moodkiller--SendTo-rclone-GDrive/
+- moom825--batch-extention-spoofer/
 - NabiKAZ--video2gif/
+- patrickfav--density-converter/
 - PAXANDDOS--ForzaHorizonFix/
-- README.md
+- ph33nx--WinMasterBlocker/
+- prashantmi--Rar-Password-Cracker/
+- Pyenb--Outlook-desktop-ad-blocker/
+- richhost--pixzip-lite/
+- rossy--mpv-install/
+- scottgriv--batch-useful_bat_files/
 - Serede--mkvtoolnix-batch/
-- abbodi1406--BatUtil/
-- anonymlol--Encoding_automation_scripts/
-- and more...
+- ShadowWhisperer--Remove-MS-Edge/
+- shenwei356--brename/
+- SkyEmie--batch-obfuscator/
+- slathrop--git-scripts-win/
+- stbrenner--SilentCMD/
+- userdocs--LFTP4WIN/
+- vegardit--cygwin-portable-installer/
+- vogeljo--reset-vassistx/
+- w3c--libwww/
+- warengonzaga--wifi-passview/
+- wieslawsoltes--BatchEncoder/
+- xxmichibxx--Batch-CIA-3DS-Decryptor-Redux/
+- YILS-LIN--short-video-factory/
+- yornaath--batshit/
+- README.md
 </details>
 
 <details>
@@ -131,6 +268,25 @@ Scripts and imported toolkits are organized by purpose:
 - mitchv2020--QuestToolbox/
 - Takaovi--BatchStealer/
 - tinboye--Steam_workshop_scripts/
+- README.md
+</details>
+
+<details>
+  <summary>Gaming & Entertainment Tools</summary>
+
+- gameclamp--MangaMeeyaAssociations/
+- jiesou--MFWL-Minecraft-For-Windows-Unlock-Launcher/
+- xxmichibxx--Batch-CIA-3DS-Decryptor-Redux/
+- README.md
+</details>
+
+<details>
+  <summary>Network & Internet Tools</summary>
+
+- auspbro--batch-snippets/
+- TechnicalUserX--batch_wifi_brute_forcer/
+- TheBATeam--Batch-WI-FI-Brute-Forcer/
+- YILS-LIN--short-video-factory/
 - README.md
 </details>
 
@@ -147,13 +303,34 @@ Scripts and imported toolkits are organized by purpose:
 <details>
   <summary>Other & Uncategorized</summary>
 
+- AFaustini--OtimizeWindows/
+- Andrew-J-Larson--OS-Scripts/
+- boxcutter--windows/
+- carlospolop--winPE/
 - corpnewt--Batch-Scripts/
 - Da2dalus--FunBatchCode-MalicousAndNonMalicous/
+- EbolaMan-YT--Batch-Multi-Tool/
 - EbolaMan-YT--PsExec/
+- gatoslu--KMS-VL-ALL-CMD/
+- GDX-X--PFS-BatchKit-Manager/
 - geekcomputers--Batch/
+- islamadel--bat2exe/
+- itsHenry35--Adobe-flash-player-installer/
+- Kawwabi--TerabyteTweaker/
+- Kreijstal--BatchProjects/
 - matej137--OutlookRemover/
+- minigueimeiros--office-365-cmd/
+- newmatrix--WinRTP/
 - Nickfost--Batch/
+- ParrySMS--batteryreport/
 - peterjc123--pytorch-scripts/
+- slorelee--wimbuilder2/
+- TairikuOokami--Windows/
+- TheBobPony--MSEdgeTweaker/
+- tsgrgo--windows-update-disabler/
+- vektort13--antiOS_batch/
+- vladimir-kharin--1c-batch/
+- yanncam--exe2powershell/
 - README.md
 </details>
 
@@ -167,6 +344,13 @@ Scripts and imported toolkits are organized by purpose:
 </details>
 
 <details>
+  <summary>Process, Service & Startup Management</summary>
+
+- stefanpejcic--EmptyStandbyList/
+- README.md
+</details>
+
+<details>
   <summary>Scripting Libraries, Examples & Tutorials</summary>
 
 - happy05dz--Batch-Script-Collection/
@@ -176,37 +360,86 @@ Scripts and imported toolkits are organized by purpose:
 </details>
 
 <details>
+  <summary>Security & Privacy Tools</summary>
+
+- anic17--Batch-Antivirus/
+- bongochong--CWP-Utilities/
+- SwiftOnSecurity--OfficeDeployFramework/
+- README.md
+</details>
+
+<details>
   <summary>Security, Hardening & Diagnostics</summary>
 
 - AhmetHan--EDR_Tester/
 - azmatt--windowsEnum/
 - diogo-fernan--ir-rescue/
+- enjoiz--Privesc/
 - frizb--Windows-Privilege-Escalation/
 - gladiatx0r--Powerless/
+- illsk1lls--ZipRipper/
+- peass-ng--PEASS-ng/
 - repnz--shellcode2exe/
 - swagkarna--Defeat-Defender-V1.2.0/
+- TheBATeam--Batch-WI-FI-Brute-Forcer/
 - README.md
 </details>
 
 <details>
   <summary>Single-Function Scripts</summary>
 
-- Over 400+ single-purpose batch scripts for Windows customization, tweaks, and utilities
+- README.md
+</details>
+
+<details>
+  <summary>System Information & Diagnostics</summary>
+
+- ios12checker--Windows-Maintenance-Tool/
+- weareblahs--WSAUtilities/
 - README.md
 </details>
 
 <details>
   <summary>System Optimization & Performance</summary>
 
+- Aetherinox--pause-windows-updates/
 - ancel1x--Ancels-Performance-Batch/
 - Batlez--Batlez-Tweaks/
 - CoolDotty--NeverWake/
 - fr0st-iwnl--WinConfigs/
+- ios12checker--Windows-Maintenance-Tool/
 - Jisll--windows11/
 - leetfin--Windows10Tools/
 - m2nlight--WindowsServerToWindowsDesktop/
+- MajorGeek--MajorGeeks-Windows-Tweaks/
+- ManuelGil--Script-Reset-Windows-Update-Tool/
 - NARCOTIC--Windows-Optimizer/
+- semazurek--ET-Optimizer/
 - TerryHuangHD--Windows10-VersionSwitcher/
+- TheBobPony--MSEdgeTweaker/
+- tsgrgo--windows-update-disabler/
+- vmavromatis--gnome-layout-manager/
+- YasserDRIF--Toggle-Tweaker/
+- Zusier--Zusiers-optimization-Batch/
+- README.md
+</details>
+
+<details>
+  <summary>System Tweaks & Performance Enhancements</summary>
+
+- 2rf--winGetDebloated/
+- Aetherinox--pause-windows-updates/
+- ancel1x--Ancels-Performance-Batch/
+- balsamleti--speedup-windows10/
+- Batlez--Batlez-Tweaks/
+- chainski--WindowsCleanerUtility/
+- MajorGeek--MajorGeeks-Windows-Tweaks/
+- semazurek--ET-Optimizer/
+- SeregaSPb--Windows-10-batch-optimizer/
+- tcja--Windows-10-tweaks/
+- vmavromatis--gnome-layout-manager/
+- warengonzaga--wrn-cleaner/
+- Zusier--Zusiers-optimization-Batch/
 - README.md
 </details>
 
@@ -383,3 +616,4 @@ Thanks to:
 ---
 
 🛠️ Made with love for the Windows command line
+

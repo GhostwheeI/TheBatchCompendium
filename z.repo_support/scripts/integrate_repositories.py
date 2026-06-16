@@ -101,11 +101,11 @@ class RepositoryIntegrator:
                 return None
             
             # Clean the repository name for filesystem
-            clean_name = repo_name.replace('/', '_').replace('\\', '_')
+            clean_name = repo_name.replace('/', '--').replace('\\', '--')
             category = repo.get('category', 'Uncategorized')
             
             # Create category directory if it doesn't exist
-            category_path = self.base_path / category.replace(' & ', '_').replace(' ', '_')
+            category_path = self.base_path / category
             category_path.mkdir(exist_ok=True)
             
             # Create repository directory
