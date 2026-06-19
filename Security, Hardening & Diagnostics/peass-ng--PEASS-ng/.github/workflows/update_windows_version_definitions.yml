@@ -1,0 +1,78 @@
+name: Update Windows Version Definitions
+
+on:
+  schedule:
+    - cron: "17 4 */14 * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-definitions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: master
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Install Python dependencies
+        run: python3 -m pip install --disable-pip-version-check openpyxl
+
+      - name: Update windows version definitions
+        timeout-minutes: 50
+        run: python3 build_lists/update_windows_version_defs.py --verbose
+
+      - name: Validate windows version definitions
+        run: python3 build_lists/validate_windows_version_defs.py
+
+      - name: Create validated update pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="chore(winpeas): update windows version vulnerability definitions"
+          branch="bot/update-windows-version-definitions"
+
+          if git diff --quiet -- build_lists/windows_version_exploits.json; then
+            echo "No windows version definition updates detected."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add build_lists/windows_version_exploits.json
+          git commit -m "$title"
+          git push --force origin "$branch"
+
+          pr_number="$(gh pr list --state open --head "$branch" --base master --json number --jq '.[0].number')"
+          if [ -z "$pr_number" ]; then
+            gh pr create \
+              --base master \
+              --head "$branch" \
+              --title "$title" \
+              --body "Automated update of \`build_lists/windows_version_exploits.json\`. The generated JSON passed \`build_lists/validate_windows_version_defs.py\` before this PR was created."
+          else
+            gh pr edit "$pr_number" \
+              --title "$title" \
+              --body "Automated update of \`build_lists/windows_version_exploits.json\`. The generated JSON passed \`build_lists/validate_windows_version_defs.py\` before this PR was updated."
+          fi
+
+          pr_number="$(gh pr list --state open --head "$branch" --base master --json number --jq '.[0].number')"
+          if [ -z "$pr_number" ]; then
+            echo "Could not resolve the generated pull request after creating/updating it."
+            exit 1
+          fi
+
+          gh workflow run PR-tests.yml --ref "$branch"
+          echo "PR-tests dispatched for PR #$pr_number. The trusted workflow_run merge job will merge it and dispatch CI-master_test after tests pass."
