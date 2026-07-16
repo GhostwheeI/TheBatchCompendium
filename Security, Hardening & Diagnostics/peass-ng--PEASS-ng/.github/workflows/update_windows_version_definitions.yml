@@ -1,0 +1,148 @@
+name: Update Windows Version Definitions
+
+on:
+  schedule:
+    - cron: "17 4 */14 * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-definitions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: master
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Install Python dependencies
+        run: python3 -m pip install --disable-pip-version-check openpyxl
+
+      - name: Update windows version definitions
+        timeout-minutes: 50
+        run: python3 build_lists/update_windows_version_defs.py --verbose
+
+      - name: Validate windows version definitions
+        run: python3 build_lists/validate_windows_version_defs.py
+
+      - name: Create validated update pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MERGE_TOKEN: ${{ secrets.CODEX_FIXER_TOKEN }}
+        run: |
+          title="chore(winpeas): update windows version vulnerability definitions"
+          branch="bot/update-windows-version-definitions"
+
+          if git diff --quiet -- build_lists/windows_version_exploits.json; then
+            echo "No windows version definition updates detected."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add build_lists/windows_version_exploits.json
+          git commit -m "$title"
+          git push --force origin "$branch"
+
+          pr_number="$(gh pr list --state open --head "$branch" --base master --json number --jq '.[0].number')"
+          if [ -z "$pr_number" ]; then
+            gh pr create \
+              --base master \
+              --head "$branch" \
+              --title "$title" \
+              --body "Automated update of \`build_lists/windows_version_exploits.json\`. The generated JSON passed \`build_lists/validate_windows_version_defs.py\` before this PR was created."
+          else
+            gh pr edit "$pr_number" \
+              --title "$title" \
+              --body "Automated update of \`build_lists/windows_version_exploits.json\`. The generated JSON passed \`build_lists/validate_windows_version_defs.py\` before this PR was updated."
+          fi
+
+          pr_number="$(gh pr list --state open --head "$branch" --base master --json number --jq '.[0].number')"
+          if [ -z "$pr_number" ]; then
+            echo "Could not resolve the generated pull request after creating/updating it."
+            exit 1
+          fi
+
+          # Run the winPEAS PR-tests build for the bot branch, wait for it, and merge on
+          # success. We dispatch with github.token (this workflow has `actions: write`) and
+          # then poll the dispatched run directly, instead of relying on a cross-workflow
+          # `workflow_run` trigger: runs owned by GITHUB_TOKEN do not emit `workflow_run`
+          # events, and the auto-created `pull_request` PR-tests run for a bot-authored PR is
+          # held in `action_required`. The merge itself is done with a PAT (see below).
+          if [ -z "$MERGE_TOKEN" ]; then
+            echo "CODEX_FIXER_TOKEN (MERGE_TOKEN) is required to merge the validated bot PR."
+            exit 1
+          fi
+
+          dispatch_ts="$(date -u +%s)"
+          gh workflow run PR-tests.yml --ref "$branch"
+          echo "Dispatched PR-tests for $branch (PR #$pr_number); locating the run..."
+
+          run_id=""
+          for attempt in $(seq 1 18); do
+            row="$(gh run list --workflow=PR-tests.yml --branch "$branch" --event workflow_dispatch \
+              --limit 1 --json databaseId,createdAt --jq '.[0] | [.databaseId, .createdAt] | @tsv')"
+            cid="$(printf '%s' "$row" | cut -f1)"
+            cts_iso="$(printf '%s' "$row" | cut -f2)"
+            if [ -n "$cid" ]; then
+              cts="$(date -u -d "$cts_iso" +%s 2>/dev/null || echo 0)"
+              if [ "$cts" -ge "$((dispatch_ts - 60))" ]; then
+                run_id="$cid"
+                break
+              fi
+            fi
+            sleep 10
+          done
+
+          if [ -z "$run_id" ]; then
+            echo "Could not locate the dispatched PR-tests run."
+            exit 1
+          fi
+          echo "Watching PR-tests run $run_id until it completes..."
+
+          status=""
+          conclusion=""
+          for attempt in $(seq 1 70); do
+            status="$(gh run view "$run_id" --json status --jq .status)"
+            if [ "$status" = "completed" ]; then
+              conclusion="$(gh run view "$run_id" --json conclusion --jq .conclusion)"
+              break
+            fi
+            sleep 30
+          done
+
+          if [ "$conclusion" != "success" ]; then
+            echo "PR-tests run $run_id did not pass (status=$status conclusion=$conclusion); not merging PR #$pr_number."
+            exit 1
+          fi
+          echo "PR-tests passed. Squash-merging PR #$pr_number..."
+
+          # Merge with the PAT (not github.token) so the resulting push to master triggers
+          # CI-master_test -> Publish_release. A github.token-authored merge would not.
+          for attempt in $(seq 1 6); do
+            if GH_TOKEN="$MERGE_TOKEN" gh api -X PUT \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/${{ github.repository }}/pulls/${pr_number}/merge" \
+              -f merge_method=squash \
+              -f commit_title="$title"; then
+              echo "Merged windows definitions PR #$pr_number. CI-master_test will build and publish the release."
+              exit 0
+            fi
+            echo "Merge attempt $attempt failed for PR #$pr_number; retrying."
+            sleep 10
+          done
+
+          echo "Failed to merge PR #$pr_number after retries."
+          exit 1
