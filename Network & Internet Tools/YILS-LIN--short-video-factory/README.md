@@ -1,15 +1,3 @@
-# Short Video Factory
-
-A tool built with batch scripts for processing short videos.
-
-## Features
-- Batch processing of videos
-- Various transformation and formatting commands
-
----
-
-## Original Readme
-
 <a id="readme-top"></a>
 
 <!-- 项目海报 -->
@@ -182,8 +170,8 @@ Copyright © 2025 YILS.
 ## ⭐ 星标历史
 
 <div align="center">
-  <a href="https://star-history.com/#YILS-LIN/short-video-factory">
-    <img src="https://api.star-history.com/svg?repos=YILS-LIN/short-video-factory&type=Date" alt="Star History Chart" width="800">
+  <a href="#">
+    <img src="./images/StarHistory.png" alt="Star History Chart" width="800">
   </a>
 </div>
 
