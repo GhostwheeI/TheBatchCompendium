@@ -4,63 +4,37 @@ Repository Discovery Processing Report
 
 Discovery Summary:
 -----------------
-Total Repositories Discovered: 156
+Total Repositories Discovered: 34
 Duplicates Removed: 0
-Unique Repositories: 156
-Quality Filtered (Final): 112
+Unique Repositories: 34
+Quality Filtered (Final): 5
 
 Category Distribution:
 ---------------------
-Audio & Video Capture, Conversion & Playback: 2
-Development & Scripting Tools: 58
-File & Disk Utilities: 13
-Gaming & Entertainment Tools: 3
-Network & Internet Tools: 4
-Process, Service & Startup Management: 1
-Security & Privacy Tools: 3
-System Information & Diagnostics: 2
-System Tweaks & Performance Enhancements: 13
-Uncategorized: 13
+Development & Scripting Tools: 1
+File & Disk Utilities: 1
+System Tweaks & Performance Enhancements: 2
+Uncategorized: 1
 
 Top New Repositories:
 ------------------------------
- 1. peass-ng/PEASS-ng (19,995 ⭐, Quality: 0.52)
+ 1. boxcutter/windows-batch (770 ⭐, Quality: 0.45)
     Category: Development & Scripting Tools
-    PEASS - Privilege Escalation Awesome Scripts SUITE (with col...
+    Virtual machine templates for Windows written in legacy JSON...
 
- 2. AveYo/MediaCreationTool.bat (10,234 ⭐, Quality: 0.74)
-    Category: Development & Scripting Tools
-    Universal MCT wrapper script for all Windows 10/11 versions ...
+ 2. LennoC/N_m3u8DL-RE_SimpleBatGUI (51 ⭐, Quality: 0.32)
+    Category: Uncategorized
+    简单的批处理调用N_m3u8DL-RE进行下载，预设单个下载、批量下载、录播下载。...
 
- 3. ShadowWhisperer/Remove-MS-Edge (5,203 ⭐, Quality: 0.74)
-    Category: Development & Scripting Tools
-    Uninstall Microsoft Edge with an executable or batch script....
+ 3. SegoCode/DebloBat (50 ⭐, Quality: 0.34)
+    Category: System Tweaks & Performance Enhancements
+    ⚙️ Yet another (and ugly) debloat, optimizer and tweaker for...
 
- 4. batsh-dev-team/Batsh (4,352 ⭐, Quality: 0.54)
-    Category: Development & Scripting Tools
-    A language that compiles to Bash and Windows Batch...
+ 4. dubbyOW/BCDEditTweaks (50 ⭐, Quality: 0.38)
+    Category: System Tweaks & Performance Enhancements
+    .cmd script for enhancing Windows performance through optimi...
 
- 5. YILS-LIN/short-video-factory (4,085 ⭐, Quality: 0.54)
-    Category: Network & Internet Tools
-    一键生成产品营销与泛内容短视频，AI批量自动剪辑，高颜值跨平台桌面端工具 One click generation of...
-
- 6. ayoisaiah/f2 (2,417 ⭐, Quality: 0.54)
+ 5. edinsuta/yt-dlp-batch (50 ⭐, Quality: 0.36)
     Category: File & Disk Utilities
-    F2 is a cross-platform command-line tool for batch renaming ...
-
- 7. m-ab-s/media-autobuild_suite (1,797 ⭐, Quality: 0.57)
-    Category: Development & Scripting Tools
-    This Windows Batchscript helps setup a Mingw-w64 compiler en...
-
- 8. abbodi1406/BatUtil (1,421 ⭐, Quality: 0.56)
-    Category: Development & Scripting Tools
-    Collection of batch scripts utilities for Windows...
-
- 9. ios12checker/Windows-Maintenance-Tool (1,324 ⭐, Quality: 0.59)
-    Category: System Information & Diagnostics
-    A powerful, all-in-one Windows maintenance toolkit built ent...
-
-10. npocmaka/batch.scripts (1,132 ⭐, Quality: 0.72)
-    Category: Development & Scripting Tools
-    batch script utils and examples by npocmaka -...
+    Simple batch files for simplifying basic usage of https://gi...
 
