@@ -1,7 +1,7 @@
 {
   "repository": "batsh-dev-team/Batsh",
   "url": "https://github.com/batsh-dev-team/Batsh",
-  "last_updated": "2026-06-15T23:04:22.442439",
+  "last_updated": "2026-08-01T09:43:17.894367",
   "stars": "4352",
   "description": "A language that compiles to Bash and Windows Batch"
 }
