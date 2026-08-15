@@ -19,6 +19,11 @@ namespace winPEAS.Checks
 {
     internal class WindowsCreds : ISystemCheck
     {
+        private const string CredentialLockerMitreId = "T1555.004";
+        private const string CredentialLockerLink = "https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#credentials-manager--windows-vault";
+        private const string DpapiLink = "https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#dpapi";
+        private const string RdcManLink = "https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#remote-desktop-credential-manager";
+
         public string[] MitreAttackIds { get; } = new[] { "T1552.001", "T1552.002", "T1555.003", "T1555.004", "T1558", "T1547.005", "T1563.002" };
 
         public void PrintInfo(bool isDebug)
@@ -29,6 +34,7 @@ namespace winPEAS.Checks
             {
                 PrintVaultCreds,
                 PrintCredentialManager,
+                PrintUWPPasswordVault,
                 PrintSavedRDPInfo,
                 PrintRDPSettings,
                 PrintRecentRunCommands,
@@ -49,8 +55,8 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("Checking Windows Vault", "T1555.004");
-                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#credentials-manager--windows-vault");
+                Beaprint.MainPrint("Checking Windows Vault", CredentialLockerMitreId);
+                Beaprint.LinkPrint(CredentialLockerLink);
                 var vaultCreds = VaultCli.DumpVault();
 
                 var colorsC = new Dictionary<string, string>()
@@ -69,8 +75,8 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("Checking Credential manager", "T1555.004");
-                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#credentials-manager--windows-vault");
+                Beaprint.MainPrint("Checking Credential manager", CredentialLockerMitreId);
+                Beaprint.LinkPrint(CredentialLockerLink);
 
                 var colorsC = new Dictionary<string, string>()
                 {
@@ -109,6 +115,93 @@ namespace winPEAS.Checks
             {
                 Beaprint.PrintException(ex.Message);
             }
+        }
+
+        private static void PrintUWPPasswordVault()
+        {
+            try
+            {
+                Beaprint.MainPrint("Checking UWP PasswordVault / Credential Locker", CredentialLockerMitreId);
+                Beaprint.LinkPrint("https://hacktricks.wiki");
+
+                var colorsC = new Dictionary<string, string>()
+        {
+            { "Resource.*|UserName.*|Password.*", Beaprint.ansi_color_bad },
+        };
+
+                Type vaultType = Type.GetType("Windows.Security.Credentials.PasswordVault, Windows, ContentType=WindowsRuntime");
+                if (vaultType == null)
+                {
+                    Beaprint.PrintException("Could not load WindowsRuntime PasswordVault type. Ensure you are running on Windows.");
+                    return;
+                }
+
+                object vaultInstance = Activator.CreateInstance(vaultType);
+                var retrieveAllMethod = vaultType.GetMethod("RetrieveAll");
+                var credentialsList = retrieveAllMethod.Invoke(vaultInstance, null) as System.Collections.IEnumerable;
+
+                if (credentialsList == null)
+                {
+                    Beaprint.AnsiPrint("    [-] No UWP credentials found in the locker.\n", colorsC);
+                    return;
+                }
+
+                int count = 0;
+                foreach (object credential in credentialsList)
+                {
+                    count++;
+                    try
+                    {
+                        Type credType = credential.GetType();
+                        var retrievePasswordMethod = credType.GetMethod("RetrievePassword");
+                        retrievePasswordMethod.Invoke(credential, null);
+
+                        string resource = credType.GetProperty("Resource")?.GetValue(credential)?.ToString() ?? "";
+                        string userName = credType.GetProperty("UserName")?.GetValue(credential)?.ToString() ?? "";
+                        string password = credType.GetProperty("Password")?.GetValue(credential)?.ToString() ?? "";
+
+                        var credData = new Dictionary<string, string>
+                {
+                    { "Resource", resource },
+                    { "UserName", userName },
+                    { "Password", password }
+                };
+
+                        Beaprint.DictPrint(credData, colorsC, true, true);
+                        Beaprint.PrintLineSeparator();
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+                }
+
+                if (count == 0)
+                {
+                    Beaprint.AnsiPrint("    [-] No UWP credentials found in the locker.\n", colorsC);
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        private static List<Dictionary<string, string>> PrintLinkedCredentialFiles(
+            string title,
+            string mitreId,
+            string link,
+            Func<List<Dictionary<string, string>>> getFiles,
+            bool deleteNulls = false,
+            string linkComment = "")
+        {
+            Beaprint.MainPrint(title, mitreId);
+            Beaprint.LinkPrint(link, linkComment);
+
+            var files = getFiles();
+            Beaprint.DictPrint(files, deleteNulls);
+
+            return files;
         }
 
         static void PrintSavedRDPInfo()
@@ -154,14 +247,15 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("Checking for DPAPI Master Keys", "T1555.003");
-                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#dpapi");
-                var masterKeys = KnownFileCredsInfo.ListMasterKeys();
+                var masterKeys = PrintLinkedCredentialFiles(
+                    "Checking for DPAPI Master Keys",
+                    "T1555.003",
+                    DpapiLink,
+                    KnownFileCredsInfo.ListMasterKeys,
+                    true);
 
-                if (masterKeys.Count != 0)
+                if (masterKeys.Count > 0)
                 {
-                    Beaprint.DictPrint(masterKeys, true);
-
                     if (MyUtils.IsHighIntegrity())
                     {
                         Beaprint.InfoPrint("Follow the provided link for further instructions in how to decrypt the masterkey.");
@@ -182,12 +276,13 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("Checking for DPAPI Credential Files", "T1555.003");
-                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#dpapi");
-                var credFiles = KnownFileCredsInfo.GetCredFiles();
-                Beaprint.DictPrint(credFiles, false);
+                var credFiles = PrintLinkedCredentialFiles(
+                    "Checking for DPAPI Credential Files",
+                    "T1555.003",
+                    DpapiLink,
+                    KnownFileCredsInfo.GetCredFiles);
 
-                if (credFiles.Count != 0)
+                if (credFiles.Count > 0)
                 {
                     Beaprint.InfoPrint("Follow the provided link for further instructions in how to decrypt the creds file");
                 }
@@ -202,13 +297,14 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("Checking for RDCMan Settings Files", "T1552.001");
-                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#remote-desktop-credential-manager",
-                    "Dump credentials from Remote Desktop Connection Manager");
-                var rdcFiles = RemoteDesktop.GetRDCManFiles();
-                Beaprint.DictPrint(rdcFiles, false);
+                var rdcFiles = PrintLinkedCredentialFiles(
+                    "Checking for RDCMan Settings Files",
+                    "T1552.001",
+                    RdcManLink,
+                    RemoteDesktop.GetRDCManFiles,
+                    linkComment: "Dump credentials from Remote Desktop Connection Manager");
 
-                if (rdcFiles.Count != 0)
+                if (rdcFiles.Count > 0)
                 {
                     Beaprint.InfoPrint("Follow the provided link for further instructions in how to decrypt the .rdg file");
                 }
