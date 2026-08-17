@@ -1,7 +1,7 @@
 # Title: Variables - sidB
 # ID: sidB
 # Author: Carlos Polop
-# Last Update: 22-08-2023
+# Last Update: 06-07-2026
 # Description: Dangerous sid binaries
 # License: GNU GPL
 # Version: 1.0
@@ -18,6 +18,7 @@ sidB="/apache2$%Read_root_passwd__apache2_-f_/etc/shadow\(CVE-2019-0211\)\
  /at$%RTru64_UNIX_4.0g\(CVE-2002-1614\)\
  /abrt-action-install-debuginfo-to-abrt-cache$%CENTOS 7.1/Fedora22\
  /chfn$%SuSE_9.3/10\
+ /check_icmp$%Monitoring_Plugins<3.0.1_if_setuid-root\(07-2026\)\
  /chkey$%Solaris_2.5.1\
  /chkperm$%Solaris_7.0_\
  /chpass$%2Vulns:OpenBSD_6.1_to_OpenBSD 6.6\(CVE-2019-19726\)--OpenBSD_2.7_i386/OpenBSD_2.6_i386/OpenBSD_2.5_1999/08/06/OpenBSD_2.5_1998/05/28/FreeBSD_4.0-RELEASE/FreeBSD_3.5-RELEASE/FreeBSD_3.4-RELEASE/NetBSD_1.4.2\
