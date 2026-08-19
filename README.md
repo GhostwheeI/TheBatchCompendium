@@ -4,7 +4,7 @@
 
 # 🎯 The Largest Batch Script Collection 🎯
 
-## 📊 **2,050 BATCH SCRIPTS** 📊
+## 📊 **4,404 BATCH SCRIPTS** 📊
 
 ### *The ultimate compendium of Windows batch automation*
 
@@ -13,7 +13,7 @@
 ---
 
 ![Windows](https://img.shields.io/badge/platform-Windows-blue)
-![Scripts](https://img.shields.io/badge/scripts-2050-green)
+![Scripts](https://img.shields.io/badge/scripts-4404-green)
 ![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 
 # The Batch Compendium
