@@ -1226,6 +1226,7 @@
     <Compile Include="Info\ApplicationInfo\ApplicationInfoHelper.cs" />
     <Compile Include="Info\ApplicationInfo\AutoRuns.cs" />
     <Compile Include="Info\ApplicationInfo\DeviceDrivers.cs" />
+    <Compile Include="Info\ApplicationInfo\InstalledPackageInventory.cs" />
     <Compile Include="Info\ApplicationInfo\SoapClientProxyAnalyzer.cs" />
     <Compile Include="Info\ApplicationInfo\InstalledApps.cs" />
     <Compile Include="Helpers\Beaprint.cs" />
@@ -1258,12 +1259,14 @@
     <Compile Include="Info\FilesInfo\Office\OfficeRecentFileInfo.cs" />
     <Compile Include="Info\FilesInfo\Office\OneDrive\CloudSyncProviderInfo.cs" />
     <Compile Include="Info\FilesInfo\Office\OneDrive\OneDriveSyncProviderInfo.cs" />
+    <Compile Include="Info\FilesInfo\RegistryHiveExposure.cs" />
     <Compile Include="Info\FilesInfo\WSL\WSLHelper.cs" />
     <Compile Include="Info\NetworkInfo\Enums\IPVersion.cs" />
     <Compile Include="Info\NetworkInfo\Enums\MibTcpState.cs" />
     <Compile Include="Info\NetworkInfo\Enums\Protocol.cs" />
     <Compile Include="Info\NetworkInfo\Enums\TcpTableClass.cs" />
     <Compile Include="Info\NetworkInfo\Enums\UdpTableClass.cs" />
+    <Compile Include="Info\NetworkInfo\HackTricksHostChecker.cs" />
     <Compile Include="Info\NetworkInfo\HostnameResolution.cs" />
     <Compile Include="Info\NetworkInfo\InternetConnectivity.cs" />
     <Compile Include="Info\NetworkInfo\InternetSettings\InternetSettings.cs" />
@@ -1325,6 +1328,7 @@
     <Compile Include="Info\WindowsCreds\RDPServerSettings.cs" />
     <Compile Include="Info\WindowsCreds\RDPSettingsInfo.cs" />
     <Compile Include="Info\WindowsCreds\RemoteDesktop.cs" />
+    <Compile Include="Info\WindowsCreds\SccmNetworkAccessAccount.cs" />
     <Compile Include="InterestingFiles\GPP.cs" />
     <Compile Include="InterestingFiles\InterestingFiles.cs" />
     <Compile Include="InterestingFiles\Unattended.cs" />
