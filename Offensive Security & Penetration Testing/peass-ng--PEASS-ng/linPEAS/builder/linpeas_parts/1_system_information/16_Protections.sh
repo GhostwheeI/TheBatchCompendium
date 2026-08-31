@@ -1,12 +1,14 @@
 # Title: System Information - Protections
 # ID: SY_Protections
 # Author: Carlos Polop
-# Last Update: 07-03-2024
+# Last Update: 08-07-2026
 # Description: Check for system security protections and their bypass possibilities:
 #   - AppArmor/SELinux status and profiles
 #   - ASLR status
 #   - Seccomp filters
 #   - Capabilities
+#   - Fail2ban/CrowdSec intrusion prevention systems (affects su/ssh brute forcing)
+#   - Pending reboot (running kernel/libraries may be outdated -> kernel exploits)
 #   - Common vulnerable scenarios:
 #     * Disabled security modules
 #     * Weak security profiles
@@ -28,10 +30,10 @@
 # License: GNU GPL
 # Version: 1.0
 # Mitre: T1518.001
-# Functions Used: echo_not_found, print_2title, print_list, warn_exec
+# Functions Used: echo_no, echo_not_found, print_2title, print_list, warn_exec
 # Global Variables:
 # Initial Functions:
-# Generated Global Variables: $ASLR, $hypervisorflag, $detectedvirt, $unpriv_userns_clone, $perf_event_paranoid, $mmap_min_addr, $ptrace_scope, $dmesg_restrict, $kptr_restrict, $unpriv_bpf_disabled, $protected_symlinks, $protected_hardlinks, $label, $sysctl_path, $sysctl_var, $zero_color, $nonzero_color, $sysctl_value
+# Generated Global Variables: $ASLR, $hypervisorflag, $detectedvirt, $unpriv_userns_clone, $perf_event_paranoid, $mmap_min_addr, $ptrace_scope, $dmesg_restrict, $kptr_restrict, $unpriv_bpf_disabled, $protected_symlinks, $protected_hardlinks, $label, $sysctl_path, $sysctl_var, $zero_color, $nonzero_color, $sysctl_value, $f2b_jails
 # Fat linpeas: 0
 # Small linpeas: 0
 
@@ -149,6 +151,38 @@ elif [ -f "/proc/config.gz" ]; then
     zcat /proc/config.gz 2>/dev/null | grep -E 'CONFIG_RANDOMIZE_BASE|CONFIG_STACKPROTECTOR|CONFIG_SLAB_FREELIST_|CONFIG_KASAN'
 else
     echo_not_found "kernel config"
+fi
+
+#-- SY) Fail2ban (Intrusion Prevention System)
+print_list "Fail2ban present? .............. "$NC
+if command -v fail2ban-client >/dev/null 2>&1 || [ -S "/var/run/fail2ban/fail2ban.sock" ] || pgrep -x fail2ban-server >/dev/null 2>&1; then
+    f2b_jails=$(fail2ban-client status 2>/dev/null | grep "Jail list" | sed "s/.*Jail list:[[:space:]]*//")
+    if [ "$f2b_jails" ]; then
+        echo "Yes - active, jails: $f2b_jails" | sed -${E} "s,.*,${SED_GREEN},"
+    else
+        echo "Yes - installed (could not query jails, may need root)" | sed -${E} "s,.*,${SED_GREEN},"
+    fi
+else
+    echo_not_found "fail2ban"
+fi
+
+#-- SY) CrowdSec (Intrusion Prevention System)
+print_list "CrowdSec present? .............. "$NC
+if command -v cscli >/dev/null 2>&1 || pgrep -x crowdsec >/dev/null 2>&1; then
+    echo "Yes" | sed -${E} "s,.*,${SED_GREEN},"
+else
+    echo_not_found "crowdsec"
+fi
+
+#-- SY) Pending reboot (updates installed but not applied yet)
+print_list "Pending reboot? ................ "$NC
+if [ -f "/var/run/reboot-required" ] || [ -f "/run/reboot-required" ]; then
+    echo "Yes - updates installed but not applied, the running kernel/libs may be outdated (check kernel exploits)" | sed -${E} "s,.*,${SED_RED},"
+    if [ -f "/var/run/reboot-required.pkgs" ]; then
+        sed "s,^,    ," "/var/run/reboot-required.pkgs" 2>/dev/null
+    fi
+else
+    echo_no
 fi
 
 #-- SY) Gatekeeper
