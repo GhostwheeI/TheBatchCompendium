@@ -1,14 +1,15 @@
 # Title: Variables - kernel_cve_registry_data
 # ID: kernel_cve_registry_data
 # Author: Carlos Polop
-# Last Update: 08-06-2026
+# Contributor: Arjay Saguisa
+# Last Update: 17-08-2026
 # Description: Embedded kernel exploit matching datasets extracted from linux-exploit-suggester and linux-exploit-suggester-2 examples. Data is split across KERNEL_CVE_DATA_1..X with a maximum of 25 rows per env variable. This file also stores reference-only CVE tokens found in example repos when no explicit suggester matching rule exists.
 # License: GNU GPL
 # Version: 1.0
 # Functions Used:
 # Global Variables:
 # Initial Functions:
-# Generated Global Variables: $KERNEL_CVE_DATA_1, $KERNEL_CVE_DATA_2, $KERNEL_CVE_DATA_3, $KERNEL_CVE_DATA_4, $KERNEL_CVE_DATA_5, $KERNEL_CVE_DATA_6, $KERNEL_CVE_DATA_7, $KERNEL_CVE_DATA_8, $KERNEL_CVE_DATA_9, $KERNEL_CVE_DATA_10, $KERNEL_CVE_DATA_11, $KERNEL_CVE_DATA_12, $KERNEL_CVE_DATA_13, $KERNEL_CVE_DATA_14, $KERNEL_CVE_DATA_15, $KERNEL_CVE_DATA_16, $KERNEL_CVE_DATA_17, $KERNEL_CVE_DATA_18, $KERNEL_CVE_DATA_19, $KERNEL_CVE_DATA_20, $KERNEL_CVE_DATA_21
+# Generated Global Variables: $KERNEL_CVE_DATA_1, $KERNEL_CVE_DATA_2, $KERNEL_CVE_DATA_3, $KERNEL_CVE_DATA_4, $KERNEL_CVE_DATA_5, $KERNEL_CVE_DATA_6, $KERNEL_CVE_DATA_7, $KERNEL_CVE_DATA_8, $KERNEL_CVE_DATA_9, $KERNEL_CVE_DATA_10, $KERNEL_CVE_DATA_11, $KERNEL_CVE_DATA_12, $KERNEL_CVE_DATA_13, $KERNEL_CVE_DATA_14, $KERNEL_CVE_DATA_15, $KERNEL_CVE_DATA_16, $KERNEL_CVE_DATA_17, $KERNEL_CVE_DATA_18, $KERNEL_CVE_DATA_19, $KERNEL_CVE_DATA_20, $KERNEL_CVE_DATA_21, $KERNEL_CVE_DATA_22, $KERNEL_CVE_DATA_23
 # Fat linpeas: 0
 # Small linpeas: 1
 
@@ -114,7 +115,6 @@ CVE-2022-32250	nft_object UAF (NFT_MSG_NEWSET)	pkg=linux-kernel,ver<5.18.1,CONFI
 CVE-2023-0386	OverlayFS suid smuggle	pkg=linux-kernel,ver>=5.11,ver<=6.2,CONFIG_USER_NS=y,sysctl:kernel.unprivileged_userns_clone==1	ubuntu=22.04.1{kernel:5.15.0-57-generic}	1	CONFIG_USER_NS needs to be enabled && kernel.unprivileged_userns_clone=1 required
 CVE-2024-1086	double-free in nf_tables	pkg=linux-kernel,x86_64,ver>=5.14,ver<=6.6,CONFIG_NF_TABLES=y,CONFIG_USER_NS=y,sysctl:kernel.unprivileged_userns_clone==1	debian=12,ubuntu=22.04	1	CONFIG_USER_NS and CONFIG_NF_TABLES need to be enabled && kernel.unprivileged_userns_clone=1 required
 CVE-2021-3560	Polkit race authentication bypass	cmd:sh -c "apt list --installed 2>/dev/null | grep -E 'polkit.*0\\.105-26' | grep -qEv 'ubuntu1\\.[1-9]' || yum list installed 2>/dev/null | grep -qE 'polkit.*\\(0\\.117-2\\|0\\.115-6\\|0\\.11[3-9]\\)' || rpm -qa 2>/dev/null | grep -qE 'polkit.*\\(0\\.117-2\\|0\\.115-6\\|0\\.11[3-9]\\)'"		1	Migrated from former standalone 1_system_information check
-CVE-2025-38236	AF_UNIX MSG_OOB UAF	pkg=linux-kernel,ver>=6.9.0		1	Migrated from former standalone 1_system_information check
 CVE-2025-38352	POSIX CPU timers race	pkg=linux-kernel,ver>=6.12,ver<6.12.34,CONFIG_POSIX_CPU_TIMERS_TASK_WORK!=y		1	Migrated from former standalone 1_system_information check
 af_packet	2016-8655	4.4.0		http://www.exploit-db.com/exploits/40871
 american-sign-language	2010-4347	2.6.0,2.6.1,2.6.2,2.6.3,2.6.4,2.6.5,2.6.6,2.6.7,2.6.8,2.6.9,2.6.10,2.6.11,2.6.12,2.6.13,2.6.14,2.6.15,2.6.16,2.6.17,2.6.18,2.6.19,2.6.20,2.6.21,2.6.22,2.6.23,2.6.24,2.6.25,2.6.26,2.6.27,2.6.28,2.6.29,2.6.30,2.6.31,2.6.32,2.6.33,2.6.34,2.6.35,2.6.36		http://www.securityfocus.com/bid/45408
@@ -586,6 +586,10 @@ CVE-2025-40040	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token
 CVE-2025-6349	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token from example repos; no matching rule defined in source suggesters
 CVE-2025-8045	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token from example repos; no matching rule defined in source suggesters
 CVE-2025-8109	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token from example repos; no matching rule defined in source suggesters
+CVE-2025-38236	AF_UNIX MSG_OOB UAF	pkg=linux-kernel,ver>=5.15,ver<6.1.143		1	Fixed in stable 6.1.143
+CVE-2025-38236	AF_UNIX MSG_OOB UAF	pkg=linux-kernel,ver>=6.2,ver<6.6.96		1	Fixed in stable 6.6.96
+CVE-2025-38236	AF_UNIX MSG_OOB UAF	pkg=linux-kernel,ver>=6.7,ver<6.12.36		1	Fixed in stable 6.12.36
+CVE-2025-38236	AF_UNIX MSG_OOB UAF	pkg=linux-kernel,ver>=6.13,ver<6.15.5		1	Fixed in stable 6.15.5
 CVE-2106-2504	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token from example repos; no matching rule defined in source suggesters
 EOF_DATA_20
 )"
@@ -599,6 +603,7 @@ CVE-2021-4154	cgroup fsconfig type confusion	pkg=linux-kernel,ver=5.13.3		1	From
 CVE-2022-2588	route4_filter double-free	pkg=linux-kernel,ver=5.19.1,CONFIG_USER_NS=y,sysctl:kernel.unprivileged_userns_clone==1		1	From kernel-exploit-factory detail section and exploit prerequisites
 CVE-2022-2639	openvswitch reserve_sfa_size integer overflow	pkg=linux-kernel,ver=5.17.4,cmd:grep -qi openvswitch /proc/modules		1	From kernel-exploit-factory detail section; openvswitch module required
 CVE-2025-21702	net/sched qdisc UAF	pkg=linux-kernel,ver=6.6.75,CONFIG_NET_SCHED=y		1	From kernel-exploit-factory detail section (test version Linux-6.6.75)
+CVE-2025-38236	AF_UNIX MSG_OOB UAF	pkg=linux-kernel,ver>=6.16,ver<6.17,cmd:uname -r 2>/dev/null | grep -Eq '^6\.16\.0-rc[123]([-.]|$)'		1	Fixed in mainline 6.16-rc4
 CVE-2026-31431	Copy Fail	pkg=linux-kernel,ver>=4.14,ver<5.10.254,CONFIG_CRYPTO_USER_API_AEAD=[my],CONFIG_CRYPTO_AUTHENC=[my]		1	Upstream issue introduced in 4.14; fixed by stable backports and in mainline 7.0
 CVE-2026-31431	Copy Fail	pkg=linux-kernel,ver>=5.11,ver<5.15.204,CONFIG_CRYPTO_USER_API_AEAD=[my],CONFIG_CRYPTO_AUTHENC=[my]		1	Upstream issue introduced in 4.14; fixed by stable backports and in mainline 7.0
 CVE-2026-31431	Copy Fail	pkg=linux-kernel,ver>=5.16,ver<6.1.170,CONFIG_CRYPTO_USER_API_AEAD=[my],CONFIG_CRYPTO_AUTHENC=[my]		1	Upstream issue introduced in 4.14; fixed by stable backports and in mainline 7.0
@@ -606,12 +611,66 @@ CVE-2026-31431	Copy Fail	pkg=linux-kernel,ver>=6.2,ver<6.6.137,CONFIG_CRYPTO_USE
 CVE-2026-31431	Copy Fail	pkg=linux-kernel,ver>=6.7,ver<6.12.85,CONFIG_CRYPTO_USER_API_AEAD=[my],CONFIG_CRYPTO_AUTHENC=[my]		1	Upstream issue introduced in 4.14; fixed by stable backports and in mainline 7.0
 CVE-2026-31431	Copy Fail	pkg=linux-kernel,ver>=6.13,ver<6.18.22,CONFIG_CRYPTO_USER_API_AEAD=[my],CONFIG_CRYPTO_AUTHENC=[my]		1	Upstream issue introduced in 4.14; fixed by stable backports and in mainline 7.0
 CVE-2026-31431	Copy Fail	pkg=linux-kernel,ver>=6.19,ver<6.19.12,CONFIG_CRYPTO_USER_API_AEAD=[my],CONFIG_CRYPTO_AUTHENC=[my]		1	Upstream issue fixed in 6.19.12 and mainline 7.0
+CVE-2026-43503	DirtyClone	pkg=linux-kernel,ver>=3.9,ver<5.10.257		1	Fixed in stable 5.10.257; exploit path is in the networking stack and may be mitigated by removing the relevant ESP modules
 CVE-2017-16994	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token from example repos; appears as related bypass mention
 CVE-2020-27171	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token from example repos; appears as related comment in exploit source
 CVE-2024-0193	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token from example repos; appears as upstream source reference
 CVE-2026-43284	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token from official Ubuntu/Red Hat Dirty Frag advisories; no stable matcher added
+CVE-2026-43494	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token from official Ubuntu PinTheft advisory; no stable matcher added
 CVE-2026-43500	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token from official Ubuntu/Red Hat Dirty Frag advisories; no stable matcher added
 CVE-2026-46243	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token from official Red Hat CIFSwitch advisory; no stable matcher added
 CVE-2026-46300	catalog_reference_only	9999.9999.9999		0	Reference-only CVE token from official Ubuntu/Red Hat Fragnesia advisories; no stable matcher added
 EOF_DATA_21
+)"
+
+KERNEL_CVE_DATA_22="$(cat <<'EOF_DATA_22'
+CVE-2026-43503	DirtyClone	pkg=linux-kernel,ver>=5.11,ver<5.15.208		1	Fixed in stable 5.15.208; exploit path is in the networking stack and may be mitigated by removing the relevant ESP modules
+CVE-2026-43503	DirtyClone	pkg=linux-kernel,ver>=5.16,ver<6.1.174		1	Fixed in stable 6.1.174; exploit path is in the networking stack and may be mitigated by removing the relevant ESP modules
+CVE-2026-43503	DirtyClone	pkg=linux-kernel,ver>=6.2,ver<6.6.141		1	Fixed in stable 6.6.141; exploit path is in the networking stack and may be mitigated by removing the relevant ESP modules
+CVE-2026-43503	DirtyClone	pkg=linux-kernel,ver>=6.7,ver<6.12.91		1	Fixed in stable 6.12.91; exploit path is in the networking stack and may be mitigated by removing the relevant ESP modules
+CVE-2026-43503	DirtyClone	pkg=linux-kernel,ver>=6.13,ver<6.18.33		1	Fixed in stable 6.18.33; exploit path is in the networking stack and may be mitigated by removing the relevant ESP modules
+CVE-2026-43503	DirtyClone	pkg=linux-kernel,ver>=6.19,ver<7.0.10		1	Fixed in stable 7.0.10 and mainline 7.1
+CVE-2026-46331	pedit COW	pkg=linux-kernel,ver>=4.19.244,ver<4.20		1	Fixed before 4.20 in later backports; exploit path uses the traffic-control act_pedit subsystem
+CVE-2026-46331	pedit COW	pkg=linux-kernel,ver>=5.4.195,ver<5.5		1	Fixed before 5.5 in later backports; exploit path uses the traffic-control act_pedit subsystem
+CVE-2026-46331	pedit COW	pkg=linux-kernel,ver>=5.10.117,ver<5.11		1	Fixed before 5.11 in later backports; exploit path uses the traffic-control act_pedit subsystem
+CVE-2026-46331	pedit COW	pkg=linux-kernel,ver>=5.15.41,ver<5.16		1	Fixed before 5.16 in later backports; exploit path uses the traffic-control act_pedit subsystem
+CVE-2026-46331	pedit COW	pkg=linux-kernel,ver>=5.17.9,ver<5.18		1	Fixed before 5.18 in later backports; exploit path uses the traffic-control act_pedit subsystem
+CVE-2026-46331	pedit COW	pkg=linux-kernel,ver>=5.18,ver<6.12.94		1	Fixed in stable 6.12.94; exploit path uses the traffic-control act_pedit subsystem
+CVE-2026-46331	pedit COW	pkg=linux-kernel,ver>=6.13,ver<6.18.36		1	Fixed in stable 6.18.36; exploit path uses the traffic-control act_pedit subsystem
+CVE-2026-46331	pedit COW	pkg=linux-kernel,ver>=6.19,ver<7.0.13		1	Fixed in stable 7.0.13 and mainline 7.1
+CVE-2026-46333	ptrace exit-race	pkg=linux-kernel,ver>=3.16.52,ver<3.17,cmd:[ "$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null || echo 0)" -lt 2 ]		1	Upstream issue backported into 3.16 at 3.16.52; mitigated by kernel.yama.ptrace_scope >= 2
+CVE-2026-46333	ptrace exit-race	pkg=linux-kernel,ver>=4.4.40,ver<4.5,cmd:[ "$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null || echo 0)" -lt 2 ]		1	Upstream issue backported into 4.4 at 4.4.40; mitigated by kernel.yama.ptrace_scope >= 2
+CVE-2026-46333	ptrace exit-race	pkg=linux-kernel,ver>=4.8.16,ver<4.9,cmd:[ "$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null || echo 0)" -lt 2 ]		1	Upstream issue backported into 4.8 at 4.8.16; mitigated by kernel.yama.ptrace_scope >= 2
+CVE-2026-46333	ptrace exit-race	pkg=linux-kernel,ver>=4.9.1,ver<4.10,cmd:[ "$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null || echo 0)" -lt 2 ]		1	Upstream issue backported into 4.9 at 4.9.1; mitigated by kernel.yama.ptrace_scope >= 2
+CVE-2026-46333	ptrace exit-race	pkg=linux-kernel,ver>=4.10,ver<5.10.256,cmd:[ "$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null || echo 0)" -lt 2 ]		1	Upstream issue introduced in 4.10; fixed in 5.10.256; mitigated by kernel.yama.ptrace_scope >= 2
+CVE-2026-46333	ptrace exit-race	pkg=linux-kernel,ver>=5.11,ver<5.15.207,cmd:[ "$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null || echo 0)" -lt 2 ]		1	Upstream issue introduced in 4.10; fixed in 5.15.207; mitigated by kernel.yama.ptrace_scope >= 2
+CVE-2026-46333	ptrace exit-race	pkg=linux-kernel,ver>=5.16,ver<6.1.173,cmd:[ "$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null || echo 0)" -lt 2 ]		1	Upstream issue introduced in 4.10; fixed in 6.1.173; mitigated by kernel.yama.ptrace_scope >= 2
+CVE-2026-46333	ptrace exit-race	pkg=linux-kernel,ver>=6.2,ver<6.6.139,cmd:[ "$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null || echo 0)" -lt 2 ]		1	Upstream issue introduced in 4.10; fixed in 6.6.139; mitigated by kernel.yama.ptrace_scope >= 2
+CVE-2026-46333	ptrace exit-race	pkg=linux-kernel,ver>=6.7,ver<6.12.89,cmd:[ "$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null || echo 0)" -lt 2 ]		1	Upstream issue introduced in 4.10; fixed in 6.12.89; mitigated by kernel.yama.ptrace_scope >= 2
+CVE-2026-46333	ptrace exit-race	pkg=linux-kernel,ver>=6.13,ver<6.18.31,cmd:[ "$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null || echo 0)" -lt 2 ]		1	Upstream issue introduced in 4.10; fixed in 6.18.31; mitigated by kernel.yama.ptrace_scope >= 2
+CVE-2026-46333	ptrace exit-race	pkg=linux-kernel,ver>=6.19,ver<7.0.8,cmd:[ "$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null || echo 0)" -lt 2 ]		1	Upstream issue introduced in 4.10; fixed in 7.0.8; mitigated by kernel.yama.ptrace_scope >= 2
+EOF_DATA_22
+)"
+
+KERNEL_CVE_DATA_23="$(cat <<'EOF_DATA_23'
+CVE-2026-43499	GhostLock rtmutex UAF	pkg=linux-kernel,ver>=2.6.39,ver<5.10.261,CONFIG_FUTEX_PI=y		1	Fixed in stable 5.10.261; priority-inheritance futexes must be enabled
+CVE-2026-43499	GhostLock rtmutex UAF	pkg=linux-kernel,ver>=5.11,ver<5.15.212,CONFIG_FUTEX_PI=y		1	Fixed in stable 5.15.212; priority-inheritance futexes must be enabled
+CVE-2026-43499	GhostLock rtmutex UAF	pkg=linux-kernel,ver>=5.16,ver<6.1.175,CONFIG_FUTEX_PI=y		1	Fixed in stable 6.1.175; priority-inheritance futexes must be enabled
+CVE-2026-43499	GhostLock rtmutex UAF	pkg=linux-kernel,ver>=6.2,ver<6.6.140,CONFIG_FUTEX_PI=y		1	Fixed in stable 6.6.140; priority-inheritance futexes must be enabled
+CVE-2026-43499	GhostLock rtmutex UAF	pkg=linux-kernel,ver>=6.7,ver<6.12.86,CONFIG_FUTEX_PI=y		1	Fixed in stable 6.12.86; priority-inheritance futexes must be enabled
+CVE-2026-43499	GhostLock rtmutex UAF	pkg=linux-kernel,ver>=6.13,ver<6.18.27,CONFIG_FUTEX_PI=y		1	Fixed in stable 6.18.27; priority-inheritance futexes must be enabled
+CVE-2026-43499	GhostLock rtmutex UAF	pkg=linux-kernel,ver>=6.19,ver<7.0.4,CONFIG_FUTEX_PI=y		1	Fixed in stable 7.0.4 and mainline 7.1; priority-inheritance futexes must be enabled
+CVE-2026-53362	IPv6 fraggap out-of-bounds write	pkg=linux-kernel,ver>=6.0,ver<6.1.177,CONFIG_IPV6=[my]		1	Fixed in stable 6.1.177; IPv6 must be enabled
+CVE-2026-53362	IPv6 fraggap out-of-bounds write	pkg=linux-kernel,ver>=6.2,ver<6.6.144,CONFIG_IPV6=[my]		1	Fixed in stable 6.6.144; IPv6 must be enabled
+CVE-2026-53362	IPv6 fraggap out-of-bounds write	pkg=linux-kernel,ver>=6.7,ver<6.12.95,CONFIG_IPV6=[my]		1	Fixed in stable 6.12.95; IPv6 must be enabled
+CVE-2026-53362	IPv6 fraggap out-of-bounds write	pkg=linux-kernel,ver>=6.13,ver<6.18.38,CONFIG_IPV6=[my]		1	Fixed in stable 6.18.38; IPv6 must be enabled
+CVE-2026-53362	IPv6 fraggap out-of-bounds write	pkg=linux-kernel,ver>=6.19,ver<7.1.3,CONFIG_IPV6=[my]		1	Fixed in stable 7.1.3 and mainline 7.2-rc1; IPv6 must be enabled
+CVE-2026-64600	RefluXFS stale mapping race	pkg=linux-kernel,ver>=4.11,ver<5.15.212,CONFIG_XFS_FS=[my],cmd:grep -qw xfs /proc/mounts		1	Fixed in stable 5.15.212; requires an XFS filesystem with reflink enabled
+CVE-2026-64600	RefluXFS stale mapping race	pkg=linux-kernel,ver>=5.16,ver<6.1.178,CONFIG_XFS_FS=[my],cmd:grep -qw xfs /proc/mounts		1	Fixed in stable 6.1.178; requires an XFS filesystem with reflink enabled
+CVE-2026-64600	RefluXFS stale mapping race	pkg=linux-kernel,ver>=6.2,ver<6.6.145,CONFIG_XFS_FS=[my],cmd:grep -qw xfs /proc/mounts		1	Fixed in stable 6.6.145; requires an XFS filesystem with reflink enabled
+CVE-2026-64600	RefluXFS stale mapping race	pkg=linux-kernel,ver>=6.7,ver<6.12.96,CONFIG_XFS_FS=[my],cmd:grep -qw xfs /proc/mounts		1	Fixed in stable 6.12.96; requires an XFS filesystem with reflink enabled
+CVE-2026-64600	RefluXFS stale mapping race	pkg=linux-kernel,ver>=6.13,ver<6.18.39,CONFIG_XFS_FS=[my],cmd:grep -qw xfs /proc/mounts		1	Fixed in stable 6.18.39; requires an XFS filesystem with reflink enabled
+CVE-2026-64600	RefluXFS stale mapping race	pkg=linux-kernel,ver>=6.19,ver<7.1.4,CONFIG_XFS_FS=[my],cmd:grep -qw xfs /proc/mounts		1	Fixed in stable 7.1.4; requires an XFS filesystem with reflink enabled
+CVE-2026-64600	RefluXFS stale mapping race	pkg=linux-kernel,ver>=7.2,ver<7.3,CONFIG_XFS_FS=[my],cmd:uname -r 2>/dev/null | grep -Eq '^7\.2\.0-rc[123]([-.]|$)',cmd:grep -qw xfs /proc/mounts		1	Fixed in mainline 7.2-rc4; requires an XFS filesystem with reflink enabled
+EOF_DATA_23
 )"
