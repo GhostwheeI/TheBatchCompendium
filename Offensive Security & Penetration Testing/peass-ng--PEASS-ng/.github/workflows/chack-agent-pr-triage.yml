@@ -4,138 +4,27 @@ on:
   workflow_run:
     workflows: ["PR-tests"]
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to review after an automated retest
+        required: true
+        type: string
 
 jobs:
-  auto_merge_windows_definition_bot_pr:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-      contents: write
-      pull-requests: write
-
-    steps:
-      - name: Resolve and verify bot PR
-        id: bot_pr
-        env:
-          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
-          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
-          GH_REPO: ${{ github.repository }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          title="chore(winpeas): update windows version vulnerability definitions"
-          branch="bot/update-windows-version-definitions"
-          expected_file="build_lists/windows_version_exploits.json"
-
-          pr_number="${PR_NUMBER}"
-          if [ -z "$pr_number" ] && [ -n "$HEAD_BRANCH" ]; then
-            pr_number="$(gh pr list --state open --head "$HEAD_BRANCH" --base master --json number --jq '.[0].number')"
-          fi
-          if [ -z "$pr_number" ]; then
-            echo "No pull request found for this workflow_run; skipping."
-            echo "should_merge=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          pr_json="$(gh pr view "$pr_number" --json title,baseRefName,headRefName,author,isCrossRepository,files,mergeStateStatus)"
-          pr_title="$(jq -r .title <<<"$pr_json")"
-          base_ref="$(jq -r .baseRefName <<<"$pr_json")"
-          head_ref="$(jq -r .headRefName <<<"$pr_json")"
-          author="$(jq -r .author.login <<<"$pr_json")"
-          is_cross_repository="$(jq -r .isCrossRepository <<<"$pr_json")"
-          merge_state="$(jq -r .mergeStateStatus <<<"$pr_json")"
-          files="$(jq -r '.files[].path' <<<"$pr_json")"
-          file_count="$(jq -r '.files | length' <<<"$pr_json")"
-
-          if [ "$pr_title" != "$title" ] ||
-             [ "$base_ref" != "master" ] ||
-             [ "$head_ref" != "$branch" ] ||
-             [ "$is_cross_repository" != "false" ] ||
-             [ "$file_count" != "1" ] ||
-             [ "$files" != "$expected_file" ]; then
-            echo "PR #$pr_number is not the trusted windows definitions bot PR; skipping."
-            echo "should_merge=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          if [ "$author" != "app/github-actions" ] &&
-             [ "$author" != "github-actions" ] &&
-             [ "$author" != "github-actions[bot]" ]; then
-            echo "PR #$pr_number is from unexpected author $author; skipping."
-            echo "should_merge=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          for attempt in {1..12}; do
-            if [ "$merge_state" = "CLEAN" ] || [ "$merge_state" = "HAS_HOOKS" ]; then
-              break
-            fi
-
-            echo "PR #$pr_number mergeStateStatus=$merge_state; waiting for GitHub to finish evaluating mergeability ($attempt/12)."
-            sleep 10
-            merge_state="$(gh pr view "$pr_number" --json mergeStateStatus --jq .mergeStateStatus)"
-          done
-
-          if [ "$merge_state" != "CLEAN" ] && [ "$merge_state" != "HAS_HOOKS" ]; then
-            echo "Refusing to merge PR #$pr_number because mergeStateStatus=$merge_state"
-            echo "should_merge=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "should_merge=true" >> "$GITHUB_OUTPUT"
-          echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
-          echo "title=$title" >> "$GITHUB_OUTPUT"
-
-      - name: Merge trusted bot PR
-        if: ${{ steps.bot_pr.outputs.should_merge == 'true' }}
-        env:
-          GH_TOKEN: ${{ secrets.CHACK_AGENT_FIXER_TOKEN }}
-          PR_NUMBER: ${{ steps.bot_pr.outputs.pr_number }}
-          COMMIT_TITLE: ${{ steps.bot_pr.outputs.title }}
-        run: |
-          if [ -z "$GH_TOKEN" ]; then
-            echo "CHACK_AGENT_FIXER_TOKEN is required to merge this PR and dispatch the release workflow."
-            exit 1
-          fi
-
-          for attempt in {1..6}; do
-            if response="$(gh api \
-              -X PUT \
-              -H "Accept: application/vnd.github+json" \
-              "/repos/${{ github.repository }}/pulls/${PR_NUMBER}/merge" \
-              -f merge_method=squash \
-              -f commit_title="$COMMIT_TITLE")"; then
-              merge_sha="$(jq -r '.sha // empty' <<<"$response")"
-              echo "Merged trusted windows definitions bot PR #$PR_NUMBER as $merge_sha."
-
-              for wait_attempt in {1..12}; do
-                master_sha="$(gh api "/repos/${{ github.repository }}/git/ref/heads/master" --jq .object.sha)"
-                if [ -z "$merge_sha" ] || [ "$master_sha" = "$merge_sha" ]; then
-                  break
-                fi
-
-                echo "Waiting for master to point at merge commit $merge_sha ($wait_attempt/12)."
-                sleep 5
-              done
-
-              gh workflow run CI-master_tests.yml --ref master
-              echo "Dispatched CI-master_test to build and publish the PEASS release."
-              exit 0
-            fi
-
-            echo "Merge attempt $attempt failed for PR #$PR_NUMBER; retrying."
-            sleep 10
-          done
-
-          echo "Failed to merge trusted windows definitions bot PR #$PR_NUMBER after retries."
-          exit 1
+  # NOTE: The windows-definitions bot PR is built, waited on and merged inline by
+  # update_windows_version_definitions.yml (it dispatches PR-tests with github.token, polls
+  # that run, then squash-merges with the CODEX_FIXER_TOKEN PAT so the push to master triggers
+  # the release). It is intentionally NOT handled here: a github.token-dispatched run does not
+  # emit a `workflow_run` event, so a job here could never reliably fire for it.
 
   chack_agent_triage:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
+      actions: write
     env:
       CHACK_LOGS_HTTP_URL: ${{ secrets.CHACK_LOGS_HTTP_URL }}
     outputs:
@@ -147,6 +36,13 @@ jobs:
       head_ref: ${{ steps.gate.outputs.head_ref }}
       base_sha: ${{ steps.gate.outputs.base_sha }}
       head_sha: ${{ steps.gate.outputs.head_sha }}
+      trusted_automerge: ${{ steps.gate.outputs.trusted_automerge }}
+      trusted_automerge_reason: ${{ steps.gate.outputs.trusted_automerge_reason }}
+      fix_pushed: ${{ steps.push_fix.outputs.pushed }}
+      retest_passed: ${{ steps.push_fix.outputs.retest_passed }}
+      retest_url: ${{ steps.push_fix.outputs.retest_url }}
+      retest_conclusion: ${{ steps.push_fix.outputs.retest_conclusion }}
+      validated_head_sha: ${{ steps.push_fix.outputs.validated_head_sha || steps.gate.outputs.head_sha }}
       decision: ${{ steps.parse.outputs.decision }}
       message: ${{ steps.parse.outputs.message }}
 
@@ -154,7 +50,7 @@ jobs:
       - name: Resolve PR context
         id: gate
         env:
-          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number || inputs.pr_number }}
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
           GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
@@ -184,6 +80,25 @@ jobs:
           head_ref="$(gh pr view "$pr_number" --json headRefName --jq .headRefName)"
           base_sha="$(gh pr view "$pr_number" --json baseRefOid --jq .baseRefOid)"
           head_sha="$(gh pr view "$pr_number" --json headRefOid --jq .headRefOid)"
+          trusted_automerge=false
+          trusted_automerge_reason=""
+
+          if [ "$base_ref" = "master" ] || [ "$base_ref" = "main" ]; then
+            case "$head_ref:$pr_title" in
+              chack-agent/ci-master-fix-[0-9]*:"Fix CI-master_test failure (run #"*")")
+                trusted_automerge=true
+                trusted_automerge_reason="trusted CI-master Chack Agent fix PR"
+                ;;
+              autoimprover/linpeas/[0-9]*:"autoimprover: simplify linpeas checks")
+                trusted_automerge=true
+                trusted_automerge_reason="trusted HackTricks-Feed linPEAS autoimprover PR"
+                ;;
+              autoimprover/winpeas/[0-9]*:"autoimprover: simplify winpeas checks")
+                trusted_automerge=true
+                trusted_automerge_reason="trusted HackTricks-Feed winPEAS autoimprover PR"
+                ;;
+            esac
+          fi
 
           echo "should_run=true" >> "$GITHUB_OUTPUT"
           echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
@@ -197,36 +112,40 @@ jobs:
           echo "head_ref=$head_ref" >> "$GITHUB_OUTPUT"
           echo "base_sha=$base_sha" >> "$GITHUB_OUTPUT"
           echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
+          echo "trusted_automerge=$trusted_automerge" >> "$GITHUB_OUTPUT"
+          echo "trusted_automerge_reason=$trusted_automerge_reason" >> "$GITHUB_OUTPUT"
 
-      - name: Checkout PR merge ref
+      - name: Checkout PR head
         uses: actions/checkout@v5
         with:
-          ref: refs/pull/${{ steps.gate.outputs.pr_number }}/merge
-        if: ${{ steps.gate.outputs.should_run == 'true' }}
+          ref: ${{ steps.gate.outputs.head_sha }}
+          fetch-depth: 0
+        if: ${{ steps.gate.outputs.should_run == 'true' && steps.gate.outputs.trusted_automerge != 'true' }}
 
       - name: Pre-fetch base and head refs
-        if: ${{ steps.gate.outputs.should_run == 'true' }}
+        if: ${{ steps.gate.outputs.should_run == 'true' && steps.gate.outputs.trusted_automerge != 'true' }}
         run: |
           git fetch --no-tags origin \
             ${{ steps.gate.outputs.base_ref }} \
             +refs/pull/${{ steps.gate.outputs.pr_number }}/head
 
       - name: Set up Node.js for Codex
-        if: ${{ steps.gate.outputs.should_run == 'true' }}
+        if: ${{ steps.gate.outputs.should_run == 'true' && steps.gate.outputs.trusted_automerge != 'true' }}
         uses: actions/setup-node@v5
         with:
           node-version: "20"
 
       - name: Install Codex CLI
-        if: ${{ steps.gate.outputs.should_run == 'true' }}
+        if: ${{ steps.gate.outputs.should_run == 'true' && steps.gate.outputs.trusted_automerge != 'true' }}
         run: |
           npm install -g @openai/codex
           codex --version
 
       - name: Run Chack Agent
         id: run_chack
-        if: ${{ steps.gate.outputs.should_run == 'true' }}
-        uses: carlospolop/chack-agent@master
+        if: ${{ steps.gate.outputs.should_run == 'true' && steps.gate.outputs.trusted_automerge != 'true' }}
+        # Pin the action so dependency changes on its default branch cannot break PR triage.
+        uses: carlospolop/chack-agent@9fd38a0657ae7060cc9bb07329c0bde71d7ba0d9
         with:
           provider: codex
           model_primary: BEST_QUALITY
@@ -234,10 +153,12 @@ jobs:
           main_action: peass-ng-pr-traige
           sub_action: Chack-Agent PR Triage
           system_prompt: |
-            You are Chack Agent, an elite PR reviewer for PEASS-ng.
-            Be conservative: merge only if changes are simple, safe, and valuable accoding to the uers give guidelines.
-            If in doubt, comment with clear questions or concerns.
-            Remember taht you are an autonomouts agent, use the exec tool to run the needed commands to list, read, analyze, modify, test...
+            You are Chack Agent, an elite PR reviewer and fixer for PEASS-ng.
+            Inspect the PR carefully. When you find a problem that you can fix confidently,
+            implement the smallest safe correction in the working tree and retest it. Do not
+            merely describe fixable problems. Leave edits uncommitted because the workflow will
+            commit and push them. Choose comment only when you are genuinely unsure how to make
+            the change correct and working, or when the PR is fundamentally a bad idea to merge.
           tools_config_json: "{\"exec_enabled\": true}"
           session_config_json: "{\"long_term_memory_enabled\": false}"
           agent_config_json: "{\"self_critique_enabled\": false, \"require_task_steps_manager_init_first\": true}"
@@ -245,14 +166,22 @@ jobs:
           user_prompt: |
             You are reviewing PR #${{ steps.gate.outputs.pr_number }} for ${{ github.repository }}.
 
-            Decide whether to merge or comment. Merge only if all of the following are true:
+            Review the changes, proactively fix any issue you can resolve safely, and run the
+            relevant focused tests. Merge only if all of the following are true:
             - Changes are simple and safe (no DoS, no long operations, no backdoors).
             - Changes follow common PEASS syntax and style without breaking anything and add useful checks or value.
             - Changes simplify code or add new useful checks without breaking anything.
 
-            If you don't have any doubts, and all the previous conditions are met, decide to merge.
-            If you have serious doubts, choose "comment" and include your doubts or questions.
-            If you decide to merge, include a short rationale.
+            If you find a concrete defect, false positive, performance risk, missing test, or
+            similar problem and know how to correct it, edit the files, run the relevant tests,
+            and leave the corrected working tree ready for the workflow to commit. Do not commit
+            or push it yourself. Return "merge" when either the original PR or your corrected
+            working tree is ready. The workflow will push edits and let the full PR tests rerun
+            before a later review can merge them.
+
+            Return "comment" only if you cannot confidently fix or validate the problem, need a
+            human decision to determine the correct behavior, or believe the PR should not be
+            merged at all. Include the precise blocker in that case.
 
             Pull request title and body:
             ----
@@ -267,9 +196,75 @@ jobs:
           codex_access_token: ${{ secrets.CODEX_ACCESS_TOKEN }}
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
 
+      - name: Commit and push Chack Agent fixes
+        id: push_fix
+        if: ${{ steps.gate.outputs.should_run == 'true' && steps.gate.outputs.trusted_automerge != 'true' }}
+        env:
+          TARGET_BRANCH: ${{ steps.gate.outputs.head_ref }}
+          PR_NUMBER: ${{ steps.gate.outputs.pr_number }}
+          ORIGINAL_HEAD_SHA: ${{ steps.gate.outputs.head_sha }}
+          PUSH_TOKEN: ${{ secrets.CODEX_FIXER_TOKEN }}
+          WORKFLOW_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "chack-agent"
+          git config user.email "chack-agent@users.noreply.github.com"
+
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+
+            # Never commit generated linPEAS artifacts refreshed by local tests.
+            git reset -- build_lists/regexes.yaml linpeas.sh linpeas_fat.sh || true
+            while IFS= read -r generated_file; do
+              git reset -- "$generated_file" || true
+            done < <(git diff --name-only --cached | grep -E '(^|/)(linpeas\.sh|linpeas_fat\.sh)$' || true)
+
+            git diff --cached --check
+            if ! git diff --cached --quiet; then
+              git commit -m "Apply Chack Agent review fixes for PR #${PR_NUMBER}"
+            fi
+          fi
+
+          if [ "$(git rev-parse HEAD)" = "$ORIGINAL_HEAD_SHA" ]; then
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -z "$PUSH_TOKEN" ]; then
+            echo "CODEX_FIXER_TOKEN is required to push Chack Agent fixes."
+            exit 1
+          fi
+
+          git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${{ github.repository }}.git"
+          git push origin "HEAD:${TARGET_BRANCH}"
+          echo "validated_head_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+          retest_url="$(GH_TOKEN="$WORKFLOW_TOKEN" gh workflow run PR-tests.yml --ref "$TARGET_BRANCH")"
+          retest_id="${retest_url##*/}"
+          echo "retest_url=$retest_url" >> "$GITHUB_OUTPUT"
+
+          retest_conclusion="timed_out"
+          for attempt in $(seq 1 180); do
+            run_state="$(GH_TOKEN="$WORKFLOW_TOKEN" gh run view "$retest_id" --json status,conclusion --jq '[.status, (.conclusion // "")] | @tsv' 2>/dev/null || true)"
+            status="${run_state%%$'\t'*}"
+            conclusion="${run_state#*$'\t'}"
+            if [ "$status" = "completed" ]; then
+              retest_conclusion="$conclusion"
+              break
+            fi
+            sleep 15
+          done
+
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+          echo "retest_conclusion=$retest_conclusion" >> "$GITHUB_OUTPUT"
+          if [ "$retest_conclusion" = "success" ]; then
+            echo "retest_passed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "retest_passed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Parse Chack Agent decision
         id: parse
-        if: ${{ steps.gate.outputs.should_run == 'true' }}
+        if: ${{ steps.gate.outputs.should_run == 'true' && steps.gate.outputs.trusted_automerge != 'true' }}
         env:
           CHACK_MESSAGE: ${{ steps.run_chack.outputs.final-message }}
         run: |
@@ -299,26 +294,33 @@ jobs:
   merge_or_comment:
     runs-on: ubuntu-latest
     needs: chack_agent_triage
-    if: ${{ github.event.workflow_run.conclusion == 'success' && needs.chack_agent_triage.outputs.should_run == 'true' && needs.chack_agent_triage.outputs.decision != '' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success') && needs.chack_agent_triage.outputs.should_run == 'true' && (needs.chack_agent_triage.outputs.trusted_automerge == 'true' || needs.chack_agent_triage.outputs.decision != '') }}
     permissions:
       contents: write
       pull-requests: write
     steps:
       - name: Merge PR when approved
-        if: ${{ needs.chack_agent_triage.outputs.decision == 'merge' }}
+        if: ${{ (needs.chack_agent_triage.outputs.fix_pushed != 'true' || needs.chack_agent_triage.outputs.retest_passed == 'true') && (needs.chack_agent_triage.outputs.trusted_automerge == 'true' || needs.chack_agent_triage.outputs.decision == 'merge') }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.CODEX_FIXER_TOKEN || github.token }}
           PR_NUMBER: ${{ needs.chack_agent_triage.outputs.pr_number }}
+          TRUSTED_AUTOMERGE: ${{ needs.chack_agent_triage.outputs.trusted_automerge }}
+          TRUSTED_AUTOMERGE_REASON: ${{ needs.chack_agent_triage.outputs.trusted_automerge_reason }}
+          VALIDATED_HEAD_SHA: ${{ needs.chack_agent_triage.outputs.validated_head_sha }}
         run: |
+          if [ "$TRUSTED_AUTOMERGE" = "true" ]; then
+            echo "Auto-merging trusted generated PR #${PR_NUMBER}: ${TRUSTED_AUTOMERGE_REASON}"
+          fi
           gh api \
             -X PUT \
             -H "Accept: application/vnd.github+json" \
             /repos/${{ github.repository }}/pulls/${PR_NUMBER}/merge \
             -f merge_method=squash \
-            -f commit_title="Auto-merge PR #${PR_NUMBER} (Chack Agent)"
+            -f commit_title="Auto-merge PR #${PR_NUMBER} (Chack Agent)" \
+            -f sha="$VALIDATED_HEAD_SHA"
 
       - name: Comment with doubts
-        if: ${{ needs.chack_agent_triage.outputs.decision == 'comment' }}
+        if: ${{ needs.chack_agent_triage.outputs.fix_pushed != 'true' && needs.chack_agent_triage.outputs.trusted_automerge != 'true' && needs.chack_agent_triage.outputs.decision == 'comment' }}
         uses: actions/github-script@v7
         env:
           PR_NUMBER: ${{ needs.chack_agent_triage.outputs.pr_number }}
@@ -331,4 +333,22 @@ jobs:
               repo: context.repo.repo,
               issue_number: Number(process.env.PR_NUMBER),
               body: process.env.CHACK_MESSAGE,
+            });
+
+      - name: Comment when a Chack fix does not pass the full retest
+        if: ${{ needs.chack_agent_triage.outputs.fix_pushed == 'true' && needs.chack_agent_triage.outputs.retest_passed != 'true' }}
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ needs.chack_agent_triage.outputs.pr_number }}
+          RETEST_URL: ${{ needs.chack_agent_triage.outputs.retest_url }}
+          RETEST_CONCLUSION: ${{ needs.chack_agent_triage.outputs.retest_conclusion }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const body = `Chack Agent applied a fix, but the full PR retest finished with \`${process.env.RETEST_CONCLUSION}\`. I could not validate this fix for merge.\n\nRetest: ${process.env.RETEST_URL}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: Number(process.env.PR_NUMBER),
+              body,
             });
