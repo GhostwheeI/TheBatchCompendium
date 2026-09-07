@@ -1,7 +1,7 @@
 # Title: Variables - sidB
 # ID: sidB
 # Author: Carlos Polop
-# Last Update: 22-08-2023
+# Last Update: 05-09-2026
 # Description: Dangerous sid binaries
 # License: GNU GPL
 # Version: 1.0
@@ -18,6 +18,7 @@ sidB="/apache2$%Read_root_passwd__apache2_-f_/etc/shadow\(CVE-2019-0211\)\
  /at$%RTru64_UNIX_4.0g\(CVE-2002-1614\)\
  /abrt-action-install-debuginfo-to-abrt-cache$%CENTOS 7.1/Fedora22\
  /chfn$%SuSE_9.3/10\
+ /check_icmp$%Monitoring_Plugins<3.0.1_if_setuid-root\(07-2026\)\
  /chkey$%Solaris_2.5.1\
  /chkperm$%Solaris_7.0_\
  /chpass$%2Vulns:OpenBSD_6.1_to_OpenBSD 6.6\(CVE-2019-19726\)--OpenBSD_2.7_i386/OpenBSD_2.6_i386/OpenBSD_2.5_1999/08/06/OpenBSD_2.5_1998/05/28/FreeBSD_4.0-RELEASE/FreeBSD_3.5-RELEASE/FreeBSD_3.4-RELEASE/NetBSD_1.4.2\
@@ -37,7 +38,7 @@ sidB="/apache2$%Read_root_passwd__apache2_-f_/etc/shadow\(CVE-2019-0211\)\
  /lpc$%S.u.S.E_Linux_5.2\
  /lpr$%BSD/OS2.1/FreeBSD2.1.5/NeXTstep4.x/IRIX6.4/SunOS4.1.3/4.1.4\(09-1996\)\
  /mail.local$%NetBSD_7.0-7.0.1__6.1-6.1.5__6.0-6.0.6\
- /mount$%Apple_Mac_OSX\(Lion\)_Kernel_xnu-1699.32.7_except_xnu-1699.24.8\
+ /mount$%Apple_Mac_OSX\(Lion\)_Kernel_xnu-1699.32.7_except_xnu-1699.24.8/util-linux_mount<=2.41.3\(CVE-2026-27456\)/util-linux_mount>=2.39_before_2.41.5_or_2.42.2\(CVE-2026-53612\)/util-linux_mount>=2.39.1_before_2.41.5_or_2.42.2\(CVE-2026-53614\)/util-linux_mount_2.39_to_2.41.5_or_2.42_to_2.42.2\(CVE-2026-76642\)/util-linux_mount_2.42.x_before_2.42.3\(CVE-2026-78409\)/util-linux_mount<=2.42.2\(CVE-2026-78410\)\
  /movemail$%Emacs\(08-1986\)\
  /mrinfo$%NetBSD_Sep_17_2002_https://securitytracker.com/id/1005234\
  /mtrace$%NetBSD_Sep_17_2002_https://securitytracker.com/id/1005234\
