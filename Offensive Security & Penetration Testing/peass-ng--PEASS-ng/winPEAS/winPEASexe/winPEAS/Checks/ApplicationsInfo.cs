@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using winPEAS.Helpers;
 using winPEAS.Info.ApplicationInfo;
+using winPEAS.Info.NetworkInfo;
 
 namespace winPEAS.Checks
 {
@@ -17,10 +18,54 @@ namespace winPEAS.Checks
             {
                 PrintActiveWindow,
                 PrintInstalledApps,
+                PrintOnlinePackageVulnerabilities,
                 PrintAutoRuns,
                 PrintScheduled,
+                PrintWritableSystemTaskTargets,
                 PrintDeviceDrivers,
             }.ForEach(action => CheckRunner.Run(action, isDebug));
+        }
+
+        void PrintOnlinePackageVulnerabilities()
+        {
+            if (!Checks.CheckOnlineVulnPackages)
+            {
+                return;
+            }
+
+            try
+            {
+                Beaprint.MainPrint("Package Vulnerabilities", "T1518");
+                Beaprint.LinkPrint("", "Optional HackTricks online lookup enabled with -vulnpackages or all. Output is capped at 50 vulnerable packages.");
+
+                var summary = HackTricksHostChecker.GetPackageVulnerabilities(50);
+                if (!string.IsNullOrEmpty(summary.Error))
+                {
+                    Beaprint.PrintException("    " + summary.Error);
+                    return;
+                }
+
+                Beaprint.NoColorPrint($"    Online package vulnerabilities found: {summary.Affected} vulnerable package(s), checked {summary.Checked}.");
+                if (summary.Lines.Count == 0)
+                {
+                    Beaprint.GoodPrint("    No vulnerable packages found by the online lookup.");
+                    return;
+                }
+
+                foreach (var line in summary.Lines)
+                {
+                    Beaprint.BadPrint("    " + line);
+                }
+
+                if (summary.NotShown > 0)
+                {
+                    Beaprint.NoColorPrint($"    ... {summary.NotShown} more vulnerable package(s) not shown.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
         }
 
         void PrintActiveWindow()
@@ -227,6 +272,59 @@ namespace winPEAS.Checks
                     };
                     Beaprint.AnsiPrint(string.Format(formString, sapp["Author"], sapp["Name"], sapp["Action"], string.Join(", ", fileRights), string.Join(", ", dirRights), sapp["Trigger"], sapp["Description"]), colorsS);
                     Beaprint.PrintLineSeparator();
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        void PrintWritableSystemTaskTargets()
+        {
+            try
+            {
+                Beaprint.MainPrint("Writable execution targets in enabled SYSTEM scheduled tasks", "T1053.005");
+                Beaprint.LinkPrint("https://attack.mitre.org/techniques/T1053/005/", "A writable executable or script launched by a SYSTEM task can provide privilege escalation when the task next runs.");
+
+                PrivilegedScheduledTaskReport report = PrivilegedScheduledTasks.GetReport();
+                if (report.Findings.Count == 0)
+                {
+                    Beaprint.GoodPrint($"    No writable targets found within {report.TasksInspected} inspected task(s).");
+                }
+
+                foreach (PrivilegedScheduledTaskFinding finding in report.Findings)
+                {
+                    Beaprint.BadPrint($"    Task: {finding.TaskPath} ({finding.Principal})");
+                    Beaprint.NoColorPrint($"    Action: {finding.Executable}");
+                    Beaprint.BadPrint($"    Writable target: {finding.TargetPath}");
+                    Beaprint.BadPrint($"    Access: {finding.AccessReason}");
+                    Beaprint.PrintLineSeparator();
+                }
+
+                if (report.TaskLimitReached)
+                {
+                    Beaprint.NoColorPrint($"    Task inspection stopped at the safety limit of {PrivilegedScheduledTasks.MaxTasks} tasks.");
+                }
+
+                if (report.FolderLimitReached)
+                {
+                    Beaprint.NoColorPrint($"    Folder inspection stopped at the safety limit of {PrivilegedScheduledTasks.MaxFolders} folders.");
+                }
+
+                if (report.FindingLimitReached)
+                {
+                    Beaprint.NoColorPrint($"    Findings were capped at {PrivilegedScheduledTasks.MaxFindings}.");
+                }
+
+                if (report.TargetLimitReached)
+                {
+                    Beaprint.NoColorPrint($"    Filesystem probes stopped at the safety limit of {PrivilegedScheduledTasks.MaxTargets} targets.");
+                }
+
+                if (report.TimeLimitReached)
+                {
+                    Beaprint.NoColorPrint($"    Inspection stopped at the safety limit of {PrivilegedScheduledTasks.MaxInspectionMilliseconds / 1000} seconds.");
                 }
             }
             catch (Exception ex)
