@@ -87,6 +87,7 @@ namespace winPEAS.Checks
                 PrintInsideContainer,
                 PrintAlwaysInstallElevated,
                 PrintObjectManagerRaceAmplification,
+                PrintClfsAuthentication,
                 PrintLSAInfo,
                 PrintNtlmSettings,
                 PrintLocalGroupPolicy,
@@ -827,6 +828,57 @@ namespace winPEAS.Checks
             }
         }
 
+        private static void PrintClfsAuthentication()
+        {
+            try
+            {
+                ClfsAuthenticationReport report = ClfsAuthentication.GetReport();
+                if (report.Status == ClfsAuthenticationStatus.NotAvailable)
+                {
+                    return;
+                }
+
+                Beaprint.MainPrint("CLFS logfile authentication mitigation", "T1068");
+                Beaprint.LinkPrint(
+                    "https://support.microsoft.com/en-us/servicing/os/windows/2025/03/common-log-file-system-clfs-authentication-mitigation",
+                    "CLFS authentication blocks maliciously modified logfiles before the kernel driver parses them.");
+
+                switch (report.Status)
+                {
+                    case ClfsAuthenticationStatus.Enforced:
+                        Beaprint.GoodPrint("    Enforced (Mode 0): CLFS rejects logfiles with missing or invalid authentication codes.");
+                        break;
+                    case ClfsAuthenticationStatus.Learning:
+                        Beaprint.InfoPrint("    Learning mode (Mode 1): unauthenticated logfiles are still accepted during the adoption period.");
+                        if (report.EnforcementTransitionPeriod.HasValue)
+                        {
+                            Beaprint.InfoPrint($"    Automatic enforcement transition: {report.EnforcementTransitionPeriod.Value} seconds.");
+                        }
+                        break;
+                    case ClfsAuthenticationStatus.LearningWithoutAutoEnforcement:
+                        Beaprint.BadPrint("    Learning mode has no automatic enforcement transition (Mode 1, EnforcementTransitionPeriod 0).");
+                        break;
+                    case ClfsAuthenticationStatus.DisabledByAdministrator:
+                        Beaprint.BadPrint("    Disabled by an administrator (Mode 2): maliciously modified CLFS logfiles are not rejected by this mitigation.");
+                        break;
+                    case ClfsAuthenticationStatus.DisabledBySystem:
+                        Beaprint.BadPrint("    Disabled automatically by the system (Mode 3): maliciously modified CLFS logfiles are not rejected by this mitigation.");
+                        break;
+                    case ClfsAuthenticationStatus.AccessDenied:
+                        Beaprint.InfoPrint("    The CLFS authentication registry configuration could not be read (access denied).");
+                        break;
+                    default:
+                        string mode = report.Mode.HasValue ? report.Mode.Value.ToString() : "missing or invalid";
+                        Beaprint.InfoPrint($"    Unknown CLFS authentication mode: {mode}.");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
         private static void PrintNtlmSettings()
         {
             Beaprint.MainPrint($"Enumerating NTLM Settings", "T1557.001");
@@ -1425,7 +1477,7 @@ namespace winPEAS.Checks
                         {
                             if (!anyFinding)
                             {
-                                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/active-directory-methodology/gpo-abuse.html", "Why it matters");
+                                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/active-directory-methodology/index.html", "Why it matters");
                             }
                             anyFinding = true;
                             Beaprint.BadPrint($"    [!] Writable applied GPO detected");
