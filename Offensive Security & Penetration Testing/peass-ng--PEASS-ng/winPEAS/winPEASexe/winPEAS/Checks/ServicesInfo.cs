@@ -12,11 +12,11 @@ namespace winPEAS.Checks
     {
         Dictionary<string, string> modifiableServices = new Dictionary<string, string>();
 
-        public string[] MitreAttackIds { get; } = new[] { "T1007", "T1543.003", "T1574.001", "T1574.011", "T1014", "T1068" };
+        public string[] MitreAttackIds { get; } = new[] { "T1007", "T1543.003", "T1574.001", "T1574.010", "T1574.011", "T1014", "T1068" };
 
         public void PrintInfo(bool isDebug)
         {
-            Beaprint.GreatPrint("Services Information", "T1007,T1543.003,T1574.001,T1574.011,T1014,T1068");
+            Beaprint.GreatPrint("Services Information", "T1007,T1543.003,T1574.001,T1574.010,T1574.011,T1014,T1068");
 
             /// Start finding Modifiable services so any function could use them
 
@@ -37,6 +37,8 @@ namespace winPEAS.Checks
                 PrintInterestingServices,
                 PrintModifiableServices,
                 PrintWritableRegServices,
+                PrintWritableSystemServiceDlls,
+                PrintWritableSystemRecoveryCommands,
                 PrintPathDllHijacking,
                 PrintOemPrivilegedUtilities,
                 PrintLegacySignedKernelDrivers,
@@ -180,6 +182,89 @@ namespace winPEAS.Checks
                     foreach (Dictionary<string, string> writeServReg in regPerms)
                         Beaprint.AnsiPrint(string.Format("    {0} ({1})", writeServReg["Path"], writeServReg["Permissions"]), colorsWR);
 
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        void PrintWritableSystemServiceDlls()
+        {
+            try
+            {
+                Beaprint.MainPrint("Writable DLLs loaded by LocalSystem services", "T1574.010");
+                Beaprint.LinkPrint(
+                    "https://attack.mitre.org/techniques/T1574/010/",
+                    "A replaceable DLL loaded by an enabled LocalSystem service can execute as SYSTEM when the service starts.");
+
+                WritableServiceDllReport report = ServicesInfoHelper.GetWritableSystemServiceDlls(Checks.CurrentUserSiDs);
+                if (report.Findings.Count == 0)
+                {
+                    Beaprint.GoodPrint($"    No replaceable ServiceDll paths found in {report.ServicesInspected} inspected service(s).");
+                }
+
+                foreach (WritableServiceDllInfo finding in report.Findings)
+                {
+                    Beaprint.BadPrint($"    {finding.ServiceName} ({finding.Account})");
+                    Beaprint.NoColorPrint($"      ServiceDll : {finding.ServiceDllPath}");
+                    Beaprint.NoColorPrint($"      DLL exists : {finding.FileExists}");
+                    Beaprint.BadPrint($"      Evidence    : {finding.AccessReason}");
+                    Beaprint.PrintLineSeparator();
+                }
+
+                if (report.ServiceLimitReached)
+                {
+                    Beaprint.GrayPrint($"    Service inspection stopped at the safety limit of {ServicesInfoHelper.MaxServiceDllServices}.");
+                }
+                if (report.FindingLimitReached)
+                {
+                    Beaprint.GrayPrint($"    Findings were capped at {ServicesInfoHelper.MaxServiceDllFindings}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        void PrintWritableSystemRecoveryCommands()
+        {
+            try
+            {
+                Beaprint.MainPrint("Writable LocalSystem service recovery command targets", "T1543.003");
+                Beaprint.LinkPrint(
+                    "https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_failure_actionsw",
+                    "A replaceable target used by an SC_ACTION_RUN_COMMAND recovery action executes under the service account when recovery fires.");
+
+                WritableServiceRecoveryCommandReport report =
+                    ServicesInfoHelper.GetWritableSystemRecoveryCommands(Checks.CurrentUserSiDs);
+                if (report.Findings.Count == 0)
+                {
+                    Beaprint.GoodPrint($"    No replaceable recovery command targets found in {report.ServicesInspected} inspected service(s).");
+                }
+
+                foreach (WritableServiceRecoveryCommandInfo finding in report.Findings)
+                {
+                    Beaprint.BadPrint($"    {finding.ServiceName} ({finding.Account})");
+                    Beaprint.NoColorPrint($"      Target exists : {finding.TargetExists}");
+                    Beaprint.NoColorPrint($"      Target path   : {finding.TargetPath}");
+                    Beaprint.BadPrint($"      Evidence      : {finding.AccessReason}");
+                    Beaprint.PrintLineSeparator();
+                }
+
+                if (report.Findings.Count > 0)
+                {
+                    Beaprint.GrayPrint("    Recovery actions run only after a qualifying service failure; this check does not stop, start, or crash services.");
+                }
+                if (report.ServiceLimitReached)
+                {
+                    Beaprint.GrayPrint($"    Service inspection stopped at the safety limit of {ServicesInfoHelper.MaxRecoveryCommandServices}.");
+                }
+                if (report.FindingLimitReached)
+                {
+                    Beaprint.GrayPrint($"    Findings were capped at {ServicesInfoHelper.MaxRecoveryCommandFindings}.");
                 }
             }
             catch (Exception ex)
