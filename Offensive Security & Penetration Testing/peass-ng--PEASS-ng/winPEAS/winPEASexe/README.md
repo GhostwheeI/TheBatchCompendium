@@ -66,6 +66,7 @@ winpeas.exe domain #enumerate also domain information
 winpeas.exe wait #wait for user input between tests
 winpeas.exe debug #display additional debug information
 winpeas.exe log #log output to out.txt instead of standard output
+winpeas.exe -vulnpackages #send installed package names/versions to the optional HackTricks online lookup to flag vulnerable packages
 winpeas.exe -linpeas=http://127.0.0.1/linpeas.sh #Execute also additional linpeas check (runs linpeas.sh in default WSL distribution) with custom linpeas.sh URL (if not provided, the default URL is: https://raw.githubusercontent.com/peass-ng/PEASS-ng/master/linPEAS/linpeas.sh)
 winpeas.exe -lolbas  #Execute also additional LOLBAS search check
 ```
@@ -132,7 +133,9 @@ Once you have installed and activated it you need to:
   - [x] Enumerate Microsoft updates
   - [x] PS, Audit, WEF and LAPS Settings
   - [x] LSA protection
+  - [x] CLFS logfile authentication mitigation status
   - [x] Credential Guard
+  - [x] Hardware and DMA security (Kernel DMA Protection, Device Guard DMA/IOMMU capability, UEFI/Secure Boot, VBS, BitLocker protectors and external DMA-capable interfaces)
   - [x] WDigest
   - [x] Number of cached cred
   - [x] Environment Variables
@@ -171,13 +174,18 @@ Once you have installed and activated it you need to:
   - [x] Interesting services (non Microsoft) information
   - [x] Modifiable services
   - [x] Writable service registry binpath
+  - [x] Writable DLLs loaded by enabled LocalSystem services
+  - [x] Writable LocalSystem service recovery command targets
   - [x] PATH Dll Hijacking
 
 - **Applications Information**
   - [x] Current Active Window
   - [x] Installed software
+  - [x] Optional online installed-package vulnerability lookup via HackTricks (`-vulnpackages` or `all`)
   - [x] AutoRuns
   - [x] Scheduled tasks
+  - [x] Microsoft Recall PolicyConfiguration task exposure (CVE-2025-60710 / CVE-2026-20941)
+  - [x] Writable execution targets in enabled SYSTEM scheduled tasks
   - [x] Device drivers
 
 - **Network Information**
@@ -189,6 +197,8 @@ Once you have installed and activated it you need to:
   - [x] Firewall rules
   - [x] DNS Cache (limit 70)
   - [x] Internet Settings
+  - [x] Internet connectivity probes
+  - [x] Optional external hostname resolution check
 
 - **Cloud Metadata Enumeration**
   - [x] AWS Metadata
@@ -209,6 +219,7 @@ Once you have installed and activated it you need to:
   - [x] AppCmd.exe
   - [x] SSClient.exe
   - [x] SCCM
+  - [x] Cached SCCM Network Access Account credential policies
   - [x] Security Package Credentials
   - [x] AlwaysInstallElevated
   - [x] WSUS (HTTP downgrade + CVE-2025-59287 exposure)
@@ -232,6 +243,7 @@ Once you have installed and activated it you need to:
   - [x] Cloud credentials
   - [x] Check for unattended files
   - [x] Check for SAM & SYSTEM backups
+  - [x] Check for exposed SAM, SECURITY and SYSTEM hives in live ACLs, backups and shadow copies
   - [x] Check for cached GPP Passwords
   - [x] Check for and extract creds from McAffe SiteList.xml files
   - [x] Possible registries with credentials
