@@ -2,25 +2,71 @@
 using System.Collections.Generic;
 using winPEAS.Helpers;
 using winPEAS.Info.ApplicationInfo;
+using winPEAS.Info.NetworkInfo;
 
 namespace winPEAS.Checks
 {
     internal class ApplicationsInfo : ISystemCheck
     {
-        public string[] MitreAttackIds { get; } = new[] { "T1518", "T1547.001", "T1053.005", "T1010", "T1014" };
+        public string[] MitreAttackIds { get; } = new[] { "T1518", "T1547.001", "T1053.005", "T1068", "T1010", "T1014" };
 
         public void PrintInfo(bool isDebug)
         {
-            Beaprint.GreatPrint("Applications Information", "T1518,T1547.001,T1053.005,T1010,T1014");
+            Beaprint.GreatPrint("Applications Information", "T1518,T1547.001,T1053.005,T1068,T1010,T1014");
 
             new List<Action>
             {
                 PrintActiveWindow,
                 PrintInstalledApps,
+                PrintOnlinePackageVulnerabilities,
                 PrintAutoRuns,
                 PrintScheduled,
+                PrintRecallPolicyConfigurationExposure,
+                PrintControllableSystemTasks,
                 PrintDeviceDrivers,
             }.ForEach(action => CheckRunner.Run(action, isDebug));
+        }
+
+        void PrintOnlinePackageVulnerabilities()
+        {
+            if (!Checks.CheckOnlineVulnPackages)
+            {
+                return;
+            }
+
+            try
+            {
+                Beaprint.MainPrint("Package Vulnerabilities", "T1518");
+                Beaprint.LinkPrint("", "Optional HackTricks online lookup enabled with -vulnpackages or all. Output is capped at 50 vulnerable packages.");
+
+                var summary = HackTricksHostChecker.GetPackageVulnerabilities(50);
+                if (!string.IsNullOrEmpty(summary.Error))
+                {
+                    Beaprint.PrintException("    " + summary.Error);
+                    return;
+                }
+
+                Beaprint.NoColorPrint($"    Online package vulnerabilities found: {summary.Affected} vulnerable package(s), checked {summary.Checked}.");
+                if (summary.Lines.Count == 0)
+                {
+                    Beaprint.GoodPrint("    No vulnerable packages found by the online lookup.");
+                    return;
+                }
+
+                foreach (var line in summary.Lines)
+                {
+                    Beaprint.BadPrint("    " + line);
+                }
+
+                if (summary.NotShown > 0)
+                {
+                    Beaprint.NoColorPrint($"    ... {summary.NotShown} more vulnerable package(s) not shown.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
         }
 
         void PrintActiveWindow()
@@ -227,6 +273,143 @@ namespace winPEAS.Checks
                     };
                     Beaprint.AnsiPrint(string.Format(formString, sapp["Author"], sapp["Name"], sapp["Action"], string.Join(", ", fileRights), string.Join(", ", dirRights), sapp["Trigger"], sapp["Description"]), colorsS);
                     Beaprint.PrintLineSeparator();
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        void PrintControllableSystemTasks()
+        {
+            try
+            {
+                Beaprint.MainPrint("Low-privilege control of enabled SYSTEM scheduled tasks", "T1053.005");
+                Beaprint.LinkPrint("https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks", "A writable action target or task DACL can let a low-privilege principal replace what the task runs as SYSTEM.");
+
+                PrivilegedScheduledTaskReport report = PrivilegedScheduledTasks.GetReport();
+                if (report.ControlFindings.Count == 0 && report.Findings.Count == 0)
+                {
+                    Beaprint.GoodPrint($"    No controllable task definitions or writable targets found within {report.TasksInspected} inspected task(s).");
+                }
+
+                foreach (PrivilegedScheduledTaskControlFinding finding in report.ControlFindings)
+                {
+                    Beaprint.BadPrint($"    Task: {finding.TaskPath} ({finding.Principal})");
+                    Beaprint.BadPrint($"    Task control: {finding.AccessReason}");
+                    Beaprint.PrintLineSeparator();
+                }
+
+                foreach (PrivilegedScheduledTaskFinding finding in report.Findings)
+                {
+                    Beaprint.BadPrint($"    Task: {finding.TaskPath} ({finding.Principal})");
+                    Beaprint.NoColorPrint($"    Action: {finding.Executable}");
+                    Beaprint.BadPrint($"    Writable target: {finding.TargetPath}");
+                    Beaprint.BadPrint($"    Access: {finding.AccessReason}");
+                    Beaprint.PrintLineSeparator();
+                }
+
+                if (report.TaskLimitReached)
+                {
+                    Beaprint.NoColorPrint($"    Task inspection stopped at the safety limit of {PrivilegedScheduledTasks.MaxTasks} tasks.");
+                }
+
+                if (report.FolderLimitReached)
+                {
+                    Beaprint.NoColorPrint($"    Folder inspection stopped at the safety limit of {PrivilegedScheduledTasks.MaxFolders} folders.");
+                }
+
+                if (report.FindingLimitReached)
+                {
+                    Beaprint.NoColorPrint($"    Findings were capped at {PrivilegedScheduledTasks.MaxFindings}.");
+                }
+
+                if (report.TargetLimitReached)
+                {
+                    Beaprint.NoColorPrint($"    Filesystem probes stopped at the safety limit of {PrivilegedScheduledTasks.MaxTargets} targets.");
+                }
+
+                if (report.TimeLimitReached)
+                {
+                    Beaprint.NoColorPrint($"    Inspection stopped at the safety limit of {PrivilegedScheduledTasks.MaxInspectionMilliseconds / 1000} seconds.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        void PrintRecallPolicyConfigurationExposure()
+        {
+            try
+            {
+                Beaprint.MainPrint("Microsoft Recall PolicyConfiguration task exposure", "T1068,T1053.005");
+                Beaprint.LinkPrint(
+                    "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-20941",
+                    "CVE-2025-60710 and CVE-2026-20941 abused a WNF-triggered SYSTEM task and unsafe privileged directory cleanup. This check is read-only and does not trigger the task.");
+
+                RecallPolicyConfigurationReport report = RecallPolicyConfiguration.GetReport();
+                if (!report.TaskPresent)
+                {
+                    if (report.Status == RecallPolicyConfigurationStatus.InspectionFailed)
+                    {
+                        Beaprint.InfoPrint("    Unable to query the Recall PolicyConfiguration task; verify it manually.");
+                        if (!string.IsNullOrEmpty(report.Error))
+                        {
+                            Beaprint.InfoPrint("    Inspection detail: " + report.Error);
+                        }
+                    }
+                    else
+                    {
+                        Beaprint.GoodPrint("    Recall PolicyConfiguration task not present.");
+                    }
+                    return;
+                }
+
+                Beaprint.NoColorPrint("    Task: " + RecallPolicyConfiguration.TaskPath);
+                Beaprint.NoColorPrint("    Enabled: " + (report.TaskEnabled.HasValue ? report.TaskEnabled.Value.ToString() : "unknown"));
+                Beaprint.NoColorPrint("    OS: " + (string.IsNullOrEmpty(report.ProductName) ? "unknown" : report.ProductName));
+                Beaprint.NoColorPrint("    Build: " + report.BuildString);
+                Beaprint.NoColorPrint("    SYSTEM principal: " + report.HasSystemPrincipal);
+                Beaprint.NoColorPrint("    Expected COM handler: " + report.HasExpectedComHandler);
+                Beaprint.NoColorPrint("    Recall WNF trigger: " + report.HasRecallWnfTrigger);
+                Beaprint.NoColorPrint("    Expected WNF states: " + report.ExpectedWnfStateCount + "/" + RecallPolicyConfiguration.ExpectedWnfStates.Count);
+                Beaprint.NoColorPrint("    WNF states: " + (report.WnfStateNames.Count == 0 ? "none found" : string.Join(", ", report.WnfStateNames)));
+                Beaprint.NoColorPrint("    SessionUnlock trigger: " + report.HasSessionUnlockTrigger);
+                Beaprint.NoColorPrint("    AllowStartOnDemand: " + (report.AllowStartOnDemand.HasValue ? report.AllowStartOnDemand.Value.ToString() : "unknown"));
+
+                switch (report.Status)
+                {
+                    case RecallPolicyConfigurationStatus.PotentiallyVulnerable:
+                        Beaprint.BadPrint("    Potentially vulnerable to CVE-2025-60710 / CVE-2026-20941: the task markers match and this build predates the final fix.");
+                        Beaprint.BadPrint("    Required update: " + report.RequiredUpdate + " (build " + report.RequiredBuild + " or later).");
+                        Beaprint.NoColorPrint("    Recall being disabled does not necessarily remove or disable this scheduled task.");
+                        break;
+                    case RecallPolicyConfigurationStatus.Patched:
+                        Beaprint.GoodPrint("    Task markers match, but the OS build includes the final CVE-2026-20941 fix.");
+                        break;
+                    case RecallPolicyConfigurationStatus.Disabled:
+                        Beaprint.GoodPrint("    Task markers match, but the scheduled task is disabled (Microsoft's documented workaround). Verify the security update before re-enabling it.");
+                        break;
+                    case RecallPolicyConfigurationStatus.NotAffected:
+                        Beaprint.GoodPrint("    Task is present, but this OS build is not in the affected Windows 11 24H2/25H2 or Windows Server 2025 range.");
+                        break;
+                    case RecallPolicyConfigurationStatus.UnexpectedConfiguration:
+                        Beaprint.InfoPrint("    The task is present but its SYSTEM/COM/WNF markers do not match the vulnerable configuration.");
+                        break;
+                    case RecallPolicyConfigurationStatus.UnknownBuild:
+                        Beaprint.InfoPrint("    The vulnerable task markers match, but this OS build could not be mapped confidently. Verify patch status manually.");
+                        break;
+                    case RecallPolicyConfigurationStatus.InspectionFailed:
+                        Beaprint.InfoPrint("    The task is present but could not be inspected completely. Verify its XML and patch status manually.");
+                        break;
+                }
+
+                if (!string.IsNullOrEmpty(report.Error))
+                {
+                    Beaprint.InfoPrint("    Inspection detail: " + report.Error);
                 }
             }
             catch (Exception ex)
