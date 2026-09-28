@@ -2,9 +2,9 @@
 
 ![](https://github.com/peass-ng/privilege-escalation-awesome-scripts-suite/raw/master/linPEAS/images/linpeas.png)
 
-**LinPEAS is a script that search for possible paths to escalate privileges on Linux/Unix\*/MacOS hosts. The checks are explained on [book.hacktricks.wiki](https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html)**
+**LinPEAS is a script that search for possible paths to escalate privileges on Linux/Unix\*/MacOS hosts. The checks are explained on [book.hacktricks.wiki](https://book.hacktricks.wiki/en/linux-hardening/linux-basics/linux-privilege-escalation/index.html)**
 
-Check the **Local Linux Privilege Escalation checklist** from **[book.hacktricks.wiki](https://book.hacktricks.wiki/en/linux-hardening/linux-privilege-escalation-checklist.html)**.
+Check the **Local Linux Privilege Escalation checklist** from **[book.hacktricks.wiki](https://book.hacktricks.wiki/en/linux-hardening/main-system-information/linux-privilege-escalation-checklist.html)**.
 
 [![asciicast](https://asciinema.org/a/250532.png)](https://asciinema.org/a/309566)
 
@@ -103,6 +103,14 @@ The goal of this script is to search for possible **Privilege Escalation Paths**
 This script doesn't have any dependency.
 
 ### Recent updates
+
+- **Sep 2026**: Added a read-only check for the Open vSwitch forwarded-SKB page-cache LPE chain (CVE-2026-80977, CVE-2026-89487, and CVE-2026-90049), correlating fixed kernel releases with OVS, ESP/XFRM, user-namespace, module-mitigation, and setuid-target prerequisites.
+
+- **Sep 2026**: Expanded Kubernetes container-escape enumeration with cgroup-v2-aware pod detection, non-disclosing projected-token metadata, host namespace/mount and pod-security indicators, and opt-in (`-a`/`-e`) read-only RBAC checks for privileged-pod attack chains.
+
+- **Sep 2026**: Added explicit detection for root-equivalent `lxd` group membership, writable LXD control sockets, and Ubuntu's `root:lxd` on-demand `lxd-installer` socket/service chain.
+
+- **Sep 2026**: SUID/SGID enumeration now highlights privileged files in user-writable or unusual locations, replaceable parent directories, non-root ownership, and recent changes in unusual locations. High-risk file-capability combinations now include common interpreters and DAC-bypass tools.
 
 - **Dec 2025**: Added detection for sudo configurations that expose restic's `--password-command` helper, a common privilege escalation vector observed in real environments.
 
