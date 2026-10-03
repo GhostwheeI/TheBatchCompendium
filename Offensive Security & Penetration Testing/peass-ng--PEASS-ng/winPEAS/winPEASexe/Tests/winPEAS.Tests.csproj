@@ -98,8 +98,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArgumentParsingTests.cs" />
+    <Compile Include="ChecksArgumentEdgeCasesTests.cs" />
+    <Compile Include="ClfsAuthenticationTests.cs" />
+    <Compile Include="LapsPasswordExposureTests.cs" />
+    <Compile Include="PrivilegedScheduledTaskTests.cs" />
+    <Compile Include="PrivilegedWmiEventConsumerTests.cs" />
+    <Compile Include="RegistryHiveExposureTests.cs" />
+    <Compile Include="SccmNetworkAccessAccountTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SmokeTests.cs" />
+    <Compile Include="WritableServiceDllTests.cs" />
+    <Compile Include="WritableServiceRecoveryCommandTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
