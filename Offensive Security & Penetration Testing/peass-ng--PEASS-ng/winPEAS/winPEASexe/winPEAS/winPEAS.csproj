@@ -68,7 +68,7 @@
     <OutputPath>bin\x64\Debug\</OutputPath>
     <DefineConstants>TRUE WIN32 _MSC_VER NDEBUG NO_TCL SQLITE_ASCII SQLITE_DISABLE_LFS SQLITE_ENABLE_OVERSIZE_CELL_CHECK SQLITE_MUTEX_OMIT SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OS_WIN SQLITE_SYSTEM_MALLOC VDBE_PROFILE_OFF</DefineConstants>
     <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <LangVersion>8.0</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet Condition="Exists('MinimumRecommendedRules.ruleset')">MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -1223,9 +1223,14 @@
     <Compile Include="Helpers\Search\Patterns.cs" />
     <Compile Include="Helpers\YamlConfig\YamlConfig.cs" />
     <Compile Include="Helpers\YamlConfig\YamlConfigHelper.cs" />
+    <Compile Include="Info\ActiveDirectoryInfo\LapsPasswordExposure.cs" />
     <Compile Include="Info\ApplicationInfo\ApplicationInfoHelper.cs" />
     <Compile Include="Info\ApplicationInfo\AutoRuns.cs" />
     <Compile Include="Info\ApplicationInfo\DeviceDrivers.cs" />
+    <Compile Include="Info\ApplicationInfo\InstalledPackageInventory.cs" />
+    <Compile Include="Info\ApplicationInfo\PrivilegedScheduledTasks.cs" />
+    <Compile Include="Info\ApplicationInfo\PrivilegedWmiEventConsumers.cs" />
+    <Compile Include="Info\ApplicationInfo\RecallPolicyConfiguration.cs" />
     <Compile Include="Info\ApplicationInfo\SoapClientProxyAnalyzer.cs" />
     <Compile Include="Info\ApplicationInfo\InstalledApps.cs" />
     <Compile Include="Helpers\Beaprint.cs" />
@@ -1258,12 +1263,14 @@
     <Compile Include="Info\FilesInfo\Office\OfficeRecentFileInfo.cs" />
     <Compile Include="Info\FilesInfo\Office\OneDrive\CloudSyncProviderInfo.cs" />
     <Compile Include="Info\FilesInfo\Office\OneDrive\OneDriveSyncProviderInfo.cs" />
+    <Compile Include="Info\FilesInfo\RegistryHiveExposure.cs" />
     <Compile Include="Info\FilesInfo\WSL\WSLHelper.cs" />
     <Compile Include="Info\NetworkInfo\Enums\IPVersion.cs" />
     <Compile Include="Info\NetworkInfo\Enums\MibTcpState.cs" />
     <Compile Include="Info\NetworkInfo\Enums\Protocol.cs" />
     <Compile Include="Info\NetworkInfo\Enums\TcpTableClass.cs" />
     <Compile Include="Info\NetworkInfo\Enums\UdpTableClass.cs" />
+    <Compile Include="Info\NetworkInfo\HackTricksHostChecker.cs" />
     <Compile Include="Info\NetworkInfo\HostnameResolution.cs" />
     <Compile Include="Info\NetworkInfo\InternetConnectivity.cs" />
     <Compile Include="Info\NetworkInfo\InternetSettings\InternetSettings.cs" />
@@ -1289,7 +1296,10 @@
     <Compile Include="Info\SystemInfo\AuditPolicies\AuditPolicies.cs" />
     <Compile Include="Info\SystemInfo\AuditPolicies\AuditPolicyGPOInfo.cs" />
     <Compile Include="Info\SystemInfo\AuditPolicies\AuditType.cs" />
+    <Compile Include="Info\SystemInfo\ClfsAuthentication.cs" />
+    <Compile Include="Info\SystemInfo\CrossDeviceComCve66804.cs" />
     <Compile Include="Info\SystemInfo\CredentialGuard.cs" />
+    <Compile Include="Info\SystemInfo\DmaProtection.cs" />
     <Compile Include="Info\SystemInfo\DotNet\DotNet.cs" />
     <Compile Include="Info\SystemInfo\DotNet\DotNetInfo.cs" />
     <Compile Include="Info\SystemInfo\GroupPolicy\GroupPolicy.cs" />
@@ -1304,12 +1314,15 @@
     <Compile Include="Info\SystemInfo\PowerShell\PowerShellSessionSettingsInfo.cs" />
     <Compile Include="Info\SystemInfo\Printers\PrinterInfo.cs" />
     <Compile Include="Info\SystemInfo\Printers\Printers.cs" />
+    <Compile Include="Info\SystemInfo\PrintSpoolerCve38028.cs" />
     <Compile Include="Info\SystemInfo\SysMon\SysMon.cs" />
     <Compile Include="Info\SystemInfo\SysMon\SysmonEventInfo.cs" />
     <Compile Include="Info\SystemInfo\SysMon\SysmonHashAlgorithm.cs" />
     <Compile Include="Info\SystemInfo\SysMon\SysmonInfo.cs" />
     <Compile Include="Info\SystemInfo\SysMon\SysmonOptions.cs" />
+    <Compile Include="Info\SystemInfo\StorvspVsmbCves.cs" />
     <Compile Include="Info\SystemInfo\WindowsVersionVulns.cs" />
+    <Compile Include="Info\SystemInfo\WindowsInstallerCve27727.cs" />
     <Compile Include="Info\SystemInfo\WindowsDefender\AsrRule.cs" />
     <Compile Include="Info\SystemInfo\WindowsDefender\AsrSettings.cs" />
     <Compile Include="Info\SystemInfo\WindowsDefender\WindowsDefender.cs" />
@@ -1320,11 +1333,13 @@
     <Compile Include="Info\UserInfo\Tenant\JoinType.cs" />
     <Compile Include="Info\UserInfo\Tenant\Tenant.cs" />
     <Compile Include="Info\UserInfo\Tenant\TenantInfo.cs" />
+    <Compile Include="Info\WindowsCreds\AccessibilityBinaryIntegrity.cs" />
     <Compile Include="Info\WindowsCreds\AppCmd\AppCmd.cs" />
     <Compile Include="Info\WindowsCreds\RDPClientSettings.cs" />
     <Compile Include="Info\WindowsCreds\RDPServerSettings.cs" />
     <Compile Include="Info\WindowsCreds\RDPSettingsInfo.cs" />
     <Compile Include="Info\WindowsCreds\RemoteDesktop.cs" />
+    <Compile Include="Info\WindowsCreds\SccmNetworkAccessAccount.cs" />
     <Compile Include="InterestingFiles\GPP.cs" />
     <Compile Include="InterestingFiles\InterestingFiles.cs" />
     <Compile Include="InterestingFiles\Unattended.cs" />
