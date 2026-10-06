@@ -75,6 +75,19 @@ namespace winPEAS.Info.SystemInfo
             return report;
         }
 
+        internal static bool IsHotfixInstalledOrSuperseded(Dictionary<string, string> basicInfo, string hotfix)
+        {
+            if (string.IsNullOrWhiteSpace(hotfix))
+            {
+                return false;
+            }
+
+            var definitions = LoadDefinitions();
+            var installedHotfixes = GetInstalledHotfixes(basicInfo);
+            var suppressed = ExpandSupersededHotfixes(installedHotfixes, definitions?.kb_supersedes);
+            return suppressed.Contains(hotfix.Replace("KB", "").Trim());
+        }
+
         private static void AddProductMatches(
             Dictionary<string, List<WindowsVersionVulnEntry>> products,
             string candidate,
@@ -271,6 +284,11 @@ namespace winPEAS.Info.SystemInfo
 
         private static void AddServerCandidates(List<string> candidates, string productText, int build, string arch, string servicePack)
         {
+            if (!Contains(productText, "Windows Server"))
+            {
+                return;
+            }
+
             string serverName = "";
             if (Contains(productText, "Server 2025")) serverName = "2025";
             else if (Contains(productText, "Server 2022")) serverName = "2022";
@@ -315,6 +333,10 @@ namespace winPEAS.Info.SystemInfo
         private static string GetArchitectureLabel(string systemType)
         {
             string value = (systemType ?? "").ToLowerInvariant();
+            if (value.Contains("arm64"))
+            {
+                return "ARM64-based";
+            }
             if (value.Contains("x64"))
             {
                 return "x64-based";
