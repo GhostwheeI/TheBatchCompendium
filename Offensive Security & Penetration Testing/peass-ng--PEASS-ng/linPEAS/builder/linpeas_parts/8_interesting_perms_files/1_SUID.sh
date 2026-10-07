@@ -1,21 +1,21 @@
 # Title: Interesting Permissions Files - SUID
 # ID: IP_SUID
-# Author: Carlos Polop
-# Last Update: 22-08-2023
-# Description: SUID - Check easy privesc, exploits and write perms
+# Author: Carlos Polop, HT Bot
+# Last Update: 30-09-2026
+# Description: SUID - Check easy privesc, exploits, write perms, and risky file placement
 # License: GNU GPL
-# Version: 1.0
+# Version: 1.2
 # Mitre: T1548.001
-# Functions Used: echo_not_found, print_2title, print_info
+# Functions Used: check_privileged_file_location, echo_not_found, print_2title, print_info
 # Global Variables: $IAMROOT, $LDD, $ROOT_FOLDER, $READELF, $sidB, $sidG1, $sidG2, $sidG3, $sidG4, $sidVB, $sidVB2, $STRACE, $STRINGS, $TIMEOUT, $Wfolders, $cfuncs
 # Initial Functions:
-# Generated Global Variables: $suids_files, $sname, $sline_first, $sline, $OLD_LD_LIBRARY_PATH, $LD_LIBRARY_PATH
+# Generated Global Variables: $suids_files, $sfile, $sname, $sowner, $sline_first, $sline, $OLD_LD_LIBRARY_PATH, $LD_LIBRARY_PATH
 # Fat linpeas: 0
 # Small linpeas: 1
 
 
 print_2title "SUID - Check easy privesc, exploits and write perms" "T1548.001"
-print_info "https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html#sudo-and-suid"
+print_info "https://book.hacktricks.wiki/en/linux-hardening/interesting-files-permissions/suid-sgid-and-acl-triage.html#enumerate-privileged-executables"
 if ! [ "$STRINGS" ]; then
   echo_not_found "strings"
 fi
@@ -23,13 +23,15 @@ if ! [ "$STRACE" ]; then
   echo_not_found "strace"
 fi
 suids_files=$(find $ROOT_FOLDER -perm -4000 -type f ! -path "/dev/*" 2>/dev/null)
-printf "%s\n" "$suids_files" | while read s; do
-  [ -z "$s" ] && continue
-  s=$(ls -lahtr "$s")
+printf "%s\n" "$suids_files" | while IFS= read -r sfile; do
+  [ -z "$sfile" ] && continue
+  s=$(ls -lahtr "$sfile")
   #If starts like "total 332K" then no SUID bin was found and xargs just executed "ls" in the current folder
   if echo "$s" | grep -qE "^total"; then break; fi
 
-  sname="$(echo $s | awk '{print $9}')"
+  # Keep the path returned by find: parsing it from ls output breaks on whitespace.
+  sname="$sfile"
+  sowner="$(echo "$s" | awk '{print $3}')"
   if [ "$sname" = "."  ] || [ "$sname" = ".."  ]; then
     true #Don't do nothing
   elif ! [ "$IAMROOT" ] && [ -O "$sname" ]; then
@@ -99,5 +101,8 @@ printf "%s\n" "$suids_files" | while read s; do
       fi
     fi
   fi
+
+  # Reuse this enumeration for the shared privileged-file placement checks.
+  check_privileged_file_location "SUID" "$sname" "$sowner"
 done;
 echo ""
