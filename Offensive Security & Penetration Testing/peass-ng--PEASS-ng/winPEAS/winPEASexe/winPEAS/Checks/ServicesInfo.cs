@@ -1,22 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.Win32;
 using winPEAS.Helpers;
 using winPEAS.Helpers.Registry;
 using winPEAS.Info.ServicesInfo;
+using winPEAS.Info.ProcessInfo;
 
 namespace winPEAS.Checks
 {
     internal class ServicesInfo : ISystemCheck
     {
         Dictionary<string, string> modifiableServices = new Dictionary<string, string>();
+        ServiceAccessFallbackReport serviceAccessFallback;
 
-        public string[] MitreAttackIds { get; } = new[] { "T1007", "T1543.003", "T1574.001", "T1574.011", "T1014", "T1068" };
+        public string[] MitreAttackIds { get; } = new[] { "T1007", "T1543.003", "T1574.001", "T1574.010", "T1574.011", "T1014", "T1068" };
 
         public void PrintInfo(bool isDebug)
         {
-            Beaprint.GreatPrint("Services Information", "T1007,T1543.003,T1574.001,T1574.011,T1014,T1068");
+            Beaprint.GreatPrint("Services Information", "T1007,T1543.003,T1574.001,T1574.010,T1574.011,T1014,T1068");
 
             /// Start finding Modifiable services so any function could use them
 
@@ -29,19 +33,64 @@ namespace winPEAS.Checks
             }
             catch (Exception ex)
             {
-                Beaprint.PrintException(ex.Message);
+                serviceAccessFallback = ServicesInfoHelper.GetModifiableServicesByRegistryName();
+                modifiableServices = serviceAccessFallback.Findings;
+                if (!serviceAccessFallback.Available && isDebug)
+                    Beaprint.PrintException(ex.Message);
             }
 
             new List<Action>
             {
                 PrintInterestingServices,
+                PrintVisualStudioCollectorCandidate,
+                PrintSqlServicePrivilegeContext,
                 PrintModifiableServices,
                 PrintWritableRegServices,
+                PrintWritableSystemServiceDlls,
+                PrintWritableSystemRecoveryCommands,
                 PrintPathDllHijacking,
                 PrintOemPrivilegedUtilities,
                 PrintLegacySignedKernelDrivers,
                 PrintKernelQuickIndicators,
             }.ForEach(action => CheckRunner.Run(action, isDebug));
+        }
+
+        void PrintVisualStudioCollectorCandidate()
+        {
+            VisualStudioCollectorAssessment assessment = VisualStudioCollectorIndicator.Collect();
+            if (assessment == null || !assessment.IsReviewCandidate) return;
+
+            Beaprint.MainPrint("Visual Studio diagnostic collector review candidate", "T1068");
+            Beaprint.NoColorPrint("    VSStandardCollectorService150: LocalSystem; expected Visual Studio collector image.");
+            Beaprint.NoColorPrint("    Setup WMI compiler path: " +
+                (assessment.SetupWmiCompilerPresent ? "present" : "not observed"));
+            Beaprint.GrayPrint("    Historical CVE-2024-20656. Verify the January 2024 component fix and MSI repair prerequisites; service and file presence do not prove exposure.");
+        }
+
+        void PrintSqlServicePrivilegeContext()
+        {
+            Beaprint.MainPrint("SQL service privilege configuration and this process token", "T1007");
+            SqlServicePrivilegeReport report = ServicesInfoHelper.GetSqlServicePrivilegeContext();
+            if (report.Unavailable)
+                Beaprint.GrayPrint("    Local service configuration unavailable or incomplete.");
+            if (report.Services.Count == 0 && !report.Unavailable)
+                Beaprint.GrayPrint("    No configured SQL-named services found.");
+            foreach (SqlServicePrivilegeInfo service in report.Services)
+            {
+                string privileges = service.RequiredPrivileges == null ? "unavailable or not configured"
+                    : service.RequiredPrivileges.Length == 0 ? "empty"
+                    : string.Join(", ", service.RequiredPrivileges.Take(16).Select(p =>
+                        ServicesInfoHelper.FormatSqlServiceValue(p))) +
+                        (service.RequiredPrivileges.Length > 16 ? ", ..." : "");
+                Beaprint.NoColorPrint($"    {ServicesInfoHelper.FormatSqlServiceValue(service.Name)}: state={service.State}; run-as={ServicesInfoHelper.FormatSqlServiceValue(service.Account)}");
+                Beaprint.NoColorPrint($"      Registry RequiredPrivileges: {privileges}");
+                Beaprint.GrayPrint($"      {service.Context}");
+            }
+            if (report.Omitted > 0)
+                Beaprint.GrayPrint($"    {report.Omitted} additional SQL-named service(s) omitted.");
+            if (report.TimeLimitReached)
+                Beaprint.GrayPrint("    SQL service inspection stopped at its 2-second limit; remaining services unknown.");
+            Beaprint.GrayPrint("    RequiredPrivileges is configuration, not a captured service token. No original token or exploitability is inferred.");
         }
 
         void PrintInterestingServices()
@@ -51,12 +100,18 @@ namespace winPEAS.Checks
                 Beaprint.MainPrint("Interesting Services -non Microsoft-", "T1007");
                 Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#services", "Check if you can overwrite some service binary or perform a DLL hijacking, also check for unquoted paths");
 
-                List<Dictionary<string, string>> services_info = ServicesInfoHelper.GetNonstandardServices();
-
-                if (services_info.Count < 1)
-                {
-                    services_info = ServicesInfoHelper.GetNonstandardServicesFromReg();
-                }
+                ServiceRegistryInventory inventory = ServicesInfoHelper.SelectNonstandardServices(
+                    ServicesInfoHelper.GetNonstandardServices, ServicesInfoHelper.GetNonstandardServicesFromReg);
+                List<Dictionary<string, string>> services_info = inventory.Services;
+                int nssmServicesInspected = 0;
+                var nssmTimer = new Stopwatch();
+                bool nssmTimeLimitReached = false;
+                if (inventory.UsedRegistry)
+                    Beaprint.GrayPrint($"    Registry fallback inspected {inventory.Inspected} service keys; " +
+                        $"{inventory.Unreadable} unreadable or incomplete. " +
+                        (inventory.LimitReached ? "Partial visibility: entry cap reached; remaining services unknown."
+                        : inventory.Unreadable > 0 || inventory.Inspected == 0 ? "Partial visibility possible."
+                        : ""));
 
                 foreach (Dictionary<string, string> serviceInfo in services_info)
                 {
@@ -69,6 +124,7 @@ namespace winPEAS.Checks
                     }
 
                     bool noQuotesAndSpace = MyUtils.CheckQuoteAndSpace(serviceInfo["PathName"]);
+                    ServiceCommandLineAssessment commandLine = ServicesInfoHelper.AssessServiceCommandLine(serviceInfo["PathName"]);
 
                     string formString = "    {0}(";
                     if (serviceInfo["CompanyName"] != null && serviceInfo["CompanyName"].Length > 1)
@@ -99,6 +155,12 @@ namespace winPEAS.Checks
                         formString += "\n    Possible DLL Hijacking in binary folder: {9} ({10})";
                     if (serviceInfo["Description"].Length > 1)
                         formString += "\n    " + Beaprint.ansi_color_gray + "{11}";
+                    if (commandLine.CredentialPairCandidate)
+                        formString += "\n    Credential-shaped service arguments present (values redacted; review candidate only)";
+                    else if (commandLine.UnpairedPasswordOption)
+                        formString += "\n    Password-shaped option present (values redacted; ambiguous, review only)";
+                    if (commandLine.ScanLimitReached)
+                        formString += "\n    Service command line scan stopped at 4096 characters; remaining arguments unknown";
 
                     {
                         Dictionary<string, string> colorsS = new Dictionary<string, string>()
@@ -108,14 +170,80 @@ namespace winPEAS.Checks
                                 { "No quotes and Space detected", Beaprint.ansi_color_bad },
                                 { "YOU CAN MODIFY THIS SERVICE:.*", Beaprint.ansi_color_bad },
                                 { " START ", Beaprint.ansi_color_bad },
-                                { serviceInfo["PathName"].Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)").Replace("]", "\\]").Replace("[", "\\[").Replace("?", "\\?").Replace("+","\\+"), (fileRights.Count > 0 || dirRights.Count > 0 || noQuotesAndSpace) ? Beaprint.ansi_color_bad : Beaprint.ansi_color_good },
+                                { "Credential-shaped service arguments.*", Beaprint.ansi_color_yellow },
+                                { "Password-shaped option.*", Beaprint.ansi_color_yellow },
+                                { commandLine.DisplayPath.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)").Replace("]", "\\]").Replace("[", "\\[").Replace("?", "\\?").Replace("+","\\+"), (fileRights.Count > 0 || dirRights.Count > 0 || noQuotesAndSpace) ? Beaprint.ansi_color_bad : Beaprint.ansi_color_good },
                             };
 
-                        Beaprint.AnsiPrint(string.Format(formString, serviceInfo["Name"], serviceInfo["CompanyName"], serviceInfo["DisplayName"], serviceInfo["PathName"], serviceInfo["StartMode"], serviceInfo["State"], serviceInfo["isDotNet"], "No quotes and Space detected", string.Join(", ", fileRights), dirRights.Count > 0 ? Path.GetDirectoryName(serviceInfo["FilteredPath"]) : "", string.Join(", ", dirRights), serviceInfo["Description"]), colorsS);
+                        Beaprint.AnsiPrint(string.Format(formString, serviceInfo["Name"], serviceInfo["CompanyName"], serviceInfo["DisplayName"], commandLine.DisplayPath, serviceInfo["StartMode"], serviceInfo["State"], serviceInfo["isDotNet"], "No quotes and Space detected", string.Join(", ", fileRights), dirRights.Count > 0 && commandLine.ExecutablePath != null ? Path.GetDirectoryName(commandLine.ExecutablePath) : "[binary folder redacted]", string.Join(", ", dirRights), serviceInfo["Description"]), colorsS);
                     }
+
+                    // NSSM's ImagePath names the wrapper, not the application it runs.
+                    // Read only the fixed service Parameters key; never print AppParameters.
+                    bool isNssmWrapper = ServicesInfoHelper.IsNssmServicePath(serviceInfo["PathName"]);
+                    if (isNssmWrapper)
+                        ++nssmServicesInspected;
+                    if (isNssmWrapper &&
+                        nssmServicesInspected <= ServicesInfoHelper.MaxNssmServiceContexts &&
+                        nssmTimer.ElapsedMilliseconds < 500)
+                    {
+                        nssmTimer.Start();
+                        try
+                        {
+                            NssmServiceContext context = ServicesInfoHelper.ReadNssmServiceContext(
+                                serviceInfo, path =>
+                                {
+                                    using (RegistryKey key = Registry.LocalMachine.OpenSubKey(path))
+                                    {
+                                        if (key == null) return null;
+                                        return new Dictionary<string, object>
+                                        {
+                                            ["Application"] = key.GetValue("Application", null, RegistryValueOptions.DoNotExpandEnvironmentNames),
+                                            ["AppDirectory"] = key.GetValue("AppDirectory", null, RegistryValueOptions.DoNotExpandEnvironmentNames)
+                                        };
+                                    }
+                                });
+                            if (context == null)
+                                Beaprint.GrayPrint("    NSSM application context unavailable or non-local; review service Parameters manually.");
+                            else
+                            {
+                                Beaprint.NoColorPrint($"    NSSM Application: {context.Application}");
+                                Beaprint.NoColorPrint($"    NSSM service run-as: {context.Account}");
+                                if (context.Directory != null)
+                                    Beaprint.NoColorPrint($"    NSSM AppDirectory: {context.Directory}");
+                                try
+                                {
+                                    string appParent = Path.GetDirectoryName(context.Application);
+                                    if (ProcessModuleDirectoryReview.IsFixedUnreparsedDirectory(appParent))
+                                    {
+                                        FileAttributes attributes = File.GetAttributes(context.Application);
+                                        if ((attributes & (FileAttributes.ReparsePoint | FileAttributes.Directory)) == 0)
+                                        {
+                                            // Use the exact path: GetPermissionsFile reparses it and can
+                                            // truncate an executable below a dotted parent directory.
+                                            List<string> appRights = PermissionsHelper.GetMyPermissionsF(
+                                                File.GetAccessControl(context.Application), Checks.CurrentUserSiDs,
+                                                PermissionType.WRITEABLE_OR_EQUIVALENT);
+                                            List<string> allowedAppRights = appRights
+                                                .Where(right => right.Contains("[Allow:")).ToList();
+                                            if (allowedAppRights.Count > 0)
+                                                Beaprint.BadPrint($"    NSSM Application file permissions: {string.Join(", ", allowedAppRights)} (review candidate; effective deny/inheritance unverified)");
+                                        }
+                                    }
+                                }
+                                catch { /* A stale, invalid, or inaccessible target is only a metadata lead. */ }
+                                Beaprint.GrayPrint("    Confirm the child actually runs under this service identity and reaches any privileged operation; no configuration content was read.");
+                            }
+                        }
+                        finally { nssmTimer.Stop(); }
+                    }
+                    else if (isNssmWrapper && nssmTimer.ElapsedMilliseconds >= 500)
+                        nssmTimeLimitReached = true;
 
                     Beaprint.PrintLineSeparator();
                 }
+                if (nssmServicesInspected > ServicesInfoHelper.MaxNssmServiceContexts || nssmTimeLimitReached)
+                    Beaprint.GrayPrint($"NSSM application context reads were partial (cap {ServicesInfoHelper.MaxNssmServiceContexts}; 500-ms budget); remaining wrappers were not inspected.");
             }
             catch (Exception ex)
             {
@@ -129,6 +257,22 @@ namespace winPEAS.Checks
             {
                 Beaprint.MainPrint("Modifiable Services", "T1543.003");
                 Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#services", "Check if you can modify any service");
+                Beaprint.GrayPrint("    Local SCM only. Remote sc.exe service-path replacement requires separate remote administrative/service-control access and is not inferred by this check.");
+                ScmCreateServiceAccess createAccess = ServicesInfoHelper.GetScmCreateServiceAccess();
+                if (createAccess == ScmCreateServiceAccess.Granted)
+                {
+                    Beaprint.BadPrint("    SCM create-service access granted to this process token (review candidate).");
+                    Beaprint.GrayPrint("    This does not test service creation or start. A higher-privilege transition also needs a runnable service identity, a usable service handle, and permitted executable path.");
+                }
+                else if (createAccess == ScmCreateServiceAccess.Unknown)
+                    Beaprint.GrayPrint("    SCM create-service access could not be determined for this process token.");
+                if (serviceAccessFallback != null)
+                {
+                    Beaprint.GrayPrint($"    Service enumeration was unavailable; read-only named-service access fallback inspected {serviceAccessFallback.Inspected} registry names (cap {ServicesInfoHelper.MaxRegistryServiceEntries}, 2-second deadline).");
+                    if (!serviceAccessFallback.Complete)
+                        Beaprint.GrayPrint("    Partial visibility: service access could not be checked for every name.");
+                    Beaprint.GrayPrint("    OpenService rights are review candidates; verify the service identity and start policy. No service was changed or started.");
+                }
                 if (modifiableServices.Count > 0)
                 {
                     Beaprint.BadPrint("    LOOKS LIKE YOU CAN MODIFY OR START/STOP SOME SERVICE/s:");
@@ -151,7 +295,9 @@ namespace winPEAS.Checks
                     Beaprint.DictPrint(modifiableServices, colorsMS, false, true);
                 }
                 else
-                    Beaprint.GoodPrint("    You cannot modify any service");
+                    Beaprint.GrayPrint(serviceAccessFallback == null
+                        ? "    No modifiable service observed in the enumerated services; inaccessible service ACLs may remain unknown."
+                        : "    No ChangeConfig right observed among the named services inspected; remaining access may be unknown.");
 
             }
             catch (Exception ex)
@@ -164,22 +310,110 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("Looking if you can modify any service registry", "T1574.011");
-                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#services-registry-modify-permissions", "Check if you can modify the registry of a service");
-                List<Dictionary<string, string>> regPerms = ServicesInfoHelper.GetWriteServiceRegs(Checks.CurrentUserSiDs);
+                Beaprint.MainPrint("Service registry ACL review", "T1574.011");
+                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#services-registry-modify-permissions", "Review service-key registry permissions");
+                ServiceRegistryWriteReport report = ServicesInfoHelper.GetWriteServiceRegsReport(Checks.CurrentUserSiDs);
 
                 Dictionary<string, string> colorsWR = new Dictionary<string, string>()
                             {
-                                { @"\(.*\)", Beaprint.ansi_color_bad },
+                                { @"\(.*\)", Beaprint.ansi_color_yellow },
                             };
 
-                if (regPerms.Count <= 0)
-                    Beaprint.GoodPrint("    [-] Looks like you cannot change the registry of any service...");
+                if (report.Findings.Count == 0)
+                    Beaprint.GrayPrint("    " + report.NoFindingsSummary);
                 else
                 {
-                    foreach (Dictionary<string, string> writeServReg in regPerms)
+                    foreach (Dictionary<string, string> writeServReg in report.Findings)
                         Beaprint.AnsiPrint(string.Format("    {0} ({1})", writeServReg["Path"], writeServReg["Permissions"]), colorsWR);
+                }
+                Beaprint.GrayPrint(string.Format("    Reviewed {0}/{1} service keys; {2} unreadable; {3} further ACL candidates omitted.",
+                    report.Inspected, report.TotalNames, report.Unreadable, report.OmittedFindings));
+                if (!report.Complete)
+                    Beaprint.GrayPrint("    Partial/unknown registry ACL coverage (key read, count, or time limit).");
+                if (report.Findings.Count > 0)
+                    Beaprint.GrayPrint("    ACL entries may include Deny rules and do not prove effective write access. SCM service-object rights, start permission, and service identity require separate review.");
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
 
+        void PrintWritableSystemServiceDlls()
+        {
+            try
+            {
+                Beaprint.MainPrint("Writable DLLs loaded by LocalSystem services", "T1574.010");
+                Beaprint.LinkPrint(
+                    "https://attack.mitre.org/techniques/T1574/010/",
+                    "A replaceable DLL loaded by an enabled LocalSystem service can execute as SYSTEM when the service starts.");
+
+                WritableServiceDllReport report = ServicesInfoHelper.GetWritableSystemServiceDlls(Checks.CurrentUserSiDs);
+                if (report.Findings.Count == 0)
+                {
+                    Beaprint.GoodPrint($"    No replaceable ServiceDll paths found in {report.ServicesInspected} inspected service(s).");
+                }
+
+                foreach (WritableServiceDllInfo finding in report.Findings)
+                {
+                    Beaprint.BadPrint($"    {finding.ServiceName} ({finding.Account})");
+                    Beaprint.NoColorPrint($"      ServiceDll : {finding.ServiceDllPath}");
+                    Beaprint.NoColorPrint($"      DLL exists : {finding.FileExists}");
+                    Beaprint.BadPrint($"      Evidence    : {finding.AccessReason}");
+                    Beaprint.PrintLineSeparator();
+                }
+
+                if (report.ServiceLimitReached)
+                {
+                    Beaprint.GrayPrint($"    Service inspection stopped at the safety limit of {ServicesInfoHelper.MaxServiceDllServices}.");
+                }
+                if (report.FindingLimitReached)
+                {
+                    Beaprint.GrayPrint($"    Findings were capped at {ServicesInfoHelper.MaxServiceDllFindings}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        void PrintWritableSystemRecoveryCommands()
+        {
+            try
+            {
+                Beaprint.MainPrint("Writable LocalSystem service recovery command targets", "T1543.003");
+                Beaprint.LinkPrint(
+                    "https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_failure_actionsw",
+                    "A replaceable target used by an SC_ACTION_RUN_COMMAND recovery action executes under the service account when recovery fires.");
+
+                WritableServiceRecoveryCommandReport report =
+                    ServicesInfoHelper.GetWritableSystemRecoveryCommands(Checks.CurrentUserSiDs);
+                if (report.Findings.Count == 0)
+                {
+                    Beaprint.GoodPrint($"    No replaceable recovery command targets found in {report.ServicesInspected} inspected service(s).");
+                }
+
+                foreach (WritableServiceRecoveryCommandInfo finding in report.Findings)
+                {
+                    Beaprint.BadPrint($"    {finding.ServiceName} ({finding.Account})");
+                    Beaprint.NoColorPrint($"      Target exists : {finding.TargetExists}");
+                    Beaprint.NoColorPrint($"      Target path   : {finding.TargetPath}");
+                    Beaprint.BadPrint($"      Evidence      : {finding.AccessReason}");
+                    Beaprint.PrintLineSeparator();
+                }
+
+                if (report.Findings.Count > 0)
+                {
+                    Beaprint.GrayPrint("    Recovery actions run only after a qualifying service failure; this check does not stop, start, or crash services.");
+                }
+                if (report.ServiceLimitReached)
+                {
+                    Beaprint.GrayPrint($"    Service inspection stopped at the safety limit of {ServicesInfoHelper.MaxRecoveryCommandServices}.");
+                }
+                if (report.FindingLimitReached)
+                {
+                    Beaprint.GrayPrint($"    Findings were capped at {ServicesInfoHelper.MaxRecoveryCommandFindings}.");
                 }
             }
             catch (Exception ex)

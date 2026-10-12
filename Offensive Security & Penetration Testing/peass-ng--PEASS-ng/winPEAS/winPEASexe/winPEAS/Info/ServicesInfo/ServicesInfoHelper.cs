@@ -10,19 +10,476 @@ using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 using System.ServiceProcess;
 using System.Text.RegularExpressions;
 using winPEAS.Helpers;
 using winPEAS.Helpers.Registry;
+using winPEAS.Info.ApplicationInfo;
+using winPEAS.Info.UserInfo.Token;
 using winPEAS.Native;
 
 namespace winPEAS.Info.ServicesInfo
 {
+    internal enum ScmCreateServiceAccess
+    {
+        Unknown,
+        Denied,
+        Granted
+    }
+
+    internal sealed class ServiceCommandLineAssessment
+    {
+        public string DisplayPath { get; set; }
+        public string ExecutablePath { get; set; }
+        public bool CredentialPairCandidate { get; set; }
+        public bool UnpairedPasswordOption { get; set; }
+        public bool ScanLimitReached { get; set; }
+    }
+
+    internal sealed class ServiceRegistryEntry
+    {
+        public string Name { get; set; }
+        public Dictionary<string, object> Values { get; set; }
+    }
+
+    internal sealed class ServiceRegistryInventory
+    {
+        public List<ServiceRegistryEntry> Entries { get; } = new List<ServiceRegistryEntry>();
+        public List<Dictionary<string, string>> Services { get; } = new List<Dictionary<string, string>>();
+        public bool UsedRegistry { get; set; }
+        public int Inspected { get; set; }
+        public int Unreadable { get; set; }
+        public bool LimitReached { get; set; }
+    }
+
+    internal sealed class NssmServiceContext
+    {
+        public string Application { get; set; }
+        public string Directory { get; set; }
+        public string Account { get; set; }
+    }
+
+    internal sealed class ServiceAccessFallbackReport
+    {
+        public Dictionary<string, string> Findings { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        public int Inspected { get; set; }
+        public bool Available { get; set; }
+        public bool LimitReached { get; set; }
+        public bool TimeLimitReached { get; set; }
+        public bool Complete => Available && !LimitReached && !TimeLimitReached;
+    }
+
+    internal sealed class ServiceRegistryWriteReport
+    {
+        public List<Dictionary<string, string>> Findings { get; } = new List<Dictionary<string, string>>();
+        public int TotalNames { get; set; }
+        public int Inspected { get; set; }
+        public int Unreadable { get; set; }
+        public int OmittedFindings { get; set; }
+        public bool Available { get; set; }
+        public bool LimitReached { get; set; }
+        public bool TimeLimitReached { get; set; }
+        public bool Complete => Available && !LimitReached && !TimeLimitReached && Unreadable == 0 && Inspected == TotalNames;
+        public string NoFindingsSummary => Complete
+            ? "No matching service-registry ACL entries found in the complete inventory."
+            : "Service-registry ACL review is incomplete; uninspected or unreadable keys remain unknown.";
+    }
+
+    internal sealed class SqlServicePrivilegeInfo
+    {
+        public string Name { get; set; }
+        public string Account { get; set; }
+        public string State { get; set; }
+        public string[] RequiredPrivileges { get; set; }
+        public string Context { get; set; }
+    }
+
+    internal sealed class SqlServicePrivilegeReport
+    {
+        public List<SqlServicePrivilegeInfo> Services { get; } = new List<SqlServicePrivilegeInfo>();
+        public int Omitted { get; set; }
+        public bool TimeLimitReached { get; set; }
+        public bool Unavailable { get; set; }
+    }
+
+    internal sealed class WritableServiceDllInfo
+    {
+        public string ServiceName { get; set; }
+        public string Account { get; set; }
+        public string ServiceDllPath { get; set; }
+        public bool FileExists { get; set; }
+        public string AccessReason { get; set; }
+    }
+
+    internal sealed class WritableServiceDllReport
+    {
+        public List<WritableServiceDllInfo> Findings { get; } = new List<WritableServiceDllInfo>();
+        public int ServicesInspected { get; set; }
+        public bool ServiceLimitReached { get; set; }
+        public bool FindingLimitReached { get; set; }
+    }
+
+    internal sealed class WritableServiceRecoveryCommandInfo
+    {
+        public string ServiceName { get; set; }
+        public string Account { get; set; }
+        public string TargetPath { get; set; }
+        public bool TargetExists { get; set; }
+        public string AccessReason { get; set; }
+    }
+
+    internal sealed class WritableServiceRecoveryCommandReport
+    {
+        public List<WritableServiceRecoveryCommandInfo> Findings { get; } = new List<WritableServiceRecoveryCommandInfo>();
+        public int ServicesInspected { get; set; }
+        public bool ServiceLimitReached { get; set; }
+        public bool FindingLimitReached { get; set; }
+    }
+
     class ServicesInfoHelper
     {
+        // Service keys also contain drivers; a few hundred keys can be exhausted before
+        // later service names are reached on ordinary Windows installations.
+        internal const int MaxRegistryServiceEntries = 2048;
+        internal const int MaxServiceRegistryWriteFindings = 128;
+        internal const uint ServiceChangeConfigAccess = 0x0002;
+        internal const uint ServiceStartAccess = 0x0010;
+        internal const uint ServiceStopAccess = 0x0020;
+        private const int MaxServiceAccessFallbackMilliseconds = 2000;
+        private static readonly Regex ServiceExecutable = new Regex(
+            @"^\s*(?:""(?<quoted>[^""\r\n]+?\.(?:exe|dll|sys|com|bat|cmd))""|(?<plain>[^\r\n]+?\.(?:exe|dll|sys|com|bat|cmd)))(?=\s|$)",
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+        internal static ServiceCommandLineAssessment AssessServiceCommandLine(string commandLine)
+        {
+            var assessment = new ServiceCommandLineAssessment { DisplayPath = "[service command line redacted]" };
+            if (string.IsNullOrWhiteSpace(commandLine))
+                return assessment;
+
+            const int maxCommandLineCharacters = 4096;
+            assessment.ScanLimitReached = commandLine.Length > maxCommandLineCharacters;
+            if (assessment.ScanLimitReached)
+                commandLine = commandLine.Substring(0, maxCommandLineCharacters);
+
+            Match executable = ServiceExecutable.Match(commandLine);
+            if (!executable.Success)
+                return assessment;
+
+            string path = executable.Groups["quoted"].Success ? executable.Groups["quoted"].Value : executable.Groups["plain"].Value;
+            // A malformed unquoted command can put options before the first executable
+            // suffix (including a secret value ending in .exe). Do not display it as a path.
+            if (!executable.Groups["quoted"].Success && Regex.IsMatch(path, @"(?:^|\s)[-/]"))
+                return assessment;
+            // The executable is useful for review, but arbitrary argument text must never reach output.
+            if (path.Length <= 260)
+            {
+                assessment.ExecutablePath = path;
+                assessment.DisplayPath = (executable.Groups["quoted"].Success ? "\"" + path + "\"" : path);
+            }
+            string arguments = commandLine.Substring(executable.Length).Trim();
+            if (arguments.Length == 0 && !assessment.ScanLimitReached)
+                return assessment;
+            assessment.DisplayPath += " [arguments redacted]";
+
+            string[] tokens = Regex.Matches(arguments, "\"[^\"]*\"|\\S+")
+                .Cast<Match>().Select(match => match.Value.Trim('"')).ToArray();
+            bool shortUser = false, shortPassword = false;
+            bool longUser = false, longPassword = false;
+            bool slashUser = false, slashPassword = false;
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                string token = tokens[i];
+                bool nextValue = i + 1 < tokens.Length && tokens[i + 1].Length > 0 &&
+                    !tokens[i + 1].StartsWith("-", StringComparison.Ordinal) &&
+                    !tokens[i + 1].StartsWith("/", StringComparison.Ordinal);
+                if (token.Equals("-u", StringComparison.OrdinalIgnoreCase) && nextValue) shortUser = true;
+                if (token.Equals("-p", StringComparison.OrdinalIgnoreCase) && nextValue) shortPassword = true;
+                if (token.Equals("--user", StringComparison.OrdinalIgnoreCase) && nextValue) longUser = true;
+                if (token.Equals("--password", StringComparison.OrdinalIgnoreCase) && nextValue) longPassword = true;
+                if (token.StartsWith("--user=", StringComparison.OrdinalIgnoreCase) && token.Length > 7) longUser = true;
+                if (token.StartsWith("--password=", StringComparison.OrdinalIgnoreCase) && token.Length > 11) longPassword = true;
+                if (token.StartsWith("/user:", StringComparison.OrdinalIgnoreCase) && token.Length > 6) slashUser = true;
+                if (token.StartsWith("/password:", StringComparison.OrdinalIgnoreCase) && token.Length > 10) slashPassword = true;
+            }
+            assessment.CredentialPairCandidate = (shortUser && shortPassword) ||
+                (longUser && longPassword) || (slashUser && slashPassword);
+            assessment.UnpairedPasswordOption = !assessment.CredentialPairCandidate &&
+                (shortPassword || longPassword || slashPassword);
+            return assessment;
+        }
+
+        internal static ServiceRegistryInventory ReadRegistryServiceEntries(
+            IEnumerable<string> names, Func<string, Dictionary<string, object>> readValues, int maxEntries)
+        {
+            var inventory = new ServiceRegistryInventory { UsedRegistry = true };
+            if (names == null || readValues == null || maxEntries < 1)
+                return inventory;
+            foreach (string name in names)
+            {
+                if (inventory.Inspected >= maxEntries)
+                {
+                    inventory.LimitReached = true;
+                    break;
+                }
+                inventory.Inspected++;
+                try
+                {
+                    Dictionary<string, object> values = readValues(name);
+                    if (values == null)
+                    {
+                        inventory.Unreadable++;
+                        continue;
+                    }
+                    if (values.ContainsKey("ImagePath") && values["ImagePath"] != null)
+                        inventory.Entries.Add(new ServiceRegistryEntry { Name = name, Values = values });
+                }
+                catch (Exception)
+                {
+                    inventory.Unreadable++;
+                }
+            }
+            return inventory;
+        }
+
+        internal static string GetRegistryServiceDisplayName(ServiceRegistryEntry entry)
+        {
+            object displayName;
+            return entry.Values.TryGetValue("DisplayName", out displayName) &&
+                !string.IsNullOrWhiteSpace(Convert.ToString(displayName))
+                ? Convert.ToString(displayName) : entry.Name;
+        }
+
+        internal static ServiceRegistryInventory SelectNonstandardServices(
+            Func<List<Dictionary<string, string>>> readWmi, Func<ServiceRegistryInventory> readRegistry)
+        {
+            try
+            {
+                List<Dictionary<string, string>> wmi = readWmi();
+                if (wmi != null && wmi.Count > 0)
+                {
+                    var result = new ServiceRegistryInventory();
+                    result.Services.AddRange(wmi);
+                    return result;
+                }
+            }
+            catch (Exception)
+            {
+                // WMI may be unavailable; use the same passive registry fallback.
+            }
+            return readRegistry();
+        }
+
+        internal const int MaxSqlServiceContextServices = 10;
+        private const int SqlServiceContextMilliseconds = 2000;
+
+        internal static bool IsSqlServiceName(string name)
+        {
+            return !string.IsNullOrEmpty(name) && Regex.IsMatch(name,
+                @"^(MSSQLSERVER|SQLSERVERAGENT|MSSQL\$.+|SQLAgent\$.+)$",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        }
+
+        internal static bool IsCurrentServiceAccount(string serviceAccount, string currentIdentity, string computerName)
+        {
+            if (string.IsNullOrWhiteSpace(serviceAccount) || string.IsNullOrWhiteSpace(currentIdentity))
+                return false;
+            string account = serviceAccount.Trim();
+            if (account.StartsWith(@".\", StringComparison.Ordinal))
+                account = computerName + account.Substring(1);
+            return string.Equals(account, currentIdentity.Trim(), StringComparison.OrdinalIgnoreCase);
+        }
+
+        internal static string FormatSqlServiceValue(string value)
+        {
+            if (value == null) return "unknown";
+            string clean = Regex.Replace(value, @"[\x00-\x1f\x7f]", " ");
+            return clean.Length > 80 ? clean.Substring(0, 80) + "..." : clean;
+        }
+
+        internal static string ClassifySqlServicePrivilegeContext(
+            string serviceAccount, string currentIdentity, string computerName,
+            string[] requiredPrivileges, bool? currentTokenHasImpersonate)
+        {
+            if (string.IsNullOrWhiteSpace(serviceAccount) || string.IsNullOrWhiteSpace(currentIdentity))
+                return "service account or current process identity unavailable; no token comparison";
+            if (!IsCurrentServiceAccount(serviceAccount, currentIdentity, computerName))
+                return "service account does not match this process identity; no token comparison";
+            if (requiredPrivileges == null)
+                return "RequiredPrivileges unavailable; no token comparison";
+            bool configured = requiredPrivileges.Any(p => string.Equals(
+                p, "SeImpersonatePrivilege", StringComparison.OrdinalIgnoreCase));
+            if (!configured)
+                return "SeImpersonatePrivilege not listed in configured RequiredPrivileges; original service token unknown";
+            if (!currentTokenHasImpersonate.HasValue)
+                return "current process token privileges unavailable; no token comparison";
+            return currentTokenHasImpersonate.Value
+                ? "SeImpersonatePrivilege also present in current process token; original service token unknown"
+                : "configured SeImpersonatePrivilege differs from current process token; another token may differ; unverified";
+        }
+
+        internal static SqlServicePrivilegeReport GetSqlServicePrivilegeContext()
+        {
+            var report = new SqlServicePrivilegeReport();
+            var timer = Stopwatch.StartNew();
+            string identity = null;
+            bool? hasImpersonate = null;
+            try
+            {
+                using (WindowsIdentity current = WindowsIdentity.GetCurrent())
+                    identity = current.Name;
+                Dictionary<string, string> privileges = Token.GetTokenGroupPrivs();
+                if (privileges.Count > 0)
+                    hasImpersonate = privileges.Keys.Any(p => string.Equals(
+                        p, "SeImpersonatePrivilege", StringComparison.OrdinalIgnoreCase));
+            }
+            catch (Exception) { /* Identity and token comparison remain unknown. */ }
+
+            try
+            {
+                using (RegistryKey services = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services"))
+                {
+                    if (services == null) { report.Unavailable = true; return report; }
+                    foreach (string name in services.GetSubKeyNames().Where(IsSqlServiceName).OrderBy(n => n, StringComparer.OrdinalIgnoreCase))
+                    {
+                        if (report.Services.Count >= MaxSqlServiceContextServices) { report.Omitted++; continue; }
+                        if (timer.ElapsedMilliseconds >= SqlServiceContextMilliseconds)
+                        { report.TimeLimitReached = true; break; }
+                        var entry = new SqlServicePrivilegeInfo { Name = name, State = "unknown" };
+                        try
+                        {
+                            using (RegistryKey key = services.OpenSubKey(name))
+                            {
+                                if (key != null)
+                                {
+                                    entry.Account = key.GetValue("ObjectName") as string;
+                                    entry.RequiredPrivileges = key.GetValue("RequiredPrivileges") as string[];
+                                }
+                            }
+                            using (var controller = new ServiceController(name))
+                                entry.State = controller.Status.ToString();
+                        }
+                        catch (Exception) { /* Keep readable configuration when SCM access fails. */ }
+                        entry.Context = ClassifySqlServicePrivilegeContext(entry.Account, identity,
+                            Environment.MachineName, entry.RequiredPrivileges, hasImpersonate);
+                        report.Services.Add(entry);
+                    }
+                }
+            }
+            catch (Exception) { report.Unavailable = true; }
+            return report;
+        }
+
+        internal const int MaxServiceDllServices = 4096;
+        internal const int MaxServiceDllFindings = 64;
+        internal const int MaxRecoveryCommandServices = 4096;
+        internal const int MaxRecoveryCommandFindings = 64;
+
+        private const int ServiceWin32OwnProcess = 0x10;
+        private const int ServiceWin32ShareProcess = 0x20;
+        private const int ServiceWin32TypeMask = 0x30;
+        private const int ServiceDisabled = 0x4;
+        private const uint ScManagerConnect = 0x0001;
+        internal const uint ScManagerCreateService = 0x0002;
+        private const int ErrorAccessDenied = 5;
+        private const uint ServiceQueryConfig = 0x0001;
+        private const uint ServiceConfigFailureActions = 2;
+        private const int ScActionRunCommand = 3;
+        private const uint ErrorInsufficientBuffer = 122;
+        private const uint MaxServiceConfigBuffer = 8192;
+        private const int FileWriteData = 0x00000002;
+        private const int FileAddFile = 0x00000002;
+        private const int FileDeleteChild = 0x00000040;
+        private const int Delete = 0x00010000;
+        private const int WriteDac = 0x00040000;
+        private const int WriteOwner = 0x00080000;
+        private const int FileAllAccess = 0x001F01FF;
+        private const int FileGenericRead = 0x00120089;
+        private const int FileGenericWrite = 0x00120116;
+        private const int FileGenericExecute = 0x001200A0;
+        private const int GenericAll = 0x10000000;
+        private const int GenericExecute = 0x20000000;
+        private const int GenericWrite = 0x40000000;
+        private const int GenericRead = unchecked((int)0x80000000);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct ServiceFailureActions
+        {
+            public uint ResetPeriod;
+            public IntPtr RebootMessage;
+            public IntPtr Command;
+            public uint ActionCount;
+            public IntPtr Actions;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct ServiceFailureAction
+        {
+            public int Type;
+            public uint Delay;
+        }
+
         ///////////////////////////////////////////////
         //// Non Standard Services (Non Microsoft) ////
         ///////////////////////////////////////////////
+        internal const int MaxNssmServiceContexts = 16;
+
+        internal static bool IsNssmServicePath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || path.Length > 512 || path.Any(char.IsControl)) return false;
+            string value = path.Trim().Trim('"');
+            return value.Length >= 11 && char.IsLetter(value[0]) && value[1] == ':' &&
+                value[2] == '\\' && value.EndsWith(@"\nssm.exe", StringComparison.OrdinalIgnoreCase) &&
+                !value.Any(char.IsControl);
+        }
+
+        private static string NssmLocalPath(object raw)
+        {
+            string path = raw as string;
+            if (string.IsNullOrWhiteSpace(path) || path.Length > 512 || path.Any(char.IsControl)) return null;
+            path = path.Trim().Trim('"');
+            if (path.Length < 4 || !char.IsLetter(path[0]) || path[1] != ':' ||
+                path[2] != '\\' || path.Any(char.IsControl) || path.IndexOfAny(new[] { '/', '"', '<', '>', '|', '*', '?' }) >= 0 ||
+                path.IndexOf(':', 2) >= 0 || path.IndexOf('%') >= 0) return null;
+            string[] components = path.Substring(3).Split('\\');
+            if (components.Length > 32 || components.Any(part => part.Length == 0 || part == "." || part == ".."))
+                return null;
+            return path;
+        }
+
+        internal static NssmServiceContext ReadNssmServiceContext(
+            IDictionary<string, string> service, Func<string, Dictionary<string, object>> readRegistryValues)
+        {
+            if (service == null || readRegistryValues == null ||
+                !service.ContainsKey("Name") || !service.ContainsKey("PathName") ||
+                !IsNssmServicePath(service["PathName"])) return null;
+            string name = service["Name"];
+            if (string.IsNullOrWhiteSpace(name) || name.Length > 128 || name.Any(char.IsControl) ||
+                name.IndexOfAny(new[] { '\\', '/' }) >= 0) return null;
+            try
+            {
+                Dictionary<string, object> values = readRegistryValues(
+                    @"SYSTEM\CurrentControlSet\Services\" + name + @"\Parameters");
+                if (values == null) return null;
+                object application, directory;
+                values.TryGetValue("Application", out application);
+                values.TryGetValue("AppDirectory", out directory);
+                string appPath = NssmLocalPath(application);
+                if (appPath == null) return null;
+                string account;
+                if (!service.TryGetValue("Account", out account) || string.IsNullOrWhiteSpace(account))
+                    account = "unknown";
+                if (account.Length > 128 || account.Any(char.IsControl))
+                    account = "unknown";
+                return new NssmServiceContext {
+                    Application = appPath,
+                    Directory = NssmLocalPath(directory),
+                    Account = account
+                };
+            }
+            catch { return null; }
+        }
+
         public static List<Dictionary<string, string>> GetNonstandardServices()
         {
             List<Dictionary<string, string>> results = new List<Dictionary<string, string>>();
@@ -62,6 +519,7 @@ namespace winPEAS.Info.ServicesInfo
                                         ["StartMode"] = GetStringOrEmpty(result["StartMode"]),
                                         ["PathName"] = GetStringOrEmpty(result["PathName"]),
                                         ["FilteredPath"] = binaryPath,
+                                        ["Account"] = GetStringOrEmpty(result["StartName"]),
                                         ["isDotNet"] = isDotNet,
                                         ["Description"] = GetStringOrEmpty(result["Description"])
                                     };
@@ -86,18 +544,21 @@ namespace winPEAS.Info.ServicesInfo
             return obj == null ? string.Empty : obj.ToString();
         }
 
-        public static List<Dictionary<string, string>> GetNonstandardServicesFromReg()
+        internal static ServiceRegistryInventory GetNonstandardServicesFromReg()
         {
-            List<Dictionary<string, string>> results = new List<Dictionary<string, string>>();
+            ServiceRegistryInventory inventory = new ServiceRegistryInventory { UsedRegistry = true };
 
             try
             {
-                foreach (string key in RegistryHelper.GetRegSubkeys("HKLM", @"SYSTEM\CurrentControlSet\Services"))
+                inventory = ReadRegistryServiceEntries(
+                    RegistryHelper.GetRegSubkeys("HKLM", @"SYSTEM\CurrentControlSet\Services"),
+                    key => RegistryHelper.GetRegValues("HKLM", @"SYSTEM\CurrentControlSet\Services\" + key),
+                    MaxRegistryServiceEntries);
+                foreach (ServiceRegistryEntry entry in inventory.Entries)
                 {
-                    Dictionary<string, object> key_values = RegistryHelper.GetRegValues("HKLM", @"SYSTEM\CurrentControlSet\Services\" + key);
-
-                    if (key_values.ContainsKey("DisplayName") && key_values.ContainsKey("ImagePath"))
+                    try
                     {
+                        Dictionary<string, object> key_values = entry.Values;
                         string companyName = "";
                         string isDotNet = "";
                         string pathName = Environment.ExpandEnvironmentVariables(string.Format("{0}", key_values["ImagePath"]).Replace("\\SystemRoot\\", "%SystemRoot%\\"));
@@ -116,8 +577,7 @@ namespace winPEAS.Info.ServicesInfo
                             }
                         }
 
-                        string displayName = string.Format("{0}", key_values["DisplayName"]);
-                        string imagePath = string.Format("{0}", key_values["ImagePath"]);
+                        string displayName = GetRegistryServiceDisplayName(entry);
                         string description = key_values.ContainsKey("Description") ? string.Format("{0}", key_values["Description"]) : "";
                         string startMode = "";
                         if (key_values.ContainsKey("Start"))
@@ -148,18 +608,23 @@ namespace winPEAS.Info.ServicesInfo
                         {
                             Dictionary<string, string> toadd = new Dictionary<string, string>
                             {
-                                ["Name"] = displayName,
+                                ["Name"] = entry.Name,
                                 ["DisplayName"] = displayName,
                                 ["CompanyName"] = companyName,
                                 ["State"] = "",
                                 ["StartMode"] = startMode,
                                 ["PathName"] = pathName,
                                 ["FilteredPath"] = binaryPath,
+                                ["Account"] = key_values.ContainsKey("ObjectName") ? GetStringOrEmpty(key_values["ObjectName"]) : "",
                                 ["isDotNet"] = isDotNet,
                                 ["Description"] = description
                             };
-                            results.Add(toadd);
+                            inventory.Services.Add(toadd);
                         }
+                    }
+                    catch (Exception)
+                    {
+                        inventory.Unreadable++;
                     }
                 }
             }
@@ -167,7 +632,7 @@ namespace winPEAS.Info.ServicesInfo
             {
                 Beaprint.PrintException(ex.Message);
             }
-            return results;
+            return inventory;
         }
 
         public static Dictionary<string, string> GetModifiableServices(Dictionary<string, string> SIDs)
@@ -248,34 +713,204 @@ namespace winPEAS.Info.ServicesInfo
             return results;
         }
 
+        internal static ServiceAccessFallbackReport ProbeServiceAccessByName(
+            IEnumerable<string> serviceNames,
+            Func<string, uint, bool> canOpen,
+            int maxEntries,
+            Func<bool> deadlineReached)
+        {
+            var report = new ServiceAccessFallbackReport();
+            if (serviceNames == null || canOpen == null || deadlineReached == null || maxEntries <= 0)
+                return report;
+
+            report.Available = true;
+            foreach (string name in serviceNames)
+            {
+                if (report.Inspected >= maxEntries)
+                {
+                    report.LimitReached = true;
+                    break;
+                }
+                if (deadlineReached())
+                {
+                    report.TimeLimitReached = true;
+                    break;
+                }
+                if (string.IsNullOrWhiteSpace(name))
+                    continue;
+
+                report.Inspected++;
+                if (!canOpen(name, ServiceChangeConfigAccess))
+                    continue;
+
+                var rights = new List<string>(3) { "ChangeConfig" };
+                if (canOpen(name, ServiceStartAccess)) rights.Add("Start");
+                if (canOpen(name, ServiceStopAccess)) rights.Add("Stop");
+                report.Findings[name] = string.Join(", ", rights);
+            }
+            return report;
+        }
+
+        internal static ScmCreateServiceAccess ProbeScmCreateServiceAccess(
+            Func<uint, IntPtr> openManager, Func<int> getLastError, Action<IntPtr> closeManager)
+        {
+            IntPtr manager = IntPtr.Zero;
+            try
+            {
+                manager = openManager(ScManagerCreateService);
+                if (manager != IntPtr.Zero)
+                    return ScmCreateServiceAccess.Granted;
+                return getLastError() == ErrorAccessDenied
+                    ? ScmCreateServiceAccess.Denied : ScmCreateServiceAccess.Unknown;
+            }
+            catch (Exception)
+            {
+                return ScmCreateServiceAccess.Unknown;
+            }
+            finally
+            {
+                if (manager != IntPtr.Zero)
+                {
+                    try { closeManager(manager); }
+                    catch (Exception) { /* Access result remains valid if handle cleanup fails. */ }
+                }
+            }
+        }
+
+        internal static ScmCreateServiceAccess GetScmCreateServiceAccess()
+        {
+            return ProbeScmCreateServiceAccess(
+                access => Advapi32.OpenSCManager(null, null, access),
+                Marshal.GetLastWin32Error,
+                handle => Advapi32.CloseServiceHandle(handle));
+        }
+
+        internal static ServiceAccessFallbackReport GetModifiableServicesByRegistryName()
+        {
+            var unavailable = new ServiceAccessFallbackReport();
+            IntPtr manager = IntPtr.Zero;
+            try
+            {
+                manager = Advapi32.OpenSCManager(null, null, ScManagerConnect);
+                if (manager == IntPtr.Zero)
+                    return unavailable;
+
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services"))
+                {
+                    if (key == null)
+                        return unavailable;
+
+                    string[] names = key.GetSubKeyNames();
+                    if (names.Length == 0)
+                        return unavailable;
+
+                    var stopwatch = Stopwatch.StartNew();
+                    return ProbeServiceAccessByName(
+                        names,
+                        (name, access) =>
+                        {
+                            IntPtr service = Advapi32.OpenService(manager, name, access);
+                            if (service == IntPtr.Zero)
+                                return false;
+                            Advapi32.CloseServiceHandle(service);
+                            return true;
+                        },
+                        MaxRegistryServiceEntries,
+                        () => stopwatch.ElapsedMilliseconds >= MaxServiceAccessFallbackMilliseconds);
+                }
+            }
+            catch (Exception)
+            {
+                return unavailable;
+            }
+            finally
+            {
+                if (manager != IntPtr.Zero)
+                    Advapi32.CloseServiceHandle(manager);
+            }
+        }
+
         //////////////////////////////////////////
         ///////  Find Write reg. Services ////////
         //////////////////////////////////////////
-        /// Find Services which Reg you have write or equivalent access
-        public static List<Dictionary<string, string>> GetWriteServiceRegs(Dictionary<string, string> NtAccountNames)
+        /// Review matching service-key ACL entries. Matching entries are not effective access decisions.
+        internal static ServiceRegistryWriteReport InspectWriteServiceRegs(
+            string[] names, Func<string, List<string>> readPermissions, int maxNames, Func<bool> deadlineReached)
         {
-            List<Dictionary<string, string>> results = new List<Dictionary<string, string>>();
+            var report = new ServiceRegistryWriteReport();
+            if (names == null || readPermissions == null)
+                return report;
+
+            report.Available = true;
+            report.TotalNames = names.Length;
+            foreach (string serviceRegName in names)
+            {
+                if (report.Inspected >= maxNames)
+                {
+                    report.LimitReached = true;
+                    break;
+                }
+                if (deadlineReached != null && deadlineReached())
+                {
+                    report.TimeLimitReached = true;
+                    break;
+                }
+
+                ++report.Inspected;
+                List<string> perms;
+                try { perms = readPermissions(serviceRegName); }
+                catch { perms = null; }
+                if (perms == null)
+                {
+                    ++report.Unreadable;
+                    continue;
+                }
+                if (perms.Count == 0)
+                    continue;
+                if (report.Findings.Count >= MaxServiceRegistryWriteFindings)
+                {
+                    ++report.OmittedFindings;
+                    continue;
+                }
+                report.Findings.Add(new Dictionary<string, string> {
+                    { "Path", @"HKLM\system\currentcontrolset\services\" + serviceRegName },
+                    { "Permissions", string.Join(", ", perms) }
+                });
+            }
+            return report;
+        }
+
+        internal static ServiceRegistryWriteReport GetWriteServiceRegsReport(Dictionary<string, string> ntAccountNames)
+        {
+            var unavailable = new ServiceRegistryWriteReport();
             try
             {
-                RegistryKey regKey = Registry.LocalMachine.OpenSubKey(@"system\currentcontrolset\services");
-                foreach (string serviceRegName in regKey.GetSubKeyNames())
+                using (RegistryKey regKey = Registry.LocalMachine.OpenSubKey(@"system\currentcontrolset\services"))
                 {
-                    RegistryKey key = Registry.LocalMachine.OpenSubKey(@"system\currentcontrolset\services\" + serviceRegName);
-                    List<string> perms = PermissionsHelper.GetMyPermissionsR(key, NtAccountNames);
-                    if (perms.Count > 0)
+                    if (regKey == null)
+                        return unavailable;
+                    string[] names = regKey.GetSubKeyNames();
+                    Stopwatch timer = Stopwatch.StartNew();
+                    return InspectWriteServiceRegs(names, name =>
                     {
-                        results.Add(new Dictionary<string, string> {
-                        { "Path", @"HKLM\system\currentcontrolset\services\" + serviceRegName },
-                        { "Permissions", string.Join(", ", perms) }
-                    });
-                    }
+                        using (RegistryKey key = regKey.OpenSubKey(name))
+                        {
+                            if (key == null)
+                                return null;
+                            bool aclReadable;
+                            List<string> permissions = PermissionsHelper.GetMyPermissionsR(
+                                key, ntAccountNames, out aclReadable);
+                            return aclReadable ? permissions : null;
+                        }
+                    }, MaxRegistryServiceEntries, () => timer.ElapsedMilliseconds >= MaxServiceAccessFallbackMilliseconds);
                 }
             }
-            catch (Exception ex)
-            {
-                Beaprint.PrintException(ex.Message);
-            }
-            return results;
+            catch { return unavailable; }
+        }
+
+        public static List<Dictionary<string, string>> GetWriteServiceRegs(Dictionary<string, string> ntAccountNames)
+        {
+            return GetWriteServiceRegsReport(ntAccountNames).Findings;
         }
 
 
@@ -379,6 +1014,918 @@ namespace winPEAS.Info.ServicesInfo
             public DateTime? NotAfter { get; set; }
             public bool IsLegacyExpired { get; set; }
             public string Error { get; set; }
+        }
+
+
+        //////////////////////////////////////////////////////
+        //////// Writable LocalSystem service DLLs ///////////
+        //////////////////////////////////////////////////////
+        public static WritableServiceDllReport GetWritableSystemServiceDlls(Dictionary<string, string> currentUserSids)
+        {
+            var report = new WritableServiceDllReport();
+            if (currentUserSids == null || currentUserSids.Count == 0)
+            {
+                return report;
+            }
+
+            string windowsDirectory = GetWindowsDirectory();
+            if (string.IsNullOrWhiteSpace(windowsDirectory))
+            {
+                return report;
+            }
+
+            var tokenSids = new HashSet<string>(currentUserSids.Keys, StringComparer.OrdinalIgnoreCase);
+
+            try
+            {
+                using (RegistryKey servicesKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services"))
+                {
+                    if (servicesKey == null)
+                    {
+                        return report;
+                    }
+
+                    string[] serviceNames = servicesKey.GetSubKeyNames();
+                    foreach (string serviceName in serviceNames)
+                    {
+                        if (report.ServicesInspected >= MaxServiceDllServices)
+                        {
+                            report.ServiceLimitReached = true;
+                            break;
+                        }
+                        if (report.Findings.Count >= MaxServiceDllFindings)
+                        {
+                            report.FindingLimitReached = true;
+                            break;
+                        }
+
+                        report.ServicesInspected++;
+                        try
+                        {
+                            using (RegistryKey serviceKey = servicesKey.OpenSubKey(serviceName))
+                            {
+                                if (serviceKey == null || !IsEligibleSystemService(
+                                    GetRegistryInt(serviceKey, "Type"),
+                                    GetRegistryInt(serviceKey, "Start"),
+                                    GetRegistryInt(serviceKey, "LaunchProtected"),
+                                    GetRegistryString(serviceKey, "ObjectName"),
+                                    GetRegistryString(serviceKey, "ImagePath"),
+                                    windowsDirectory))
+                                {
+                                    continue;
+                                }
+
+                                string rawServiceDll;
+                                if (!TryGetServiceDll(serviceKey, out rawServiceDll))
+                                {
+                                    continue;
+                                }
+
+                                string serviceDllPath = NormalizeServiceDllPath(rawServiceDll, windowsDirectory);
+                                if (string.IsNullOrWhiteSpace(serviceDllPath) || serviceDllPath.Length > 32767 ||
+                                    serviceDllPath.IndexOf('%') >= 0 || !IsLocalDrivePath(serviceDllPath))
+                                {
+                                    continue;
+                                }
+
+                                bool fileExists;
+                                string accessReason;
+                                string accessPath = GetFileSystemAccessPath(
+                                    serviceDllPath,
+                                    windowsDirectory,
+                                    Environment.Is64BitOperatingSystem,
+                                    Environment.Is64BitProcess);
+                                if (!TryGetReplacementDetails(
+                                    accessPath,
+                                    tokenSids,
+                                    "service DLL",
+                                    out fileExists,
+                                    out accessReason))
+                                {
+                                    continue;
+                                }
+
+                                report.Findings.Add(new WritableServiceDllInfo
+                                {
+                                    ServiceName = serviceName,
+                                    Account = GetDisplayAccount(GetRegistryString(serviceKey, "ObjectName")),
+                                    ServiceDllPath = serviceDllPath,
+                                    FileExists = fileExists,
+                                    AccessReason = accessReason,
+                                });
+                            }
+                        }
+                        catch
+                        {
+                            // A malformed or inaccessible service entry must not stop enumeration.
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Service registry enumeration can be restricted; keep this passive check quiet.
+            }
+
+            return report;
+        }
+
+        internal static bool IsEligibleSystemService(
+            int? serviceType,
+            int? startType,
+            int? launchProtected,
+            string account,
+            string imagePath,
+            string windowsDirectory)
+        {
+            return serviceType.HasValue &&
+                   (serviceType.Value & ServiceWin32TypeMask) == ServiceWin32ShareProcess &&
+                   IsEligibleUnprotectedSystemService(serviceType, startType, launchProtected, account) &&
+                   IsSystemSvchostImage(imagePath, windowsDirectory);
+        }
+
+        internal static bool IsLocalSystemAccount(string account)
+        {
+            if (string.IsNullOrWhiteSpace(account))
+            {
+                return true;
+            }
+
+            string normalized = account.Trim();
+            return normalized.Equals("LocalSystem", StringComparison.OrdinalIgnoreCase) ||
+                   normalized.Equals("SYSTEM", StringComparison.OrdinalIgnoreCase) ||
+                   normalized.Equals(@"NT AUTHORITY\SYSTEM", StringComparison.OrdinalIgnoreCase) ||
+                   normalized.Equals(@"NT AUTHORITY\LocalSystem", StringComparison.OrdinalIgnoreCase);
+        }
+
+        //////////////////////////////////////////////////////
+        ////// Writable LocalSystem recovery commands ////////
+        //////////////////////////////////////////////////////
+        public static WritableServiceRecoveryCommandReport GetWritableSystemRecoveryCommands(
+            Dictionary<string, string> currentUserSids)
+        {
+            var report = new WritableServiceRecoveryCommandReport();
+            if (currentUserSids == null || currentUserSids.Count == 0)
+            {
+                return report;
+            }
+
+            string windowsDirectory = GetWindowsDirectory();
+            if (string.IsNullOrWhiteSpace(windowsDirectory))
+            {
+                return report;
+            }
+
+            var tokenSids = new HashSet<string>(currentUserSids.Keys, StringComparer.OrdinalIgnoreCase);
+            IntPtr serviceManager = IntPtr.Zero;
+            try
+            {
+                serviceManager = Advapi32.OpenSCManager(null, null, ScManagerConnect);
+                if (serviceManager == IntPtr.Zero)
+                {
+                    return report;
+                }
+
+                using (RegistryKey servicesKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services"))
+                {
+                    if (servicesKey == null)
+                    {
+                        return report;
+                    }
+
+                    foreach (string serviceName in servicesKey.GetSubKeyNames())
+                    {
+                        if (report.ServicesInspected >= MaxRecoveryCommandServices)
+                        {
+                            report.ServiceLimitReached = true;
+                            break;
+                        }
+                        if (report.Findings.Count >= MaxRecoveryCommandFindings)
+                        {
+                            report.FindingLimitReached = true;
+                            break;
+                        }
+
+                        report.ServicesInspected++;
+                        try
+                        {
+                            using (RegistryKey serviceKey = servicesKey.OpenSubKey(serviceName))
+                            {
+                                if (serviceKey == null || !IsEligibleRecoveryService(
+                                    GetRegistryInt(serviceKey, "Type"),
+                                    GetRegistryInt(serviceKey, "Start"),
+                                    GetRegistryInt(serviceKey, "LaunchProtected"),
+                                    GetRegistryString(serviceKey, "ObjectName")))
+                                {
+                                    continue;
+                                }
+
+                                string command = GetRegistryString(serviceKey, "FailureCommand");
+                                if (string.IsNullOrWhiteSpace(command) || command.Length > 32767 ||
+                                    !HasRunCommandFailureAction(serviceManager, serviceName))
+                                {
+                                    continue;
+                                }
+
+                                foreach (string target in GetRecoveryCommandTargets(command, windowsDirectory))
+                                {
+                                    if (report.Findings.Count >= MaxRecoveryCommandFindings)
+                                    {
+                                        report.FindingLimitReached = true;
+                                        break;
+                                    }
+
+                                    bool targetExists;
+                                    string accessReason;
+                                    string accessPath = GetFileSystemAccessPath(
+                                        target,
+                                        windowsDirectory,
+                                        Environment.Is64BitOperatingSystem,
+                                        Environment.Is64BitProcess);
+                                    if (string.IsNullOrWhiteSpace(accessPath) || !IsLocalDrivePath(accessPath))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (!TryGetReplacementDetails(
+                                        accessPath,
+                                        tokenSids,
+                                        "recovery command target",
+                                        out targetExists,
+                                        out accessReason))
+                                    {
+                                        continue;
+                                    }
+
+                                    report.Findings.Add(new WritableServiceRecoveryCommandInfo
+                                    {
+                                        ServiceName = serviceName,
+                                        Account = GetDisplayAccount(GetRegistryString(serviceKey, "ObjectName")),
+                                        TargetPath = target,
+                                        TargetExists = targetExists,
+                                        AccessReason = accessReason,
+                                    });
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // A malformed or inaccessible service entry must not stop enumeration.
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Service configuration or registry enumeration may be restricted.
+            }
+            finally
+            {
+                if (serviceManager != IntPtr.Zero)
+                {
+                    Advapi32.CloseServiceHandle(serviceManager);
+                }
+            }
+
+            return report;
+        }
+
+        internal static bool IsEligibleRecoveryService(
+            int? serviceType,
+            int? startType,
+            int? launchProtected,
+            string account)
+        {
+            if (!IsEligibleUnprotectedSystemService(serviceType, startType, launchProtected, account))
+            {
+                return false;
+            }
+
+            int win32Type = serviceType.Value & ServiceWin32TypeMask;
+            return win32Type == ServiceWin32OwnProcess || win32Type == ServiceWin32ShareProcess;
+        }
+
+        private static bool IsEligibleUnprotectedSystemService(
+            int? serviceType,
+            int? startType,
+            int? launchProtected,
+            string account)
+        {
+            return serviceType.HasValue && startType.HasValue &&
+                   startType.Value != ServiceDisabled &&
+                   (!launchProtected.HasValue || launchProtected.Value == 0) &&
+                   IsLocalSystemAccount(account);
+        }
+
+        internal static List<string> GetRecoveryCommandTargets(string rawCommand, string windowsDirectory)
+        {
+            var targets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            string executable;
+            string arguments;
+            if (!TryParseRecoveryCommand(rawCommand, windowsDirectory, out executable, out arguments))
+            {
+                return new List<string>();
+            }
+
+            targets.Add(executable);
+            foreach (string referencedPath in PrivilegedScheduledTasks.ExtractReferencedFilePaths(
+                executable,
+                arguments,
+                windowsDirectory.TrimEnd('\\', '/') + @"\System32"))
+            {
+                if (targets.Count >= 8)
+                {
+                    break;
+                }
+                targets.Add(referencedPath);
+            }
+
+            return new List<string>(targets);
+        }
+
+        internal static bool TryParseRecoveryCommand(
+            string rawCommand,
+            string windowsDirectory,
+            out string executable,
+            out string arguments)
+        {
+            executable = string.Empty;
+            arguments = string.Empty;
+            if (string.IsNullOrWhiteSpace(rawCommand) || string.IsNullOrWhiteSpace(windowsDirectory))
+            {
+                return false;
+            }
+
+            string command = ExpandWindowsPath(rawCommand, windowsDirectory);
+            if (string.IsNullOrWhiteSpace(command) || command.IndexOf('%') >= 0 || command.Length > 32767)
+            {
+                return false;
+            }
+            command = command.Trim();
+
+            int argumentOffset;
+            if (command[0] == '"')
+            {
+                int closingQuote = command.IndexOf('"', 1);
+                if (closingQuote <= 1)
+                {
+                    return false;
+                }
+                executable = command.Substring(1, closingQuote - 1).Trim();
+                argumentOffset = closingQuote + 1;
+            }
+            else
+            {
+                bool startsWithAbsolutePath = command.Length >= 3 &&
+                    char.IsLetter(command[0]) && command[1] == ':' &&
+                    (command[2] == '\\' || command[2] == '/');
+                int whitespace = command.IndexOfAny(new[] { ' ', '\t', '\r', '\n' });
+                int extension = command.IndexOf(".exe", StringComparison.OrdinalIgnoreCase);
+                if (!startsWithAbsolutePath && whitespace >= 0 && extension > whitespace)
+                {
+                    extension = -1;
+                }
+                if (extension >= 0)
+                {
+                    argumentOffset = extension + 4;
+                    executable = command.Substring(0, argumentOffset).Trim();
+                }
+                else
+                {
+                    argumentOffset = whitespace < 0 ? command.Length : whitespace;
+                    executable = command.Substring(0, argumentOffset).Trim();
+                }
+            }
+
+            executable = NormalizeRecoveryExecutable(executable, windowsDirectory);
+            if (string.IsNullOrWhiteSpace(executable) || executable.Length > 32767 ||
+                executable.IndexOf('%') >= 0 || !IsAbsoluteLocalPathSyntax(executable))
+            {
+                executable = string.Empty;
+                return false;
+            }
+
+            arguments = argumentOffset < command.Length
+                ? command.Substring(argumentOffset).Trim()
+                : string.Empty;
+            return true;
+        }
+
+        private static string NormalizeRecoveryExecutable(string executable, string windowsDirectory)
+        {
+            string normalized = StripWin32DevicePrefix(executable.Trim()).Replace('/', '\\');
+            if (normalized.IndexOf('\\') < 0 && normalized.IndexOf(':') < 0)
+            {
+                if (normalized.IndexOf('.') < 0)
+                {
+                    normalized += ".exe";
+                }
+                normalized = windowsDirectory.TrimEnd('\\', '/') + @"\System32\" + normalized;
+            }
+            return StripWin32DevicePrefix(normalized);
+        }
+
+        private static bool IsAbsoluteLocalPathSyntax(string path)
+        {
+            return !string.IsNullOrWhiteSpace(path) && path.Length >= 3 &&
+                   char.IsLetter(path[0]) && path[1] == ':' &&
+                   (path[2] == '\\' || path[2] == '/');
+        }
+
+        private static bool HasRunCommandFailureAction(IntPtr serviceManager, string serviceName)
+        {
+            IntPtr service = IntPtr.Zero;
+            IntPtr buffer = IntPtr.Zero;
+            try
+            {
+                service = Advapi32.OpenService(serviceManager, serviceName, ServiceQueryConfig);
+                if (service == IntPtr.Zero)
+                {
+                    return false;
+                }
+
+                uint bytesNeeded;
+                bool initialResult = Advapi32.QueryServiceConfig2(
+                    service,
+                    ServiceConfigFailureActions,
+                    IntPtr.Zero,
+                    0,
+                    out bytesNeeded);
+                if (initialResult || (uint)Marshal.GetLastWin32Error() != ErrorInsufficientBuffer ||
+                    bytesNeeded < Marshal.SizeOf(typeof(ServiceFailureActions)) ||
+                    bytesNeeded > MaxServiceConfigBuffer)
+                {
+                    return false;
+                }
+
+                uint bufferSize = bytesNeeded;
+                buffer = Marshal.AllocHGlobal((int)bufferSize);
+                if (!Advapi32.QueryServiceConfig2(
+                    service,
+                    ServiceConfigFailureActions,
+                    buffer,
+                    bufferSize,
+                    out bytesNeeded) || bytesNeeded > bufferSize)
+                {
+                    return false;
+                }
+
+                var failureActions = (ServiceFailureActions)Marshal.PtrToStructure(
+                    buffer,
+                    typeof(ServiceFailureActions));
+                if (failureActions.ActionCount == 0 || failureActions.ActionCount > 64 ||
+                    failureActions.Actions == IntPtr.Zero)
+                {
+                    return false;
+                }
+
+                int actionSize = Marshal.SizeOf(typeof(ServiceFailureAction));
+                long bufferStart = buffer.ToInt64();
+                long bufferEnd = bufferStart + bufferSize;
+                long actionsStart = failureActions.Actions.ToInt64();
+                long actionsLength = (long)failureActions.ActionCount * actionSize;
+                if (actionsStart < bufferStart || actionsStart > bufferEnd - actionsLength)
+                {
+                    return false;
+                }
+
+                for (uint index = 0; index < failureActions.ActionCount; index++)
+                {
+                    IntPtr actionPointer = new IntPtr(actionsStart + (long)index * actionSize);
+                    var action = (ServiceFailureAction)Marshal.PtrToStructure(
+                        actionPointer,
+                        typeof(ServiceFailureAction));
+                    if (action.Type == ScActionRunCommand)
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+                // Inaccessible or malformed service configuration is not a finding.
+            }
+            finally
+            {
+                if (buffer != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(buffer);
+                }
+                if (service != IntPtr.Zero)
+                {
+                    Advapi32.CloseServiceHandle(service);
+                }
+            }
+
+            return false;
+        }
+
+        internal static bool IsSystemSvchostImage(string rawImagePath, string windowsDirectory)
+        {
+            if (string.IsNullOrWhiteSpace(rawImagePath) || string.IsNullOrWhiteSpace(windowsDirectory))
+            {
+                return false;
+            }
+
+            string imagePath = rawImagePath.Trim();
+            string executable;
+            if (imagePath.StartsWith("\"", StringComparison.Ordinal))
+            {
+                int closingQuote = imagePath.IndexOf('"', 1);
+                if (closingQuote < 0)
+                {
+                    return false;
+                }
+                executable = imagePath.Substring(1, closingQuote - 1);
+            }
+            else
+            {
+                int extension = imagePath.IndexOf(".exe", StringComparison.OrdinalIgnoreCase);
+                if (extension < 0)
+                {
+                    return false;
+                }
+                executable = imagePath.Substring(0, extension + 4).Trim();
+            }
+
+            executable = StripWin32DevicePrefix(executable);
+            executable = ExpandWindowsPath(executable, windowsDirectory);
+            executable = StripWin32DevicePrefix(executable).Replace('/', '\\');
+            string windowsRoot = windowsDirectory.TrimEnd('\\', '/');
+            return executable.Equals(windowsRoot + @"\System32\svchost.exe", StringComparison.OrdinalIgnoreCase) ||
+                   executable.Equals(windowsRoot + @"\SysWOW64\svchost.exe", StringComparison.OrdinalIgnoreCase);
+        }
+
+        internal static string NormalizeServiceDllPath(string rawPath, string windowsDirectory)
+        {
+            if (string.IsNullOrWhiteSpace(rawPath))
+            {
+                return string.Empty;
+            }
+
+            string path = rawPath.Trim();
+            if (path.Length >= 2 && path[0] == '"' && path[path.Length - 1] == '"')
+            {
+                path = path.Substring(1, path.Length - 2).Trim();
+            }
+
+            path = StripWin32DevicePrefix(path);
+            path = ExpandWindowsPath(path, windowsDirectory);
+            path = StripWin32DevicePrefix(path);
+            return path.Trim().Replace('/', '\\');
+        }
+
+        internal static string GetFileSystemAccessPath(
+            string path,
+            string windowsDirectory,
+            bool is64BitOperatingSystem,
+            bool is64BitProcess)
+        {
+            if (string.IsNullOrWhiteSpace(path) || string.IsNullOrWhiteSpace(windowsDirectory) ||
+                !is64BitOperatingSystem || is64BitProcess)
+            {
+                return path;
+            }
+
+            string windowsRoot = windowsDirectory.TrimEnd('\\', '/');
+            string system32Prefix = windowsRoot + @"\System32\";
+            if (!path.StartsWith(system32Prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return path;
+            }
+
+            return windowsRoot + @"\Sysnative\" + path.Substring(system32Prefix.Length);
+        }
+
+        internal static string GetReplacementReason(
+            RawSecurityDescriptor fileSecurity,
+            RawSecurityDescriptor directorySecurity,
+            bool fileExists,
+            ISet<string> tokenSids)
+        {
+            return GetTargetReplacementReason(
+                fileSecurity,
+                directorySecurity,
+                fileExists,
+                tokenSids,
+                "service DLL");
+        }
+
+        private static bool TryGetReplacementDetails(
+            string accessPath,
+            ISet<string> tokenSids,
+            string targetDescription,
+            out bool targetExists,
+            out string accessReason)
+        {
+            targetExists = false;
+            accessReason = string.Empty;
+
+            targetExists = File.Exists(accessPath);
+            string directoryPath = Path.GetDirectoryName(accessPath);
+            if (string.IsNullOrWhiteSpace(directoryPath) || !Directory.Exists(directoryPath))
+            {
+                return false;
+            }
+
+            RawSecurityDescriptor targetSecurity = targetExists
+                ? GetSecurityDescriptor(accessPath, false)
+                : null;
+            RawSecurityDescriptor directorySecurity = GetSecurityDescriptor(directoryPath, true);
+            accessReason = GetTargetReplacementReason(
+                targetSecurity,
+                directorySecurity,
+                targetExists,
+                tokenSids,
+                targetDescription);
+            return !string.IsNullOrEmpty(accessReason);
+        }
+
+        private static string GetTargetReplacementReason(
+            RawSecurityDescriptor fileSecurity,
+            RawSecurityDescriptor directorySecurity,
+            bool fileExists,
+            ISet<string> tokenSids,
+            string targetDescription)
+        {
+            if (directorySecurity == null || tokenSids == null || tokenSids.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            bool canControlDirectory = HasEffectiveAccess(directorySecurity, tokenSids, WriteDac) ||
+                                       HasEffectiveAccess(directorySecurity, tokenSids, WriteOwner);
+            if (!fileExists)
+            {
+                if (HasEffectiveAccess(directorySecurity, tokenSids, FileAddFile))
+                {
+                    return "FILE_ADD_FILE on the parent directory can plant the missing " + targetDescription;
+                }
+                if (canControlDirectory)
+                {
+                    return "WRITE_DAC or WRITE_OWNER on the parent directory can grant target creation rights";
+                }
+                return string.Empty;
+            }
+
+            if (fileSecurity != null && HasEffectiveAccess(fileSecurity, tokenSids, FileWriteData))
+            {
+                return "FILE_WRITE_DATA is granted on the configured " + targetDescription;
+            }
+            if (fileSecurity != null &&
+                (HasEffectiveAccess(fileSecurity, tokenSids, WriteDac) ||
+                 HasEffectiveAccess(fileSecurity, tokenSids, WriteOwner)))
+            {
+                return "WRITE_DAC or WRITE_OWNER on the " + targetDescription + " can grant overwrite rights";
+            }
+            if (canControlDirectory)
+            {
+                return "WRITE_DAC or WRITE_OWNER on the parent directory can grant replacement rights";
+            }
+
+            bool canCreate = HasEffectiveAccess(directorySecurity, tokenSids, FileAddFile);
+            if (canCreate && HasEffectiveAccess(directorySecurity, tokenSids, FileDeleteChild))
+            {
+                return "FILE_ADD_FILE and FILE_DELETE_CHILD on the parent directory permit target replacement";
+            }
+            if (canCreate && fileSecurity != null && HasEffectiveAccess(fileSecurity, tokenSids, Delete))
+            {
+                return "DELETE on the target plus FILE_ADD_FILE on its parent permit replacement";
+            }
+
+            return string.Empty;
+        }
+
+        internal static bool HasEffectiveAccess(
+            RawSecurityDescriptor security,
+            ISet<string> tokenSids,
+            int desiredAccess)
+        {
+            if (security == null || tokenSids == null || tokenSids.Count == 0 || desiredAccess == 0)
+            {
+                return false;
+            }
+
+            RawAcl dacl = security.DiscretionaryAcl;
+            if (dacl == null)
+            {
+                return true;
+            }
+
+            int remaining = desiredAccess;
+            foreach (GenericAce genericAce in dacl)
+            {
+                CommonAce ace = genericAce as CommonAce;
+                if (ace == null || ace.IsCallback ||
+                    (ace.AceFlags & AceFlags.InheritOnly) == AceFlags.InheritOnly ||
+                    !tokenSids.Contains(ace.SecurityIdentifier.Value))
+                {
+                    continue;
+                }
+
+                int accessMask = MapGenericFileRights(ace.AccessMask);
+                if (ace.AceQualifier == AceQualifier.AccessDenied && (accessMask & remaining) != 0)
+                {
+                    return false;
+                }
+                if (ace.AceQualifier == AceQualifier.AccessAllowed)
+                {
+                    remaining &= ~accessMask;
+                    if (remaining == 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static int MapGenericFileRights(int accessMask)
+        {
+            int mapped = accessMask;
+            if ((mapped & GenericAll) != 0)
+            {
+                mapped |= FileAllAccess;
+            }
+            if ((mapped & GenericRead) != 0)
+            {
+                mapped |= FileGenericRead;
+            }
+            if ((mapped & GenericWrite) != 0)
+            {
+                mapped |= FileGenericWrite;
+            }
+            if ((mapped & GenericExecute) != 0)
+            {
+                mapped |= FileGenericExecute;
+            }
+            return mapped & ~(GenericAll | GenericRead | GenericWrite | GenericExecute);
+        }
+
+        private static bool TryGetServiceDll(RegistryKey serviceKey, out string rawServiceDll)
+        {
+            rawServiceDll = string.Empty;
+            RegistryKey parametersKey = null;
+            try
+            {
+                parametersKey = serviceKey.OpenSubKey("Parameters");
+                RegistryKey sourceKey = parametersKey ?? serviceKey;
+
+                object manifest = sourceKey.GetValue(
+                    "ServiceManifest",
+                    null,
+                    RegistryValueOptions.DoNotExpandEnvironmentNames);
+                if (manifest != null && !string.IsNullOrWhiteSpace(manifest.ToString()))
+                {
+                    // A valid ServiceManifest can redirect the DLL independently of ServiceDll.
+                    return false;
+                }
+
+                RegistryValueKind kind = sourceKey.GetValueKind("ServiceDll");
+                if (kind != RegistryValueKind.ExpandString)
+                {
+                    return false;
+                }
+
+                object value = sourceKey.GetValue(
+                    "ServiceDll",
+                    null,
+                    RegistryValueOptions.DoNotExpandEnvironmentNames);
+                rawServiceDll = value == null ? string.Empty : value.ToString();
+                return !string.IsNullOrWhiteSpace(rawServiceDll);
+            }
+            catch
+            {
+                return false;
+            }
+            finally
+            {
+                parametersKey?.Dispose();
+            }
+        }
+
+        private static int? GetRegistryInt(RegistryKey key, string valueName)
+        {
+            try
+            {
+                object value = key.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+                return value == null ? (int?)null : Convert.ToInt32(value);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string GetRegistryString(RegistryKey key, string valueName)
+        {
+            try
+            {
+                object value = key.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+                return value == null ? string.Empty : value.ToString();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private static string GetDisplayAccount(string account)
+        {
+            return string.IsNullOrWhiteSpace(account) ? "LocalSystem (default)" : account;
+        }
+
+        private static string GetWindowsDirectory()
+        {
+            string windowsDirectory = Environment.GetEnvironmentVariable("SystemRoot");
+            return string.IsNullOrWhiteSpace(windowsDirectory)
+                ? Environment.GetEnvironmentVariable("windir")
+                : windowsDirectory;
+        }
+
+        private static string ExpandWindowsPath(string path, string windowsDirectory)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return string.Empty;
+            }
+
+            string expanded = path.Trim();
+            if (!string.IsNullOrWhiteSpace(windowsDirectory))
+            {
+                expanded = ReplaceWindowsDirectoryPrefix(expanded, @"\SystemRoot", windowsDirectory);
+                expanded = ReplaceWindowsDirectoryPrefix(expanded, "%SystemRoot%", windowsDirectory);
+                expanded = ReplaceWindowsDirectoryPrefix(expanded, "%windir%", windowsDirectory);
+            }
+
+            try
+            {
+                expanded = Environment.ExpandEnvironmentVariables(expanded);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+            return expanded;
+        }
+
+        private static string ReplaceWindowsDirectoryPrefix(string path, string prefix, string windowsDirectory)
+        {
+            if (!path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ||
+                (path.Length > prefix.Length && path[prefix.Length] != '\\' && path[prefix.Length] != '/'))
+            {
+                return path;
+            }
+            return windowsDirectory.TrimEnd('\\', '/') + path.Substring(prefix.Length);
+        }
+
+        private static string StripWin32DevicePrefix(string path)
+        {
+            if (path.StartsWith(@"\??\", StringComparison.Ordinal))
+            {
+                return path.Substring(4);
+            }
+            if (path.StartsWith(@"\\?\", StringComparison.Ordinal))
+            {
+                return path.Substring(4);
+            }
+            return path;
+        }
+
+        private static bool IsLocalDrivePath(string path)
+        {
+            // Avoid UNC or device paths so this passive check cannot intentionally contact a remote host.
+            if (path.Length < 3 || !char.IsLetter(path[0]) || path[1] != ':' ||
+                (path[2] != '\\' && path[2] != '/'))
+            {
+                return false;
+            }
+
+            try
+            {
+                DriveType driveType = new DriveInfo(path.Substring(0, 3)).DriveType;
+                return driveType == DriveType.Fixed || driveType == DriveType.Removable || driveType == DriveType.Ram;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static RawSecurityDescriptor GetSecurityDescriptor(string path, bool isDirectory)
+        {
+            try
+            {
+                byte[] descriptor = isDirectory
+                    ? Directory.GetAccessControl(path, AccessControlSections.Access).GetSecurityDescriptorBinaryForm()
+                    : File.GetAccessControl(path, AccessControlSections.Access).GetSecurityDescriptorBinaryForm();
+                return new RawSecurityDescriptor(descriptor, 0);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
 

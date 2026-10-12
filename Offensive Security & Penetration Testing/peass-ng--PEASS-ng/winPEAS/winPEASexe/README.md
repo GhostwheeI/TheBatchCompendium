@@ -66,6 +66,7 @@ winpeas.exe domain #enumerate also domain information
 winpeas.exe wait #wait for user input between tests
 winpeas.exe debug #display additional debug information
 winpeas.exe log #log output to out.txt instead of standard output
+winpeas.exe -vulnpackages #send installed package names/versions to the optional HackTricks online lookup to flag vulnerable packages
 winpeas.exe -linpeas=http://127.0.0.1/linpeas.sh #Execute also additional linpeas check (runs linpeas.sh in default WSL distribution) with custom linpeas.sh URL (if not provided, the default URL is: https://raw.githubusercontent.com/peass-ng/PEASS-ng/master/linPEAS/linpeas.sh)
 winpeas.exe -lolbas  #Execute also additional LOLBAS search check
 ```
@@ -129,10 +130,16 @@ Once you have installed and activated it you need to:
 - **System Information**
   - [x] Basic System info information
   - [x] Use embedded definitions to flag known exploitable vulnerabilities for the running Windows version (version-based)
+  - [x] Passive Print Spooler CVE-2022-38028/GooseEgg exposure assessment (OS fixed build, update supersedence, Spooler state/configuration, and registry ACL)
+  - [x] Passive Storage VSP/vSMB CVE-2025-59517 and CVE-2025-64673 assessment (OS/driver fixed build, update inventory, Virtual Machine Platform, `storvsp` registration, signature, and `STORVSP` device link)
+  - [x] Passive Windows Installer CVE-2025-27727 build and artifact assessment (`msi.dll`, `TempPackages`, `Installer\Folders`, and `C:\Config.Msi` ACL/rollback state)
+  - [x] Passive CrossDevice dangling COM CVE-2026-66804 assessment (fixed build, 32/64-bit registration, writable DLL path, SYSTEM COM host, and user-executable `CreateObjectTask`)
   - [x] Enumerate Microsoft updates
   - [x] PS, Audit, WEF and LAPS Settings
   - [x] LSA protection
+  - [x] CLFS logfile authentication mitigation status
   - [x] Credential Guard
+  - [x] Hardware and DMA security (Kernel DMA Protection, Device Guard DMA/IOMMU capability, UEFI/Secure Boot, VBS, BitLocker protectors and external DMA-capable interfaces)
   - [x] WDigest
   - [x] Number of cached cred
   - [x] Environment Variables
@@ -153,7 +160,7 @@ Once you have installed and activated it you need to:
 
 - **Users Information**
   - [x] Users information
-  - [x] Current token privileges
+  - [x] Current token integrity/elevation, group state, and token-manipulation privileges
   - [x] Clipboard text
   - [x] Current logged users
   - [x] RDP sessions
@@ -166,18 +173,26 @@ Once you have installed and activated it you need to:
 
 - **Processes Information**
   - [x] Interesting processes (non Microsoft)
+  - [x] Privileged/service process token identities, logon sessions, integrity levels, service associations, and read-only token-access probes
 
 - **Services Information**
   - [x] Interesting services (non Microsoft) information
   - [x] Modifiable services
   - [x] Writable service registry binpath
+  - [x] Writable DLLs loaded by enabled LocalSystem services
+  - [x] Writable LocalSystem service recovery command targets
   - [x] PATH Dll Hijacking
+
+Process-token and service-access results are local, read-only review leads. Token access does not guarantee successful impersonation, and remote service binary-path replacement requires independent remote SCM permissions.
 
 - **Applications Information**
   - [x] Current Active Window
   - [x] Installed software
+  - [x] Optional online installed-package vulnerability lookup via HackTricks (`-vulnpackages` or `all`)
   - [x] AutoRuns
   - [x] Scheduled tasks
+  - [x] Microsoft Recall PolicyConfiguration task exposure (CVE-2025-60710 / CVE-2026-20941)
+  - [x] Writable execution targets in enabled SYSTEM scheduled tasks
   - [x] Device drivers
 
 - **Network Information**
@@ -188,7 +203,9 @@ Once you have installed and activated it you need to:
   - [x] Listening ports
   - [x] Firewall rules
   - [x] DNS Cache (limit 70)
-  - [x] Internet Settings
+  - [x] WinINet, WinHTTP, policy and environment HTTP proxy settings (including ZDI-26-708 exposure indicators)
+  - [x] Internet connectivity probes
+  - [x] Optional external hostname resolution check
 
 - **Cloud Metadata Enumeration**
   - [x] AWS Metadata
@@ -199,6 +216,7 @@ Once you have installed and activated it you need to:
   - [x] Windows Vault
   - [x] Credential Manager
   - [x] Saved RDP settings
+  - [x] Passive sethc.exe/Utilman.exe integrity checks and RDP/NLA exposure context
   - [x] Recently run commands
   - [x] Default PS transcripts files
   - [x] DPAPI Masterkeys
@@ -209,6 +227,7 @@ Once you have installed and activated it you need to:
   - [x] AppCmd.exe
   - [x] SSClient.exe
   - [x] SCCM
+  - [x] Cached SCCM Network Access Account credential policies
   - [x] Security Package Credentials
   - [x] AlwaysInstallElevated
   - [x] WSUS (HTTP downgrade + CVE-2025-59287 exposure)
@@ -232,6 +251,7 @@ Once you have installed and activated it you need to:
   - [x] Cloud credentials
   - [x] Check for unattended files
   - [x] Check for SAM & SYSTEM backups
+  - [x] Check for exposed SAM, SECURITY and SYSTEM hives in live ACLs, backups and shadow copies
   - [x] Check for cached GPP Passwords
   - [x] Check for and extract creds from McAffe SiteList.xml files
   - [x] Possible registries with credentials
