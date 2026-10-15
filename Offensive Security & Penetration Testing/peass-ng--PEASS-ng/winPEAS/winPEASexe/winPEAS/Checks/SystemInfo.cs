@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Management;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Xml;
+using System.Xml.Linq;
 using winPEAS.Helpers;
 using winPEAS.Helpers.AppLocker;
 using winPEAS.Helpers.Extensions;
@@ -30,6 +33,46 @@ namespace winPEAS.Checks
         static string goodUAC = "PromptPermitDenyOnSecureDesktop";
         static string badLAPS = "LAPS not installed";
         static Dictionary<string, string> _basicSystemInfo;
+        static PrintSpoolerCve38028Report _spoolerReport;
+
+        internal enum AlwaysInstallElevatedStatus
+        {
+            BothEnabled,
+            OneEnabled,
+            NotConfirmed
+        }
+
+        internal static AlwaysInstallElevatedStatus AssessAlwaysInstallElevated(string machineValue, string userValue)
+        {
+            bool machineEnabled = machineValue == "1";
+            bool userEnabled = userValue == "1";
+            if (machineEnabled && userEnabled) return AlwaysInstallElevatedStatus.BothEnabled;
+            if (machineEnabled || userEnabled) return AlwaysInstallElevatedStatus.OneEnabled;
+            return AlwaysInstallElevatedStatus.NotConfirmed;
+        }
+
+        internal static string DescribeAlwaysInstallElevatedValue(string value)
+        {
+            if (value == "1" || value == "0") return value;
+            return string.IsNullOrEmpty(value) ? "missing" : "unexpected value";
+        }
+
+        internal enum PointAndPrintPolicyStatus
+        {
+            ExplicitAdminOnly,
+            ReviewCandidate,
+            UnknownValue,
+            NoExplicitWeakValues
+        }
+
+        internal static PointAndPrintPolicyStatus AssessPointAndPrintPolicy(uint? restrict, uint? noWarn, uint? updatePrompt)
+        {
+            if (restrict == 1) return PointAndPrintPolicyStatus.ExplicitAdminOnly;
+            if (restrict == 0 || (noWarn.HasValue && noWarn.Value != 0) ||
+                (updatePrompt.HasValue && updatePrompt.Value != 0)) return PointAndPrintPolicyStatus.ReviewCandidate;
+            if (restrict.HasValue) return PointAndPrintPolicyStatus.UnknownValue;
+            return PointAndPrintPolicyStatus.NoExplicitWeakValues;
+        }
 
 
         private static readonly Dictionary<string, string> _asrGuids = new Dictionary<string, string>
@@ -51,16 +94,20 @@ namespace winPEAS.Checks
             { "be9ba2d9-53ea-4cdc-84e5-9b1eeee46550" , "Block executable content from email client and webmail"},
         };
 
-        public string[] MitreAttackIds { get; } = new[] { "T1082", "T1068", "T1548.002", "T1003.001", "T1003.004", "T1003.005", "T1059.001", "T1552.001", "T1552.002", "T1562.001", "T1562.002", "T1518.001", "T1557.001", "T1558", "T1559", "T1134.001", "T1547.005", "T1484.001", "T1613", "T1654", "T1072", "T1187" };
+        public string[] MitreAttackIds { get; } = new[] { "T1082", "T1068", "T1546.015", "T1548.002", "T1003.001", "T1003.004", "T1003.005", "T1059.001", "T1552.001", "T1552.002", "T1562.001", "T1562.002", "T1518.001", "T1557.001", "T1558", "T1559", "T1134.001", "T1547.005", "T1484.001", "T1613", "T1654", "T1072", "T1187", "T1200" };
 
         public void PrintInfo(bool isDebug)
         {
-            Beaprint.GreatPrint("System Information", "T1082,T1068,T1548.002,T1003.001,T1003.004,T1003.005,T1059.001,T1552.001,T1552.002,T1562.001,T1562.002,T1518.001,T1557.001,T1558,T1559,T1134.001,T1547.005,T1484.001,T1613,T1654,T1072,T1187");
+            Beaprint.GreatPrint("System Information", "T1082,T1068,T1546.015,T1548.002,T1003.001,T1003.004,T1003.005,T1059.001,T1552.001,T1552.002,T1562.001,T1562.002,T1518.001,T1557.001,T1558,T1559,T1134.001,T1547.005,T1484.001,T1613,T1654,T1072,T1187,T1200");
 
             new List<Action>
             {
                 PrintBasicSystemInfo,
                 PrintWindowsVersionVulnerabilities,
+                PrintSpoolerCve38028,
+                PrintStorvspVsmbCves,
+                PrintWindowsInstallerCve27727,
+                PrintCrossDeviceComCve66804,
                 PrintMicrosoftUpdatesCOM,
                 PrintSystemLastShutdownTime,
                 PrintUserEV,
@@ -72,6 +119,7 @@ namespace winPEAS.Checks
                 PrintWdigest,
                 PrintLSAProtection,
                 PrintCredentialGuard,
+                DmaProtection.PrintInfo,
                 PrintCachedCreds,
                 PrintRegistryCreds,
                 PrintAVInfo,
@@ -87,6 +135,7 @@ namespace winPEAS.Checks
                 PrintInsideContainer,
                 PrintAlwaysInstallElevated,
                 PrintObjectManagerRaceAmplification,
+                PrintClfsAuthentication,
                 PrintLSAInfo,
                 PrintNtlmSettings,
                 PrintLocalGroupPolicy,
@@ -94,6 +143,7 @@ namespace winPEAS.Checks
                 AppLockerHelper.PrintAppLockerPolicy,
                 PrintPrintNightmarePointAndPrint,
                 PrintPrintersWMIInfo,
+                PrintPrinterDriverAclReview,
                 PrintNamedPipes,
                 PrintNamedPipeAbuseCandidates,
                 PrintAMSIProviders,
@@ -145,6 +195,29 @@ namespace winPEAS.Checks
                     Beaprint.InfoPrint("Definitions date: " + report.DefinitionsDate);
                 }
                 Beaprint.InfoPrint("Installed hotfixes detected: " + report.InstalledHotfixesCount);
+                if (basicInfo != null && basicInfo.TryGetValue("Hotfix collection", out var hotfixCollection))
+                {
+                    Beaprint.InfoPrint("Patch inventory is unavailable (" + hotfixCollection + "); version matches below cannot be filtered by installed updates.");
+                }
+                if (report.CandidateProducts.Any(p => p.StartsWith("Windows Server 2022", StringComparison.OrdinalIgnoreCase)) &&
+                    (basicInfo == null || !basicInfo.TryGetValue("CurrentBuild", out var serverBuild) || serverBuild == "20348"))
+                {
+                    var indicator = WindowsVersionVulns.GetCve202430088Indicator();
+                    if (indicator != null)
+                    {
+                        Beaprint.LinkPrint(indicator.cna_url, "Microsoft CNA affected range");
+                        Beaprint.LinkPrint(indicator.release_url, "Microsoft Server 2022 fixed release");
+                        var status = WindowsVersionVulns.AssessFixedBuild(basicInfo, indicator);
+                        string build = basicInfo != null && basicInfo.TryGetValue("CurrentBuild", out var currentBuild) ? currentBuild : "unknown";
+                        string ubr = basicInfo != null && basicInfo.TryGetValue("UpdateBuildRevision", out var revision) ? revision : "unknown";
+                        if (status == FixedBuildStatus.BelowFixedBuild)
+                            Beaprint.InfoPrint($"CVE-2024-30088: {build}.{ubr} is below the Microsoft CNA fixed build {indicator.build}.{indicator.fixed_ubr}; verify installed hotpatches before treating this as affected.");
+                        else if (status == FixedBuildStatus.FixedBuild)
+                            Beaprint.GoodPrint($"CVE-2024-30088: running build {build}.{ubr} matches the Microsoft fixed release (KB{indicator.fixed_kb}).");
+                        else
+                            Beaprint.InfoPrint($"CVE-2024-30088: patch status unknown for build {build}.{ubr}; this fixed-build reference does not verify later cumulative or hotpatch revisions.");
+                    }
+                }
                 if (report.TotalMatchedBeforeFiltering > 0)
                 {
                     Beaprint.InfoPrint($"Pre-filter matches: {report.TotalMatchedBeforeFiltering}, filtered by installed/superseded KBs: {report.FilteredByPatches}");
@@ -152,14 +225,14 @@ namespace winPEAS.Checks
 
                 if (report.Vulnerabilities.Count == 0)
                 {
-                    Beaprint.GoodPrint("No known exploited vulnerabilities matched this running Windows version.");
+                    Beaprint.InfoPrint("No other known exploited vulnerabilities matched the product and reported QFE data.");
                     return;
                 }
 
-                Beaprint.BadPrint($"Matched {report.Vulnerabilities.Count} known exploited vulnerabilities for this running Windows version.");
+                Beaprint.InfoPrint($"Matched {report.Vulnerabilities.Count} known exploited vulnerability candidates for this Windows version; missing QFE entries do not establish exploitability.");
                 if (report.MatchedProducts.Count > 0)
                 {
-                    Beaprint.BadPrint("Matched products: " + string.Join(" | ", report.MatchedProducts));
+                    Beaprint.InfoPrint("Matched products: " + string.Join(" | ", report.MatchedProducts));
                 }
 
                 int maxToPrint = 20;
@@ -169,7 +242,7 @@ namespace winPEAS.Checks
                     string kbInfo = string.IsNullOrWhiteSpace(vuln.kb) ? "" : $" KB{vuln.kb}";
                     string severityInfo = string.IsNullOrWhiteSpace(vuln.severity) ? "" : $" [{vuln.severity}]";
                     string impactInfo = string.IsNullOrWhiteSpace(vuln.impact) ? "" : $" {vuln.impact}";
-                    Beaprint.BadPrint($"    {vulnId}{kbInfo}{severityInfo}{impactInfo}");
+                    Beaprint.InfoPrint($"    {vulnId}{kbInfo}{severityInfo}{impactInfo}");
                 }
 
                 if (report.Vulnerabilities.Count > maxToPrint)
@@ -178,6 +251,397 @@ namespace winPEAS.Checks
                 }
 
                 Beaprint.InfoPrint("This check applies version matching with installed/superseded KB filtering.");
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        private static void PrintSpoolerCve38028()
+        {
+            try
+            {
+                Beaprint.MainPrint("Print Spooler LPE (CVE-2022-38028 / GooseEgg)", "T1068");
+                Beaprint.LinkPrint("https://msrc.microsoft.com/update-guide/vulnerability/CVE-2022-38028", "Microsoft advisory and security updates");
+                Beaprint.LinkPrint("https://www.microsoft.com/en-us/security/blog/2024/04/22/analyzing-forest-blizzards-custom-post-compromise-tool-for-exploiting-cve-2022-38028-to-obtain-credentials/", "Microsoft GooseEgg analysis");
+                Beaprint.InfoPrint("Passive/read-only exposure check; it does not interact with the spooler, submit a print job, or search for actor-specific files.");
+
+                var basicInfo = _basicSystemInfo ?? Info.SystemInfo.SystemInfo.GetBasicOSInfo();
+                PrintSpoolerCve38028Report report = winPEAS.Info.SystemInfo.PrintSpoolerCve38028.GetReport(basicInfo);
+                _spoolerReport = report;
+
+                Beaprint.NoColorPrint("    Product/version/architecture: " + report.ProductName + " / " + report.DisplayVersion + " / " + report.Architecture);
+                Beaprint.NoColorPrint("    OS build: " + (string.IsNullOrEmpty(report.BuildVersion) ? "unknown" : report.BuildVersion));
+                if (report.BuildApplicable)
+                {
+                    Beaprint.NoColorPrint("    First fixed level: " + report.FixedVersion + " (KB" + string.Join(" or KB", report.ApplicableKbs) + ")");
+                    Beaprint.NoColorPrint("    Applicable/superseded fix found: " + !string.IsNullOrEmpty(report.MatchedFixKb) +
+                        (string.IsNullOrEmpty(report.MatchedFixKb) ? "" : " (KB" + report.MatchedFixKb + ")"));
+                }
+
+                string registryStart = report.RegistryStart.HasValue ? report.RegistryStart.Value.ToString() : "unknown";
+                Beaprint.NoColorPrint("    Spooler present/available/running: " + report.ServiceExists + " / " + report.ServiceAvailable + " / " + report.Started);
+                Beaprint.NoColorPrint("    WMI path/account/start/state: " + report.PathName + " / " + report.StartName + " / " + report.StartMode + " / " + report.State);
+                Beaprint.NoColorPrint("    Registry image/account/start: " + report.RegistryImagePath + " / " + report.RegistryObjectName + " / " + registryStart);
+                Beaprint.NoColorPrint("    Spooler registry writable by broad low-privilege principal: " + report.RegistryWritableByLowPrivilegePrincipal);
+                if (report.RegistryWritableByLowPrivilegePrincipal)
+                {
+                    Beaprint.BadPrint("    Registry ACL principals/rights: " + string.Join(", ", report.RegistryWritablePrincipals) + " / " + string.Join(", ", report.RegistryWritableRights));
+                }
+
+                if (report.HighPriorityFinding)
+                {
+                    Beaprint.BadPrint("HIGH: The Windows build is missing the CVE-2022-38028 fix and the Print Spooler is available. " + report.PatchEvidence);
+                    Beaprint.BadPrint("Install the applicable October 2022 update or a later cumulative update. Disable the Print Spooler where it is not required.");
+                }
+                else if (report.PatchStatus == PrintSpoolerPatchStatus.Susceptible)
+                {
+                    Beaprint.InfoPrint("The Windows build appears unpatched, but the Print Spooler is absent or disabled, so the CVE is not reported as currently exposed. " + report.PatchEvidence);
+                }
+                else if (report.PatchStatus == PrintSpoolerPatchStatus.Patched)
+                {
+                    Beaprint.GoodPrint("The running system is at or above Microsoft's fixed level for CVE-2022-38028. " + report.PatchEvidence);
+                }
+                else if (report.PatchStatus == PrintSpoolerPatchStatus.NotAffected)
+                {
+                    Beaprint.GoodPrint("Microsoft does not list this Windows build as affected by CVE-2022-38028.");
+                }
+                else
+                {
+                    Beaprint.InfoPrint("Unable to determine the CVE-2022-38028 patch state. " + report.PatchEvidence);
+                }
+
+                foreach (string error in report.CollectionErrors)
+                {
+                    Beaprint.GrayPrint("    Collection note: " + error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        private static void PrintStorvspVsmbCves()
+        {
+            try
+            {
+                Beaprint.MainPrint("Storage VSP vSMB LPE (CVE-2025-59517 / CVE-2025-64673)", "T1068");
+                Beaprint.LinkPrint("https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-59517", "Microsoft advisory for CVE-2025-59517");
+                Beaprint.LinkPrint("https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-64673", "Microsoft advisory for CVE-2025-64673");
+                Beaprint.LinkPrint("https://blog.exodusintel.com/2026/07/27/from-virtual-share-to-physical-shell-leveraging-windows-inconsistent-access-control-for-lpe/", "Technical details");
+                Beaprint.InfoPrint("Passive/read-only check; it does not open a vSMB share, send IOCTL 0x240330, replace files, or activate COM objects.");
+
+                var basicInfo = _basicSystemInfo ?? Info.SystemInfo.SystemInfo.GetBasicOSInfo();
+                StorvspVsmbReport report = StorvspVsmbCves.GetReport(basicInfo);
+
+                Beaprint.NoColorPrint("    Product/architecture: " + report.ProductName + " / " + report.Architecture);
+                Beaprint.NoColorPrint("    OS build: " + (string.IsNullOrEmpty(report.BuildVersion) ? "unknown" : report.BuildVersion));
+                if (report.BuildApplicable)
+                {
+                    Beaprint.NoColorPrint("    First regular fixed build: " + report.FixedVersion + " (KB" + report.ApplicableKb + ")");
+                    if (!string.IsNullOrEmpty(report.HotpatchKb))
+                    {
+                        Beaprint.NoColorPrint("    December 2025 hotpatch: " + report.Build + "." + report.HotpatchRevision + " (KB" + report.HotpatchKb + ")");
+                    }
+                    Beaprint.NoColorPrint("    Applicable fix KB directly present: " + report.DirectFixInstalled +
+                        " (later cumulative updates are also recognized by build/driver version)");
+                }
+
+                if (report.SurfaceCollectionSkipped)
+                {
+                    Beaprint.NoColorPrint("    Attack-surface collection: skipped because this two-CVE chain is patched or not applicable to the OS build.");
+                }
+                else
+                {
+                    Beaprint.NoColorPrint("    Virtual Machine Platform: " + report.VirtualMachinePlatformState);
+                    Beaprint.NoColorPrint("    storvsp driver registered/started: " + report.DriverRegistered + " / " +
+                        (report.DriverRuntimeKnown ? report.DriverStarted.ToString() : "unknown"));
+                    if (report.DriverRegistered)
+                    {
+                        string registryState = report.DriverStart.HasValue ? report.DriverStart.Value.ToString() : "unknown";
+                        string driverType = report.DriverType.HasValue ? report.DriverType.Value.ToString() : "unknown";
+                        Beaprint.NoColorPrint("    storvsp registry image/start/type: " + report.DriverImagePath + " / " + registryState + " / " + driverType);
+                        if (report.DriverRuntimeKnown)
+                        {
+                            Beaprint.NoColorPrint("    storvsp WMI path/start mode/state: " + report.DriverWmiPath + " / " + report.DriverStartMode + " / " + report.DriverState);
+                        }
+                    }
+
+                    Beaprint.NoColorPrint("    storvsp.sys: " + report.DriverPath + " (exists: " + report.DriverExists + ")");
+                    if (report.DriverExists)
+                    {
+                        Beaprint.NoColorPrint("    storvsp.sys file/product version: " + report.DriverFileVersion + " / " + report.DriverProductVersion);
+                        Beaprint.NoColorPrint("    storvsp.sys company/signer: " + report.DriverCompany + " / " + report.DriverSigner);
+                        Beaprint.NoColorPrint("    storvsp.sys Authenticode: " + report.DriverSignatureStatus);
+                        if (report.DriverLastWriteUtc.HasValue)
+                        {
+                            Beaprint.NoColorPrint("    storvsp.sys last write UTC: " + report.DriverLastWriteUtc.Value.ToString("u"));
+                        }
+                    }
+
+                    Beaprint.NoColorPrint("    \\.\\STORVSP DOS device link: " + report.DeviceLinkPresent +
+                        (string.IsNullOrEmpty(report.DeviceLinkTarget) ? "" : " -> " + report.DeviceLinkTarget));
+                    Beaprint.NoColorPrint("    Relevant vSMB attack surface enabled: " + report.AttackSurfaceEnabled);
+                }
+
+                if (report.HighPriorityFinding)
+                {
+                    Beaprint.BadPrint("HIGH: The unpatched build and enabled STORVSP/vSMB attack surface match the low-privileged-to-SYSTEM chain (CVE-2025-59517 + CVE-2025-64673). " + report.PatchEvidence);
+                    Beaprint.BadPrint("Install KB" + report.ApplicableKb + " or a later cumulative update. If Virtual Machine Platform is unnecessary, disable it to remove this attack surface.");
+                }
+                else if (report.PatchStatus == StorvspPatchStatus.Susceptible)
+                {
+                    Beaprint.InfoPrint("The OS build is susceptible to both CVEs, but an enabled STORVSP/vSMB attack surface was not confirmed by the available evidence. " + report.PatchEvidence);
+                }
+                else if (report.PatchStatus == StorvspPatchStatus.Patched)
+                {
+                    Beaprint.GoodPrint("The running system is at or above Microsoft's fixed level for both Storage VSP vulnerabilities. " + report.PatchEvidence);
+                }
+                else if (report.OnlyCve59517Applicable)
+                {
+                    Beaprint.InfoPrint("CVE-2025-59517 applies to this build, but Microsoft does not list CVE-2025-64673; this two-CVE chain is not reported as applicable.");
+                }
+                else if (report.PatchStatus == StorvspPatchStatus.NotAffected)
+                {
+                    Beaprint.GoodPrint("Microsoft does not list this OS build as affected by both CVEs in the vSMB chain.");
+                }
+                else
+                {
+                    Beaprint.InfoPrint("Unable to determine the Storage VSP patch state. " + report.PatchEvidence);
+                }
+
+                foreach (string error in report.CollectionErrors)
+                {
+                    Beaprint.GrayPrint("    Collection note: " + error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        private static void PrintWindowsInstallerCve27727()
+        {
+            try
+            {
+                Beaprint.MainPrint("Windows Installer CVE-2025-27727", "T1068");
+                Beaprint.LinkPrint("https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-27727", "Microsoft advisory and security updates");
+                Beaprint.LinkPrint("https://blog.exodusintel.com/2026/07/06/microsoft-windows-installer-folder-delete-privilege-escalation/", "Technical details");
+                Beaprint.InfoPrint("Passive/read-only check; it does not invoke the MSI COM interface or alter installer state.");
+
+                var basicInfo = _basicSystemInfo ?? Info.SystemInfo.SystemInfo.GetBasicOSInfo();
+                WindowsInstallerReport report = WindowsInstallerCve27727.GetReport(basicInfo);
+
+                Beaprint.NoColorPrint("    Product: " + report.ProductName);
+                Beaprint.NoColorPrint("    Architecture: " + report.Architecture);
+                Beaprint.NoColorPrint("    OS build: " + (string.IsNullOrEmpty(report.BuildVersion) ? "unknown" : report.BuildVersion));
+                if (!string.IsNullOrEmpty(report.FixedVersion))
+                {
+                    Beaprint.NoColorPrint("    First fixed build: " + report.FixedVersion + " (April 2025 KB" + report.ApplicableKb + ")");
+                    string[] applicableKbs = report.ApplicableKb.Split('/');
+                    bool aprilKbFound = applicableKbs.Any(kb => report.InstalledHotfixes.IndexOf("KB" + kb, StringComparison.OrdinalIgnoreCase) >= 0);
+                    Beaprint.NoColorPrint("    Applicable April 2025 KB directly present in hotfix inventory: " + aprilKbFound +
+                        " (a later cumulative update may supersede it)");
+                }
+
+                switch (report.VersionStatus)
+                {
+                    case WindowsInstallerVersionStatus.Susceptible:
+                        Beaprint.BadPrint("The running OS build is below Microsoft's fixed build for CVE-2025-27727.");
+                        break;
+                    case WindowsInstallerVersionStatus.Patched:
+                        Beaprint.GoodPrint("The running OS build is at or above Microsoft's fixed build for CVE-2025-27727.");
+                        break;
+                    case WindowsInstallerVersionStatus.NotListed:
+                        Beaprint.InfoPrint("This OS build line is not in the Microsoft/NVD affected-build list for CVE-2025-27727.");
+                        break;
+                    default:
+                        Beaprint.InfoPrint("Unable to determine CVE-2025-27727 patch status from the OS build.");
+                        break;
+                }
+
+                Beaprint.NoColorPrint("    msi.dll: " + (string.IsNullOrEmpty(report.MsiDllPath) ? "not found" : report.MsiDllPath));
+                if (!string.IsNullOrEmpty(report.MsiDllFileVersion))
+                {
+                    Beaprint.NoColorPrint("    msi.dll file/product version: " + report.MsiDllFileVersion + " / " + report.MsiDllProductVersion);
+                    Beaprint.NoColorPrint("    msi.dll company/size/last write UTC: " + report.MsiDllCompany + " / " + report.MsiDllSize + " bytes / " + report.MsiDllLastWriteUtc.ToString("u"));
+                }
+
+                if (report.TempPackagesTotal == 0)
+                {
+                    Beaprint.GoodPrint("No values found in HKLM\\" + WindowsInstallerCve27727.TempPackagesKey + ".");
+                }
+                else
+                {
+                    Beaprint.InfoPrint("TempPackages values (showing " + report.TempPackages.Count + "/" + report.TempPackagesTotal + "):");
+                    foreach (TempPackageEntry entry in report.TempPackages)
+                    {
+                        string details = entry.Kind + "=" + entry.Data + (entry.IsFolder ? ", folder" : "");
+                        if (entry.IsConfigMsi)
+                        {
+                            Beaprint.BadPrint("    " + entry.Path + " (" + details + ", Config.Msi cleanup entry)");
+                        }
+                        else if (entry.IsOutsideCommonInstallerLocations)
+                        {
+                            Beaprint.InfoPrint("    " + entry.Path + " (" + details + ", outside common installer locations)");
+                        }
+                        else
+                        {
+                            Beaprint.NoColorPrint("    " + entry.Path + " (" + details + ")");
+                        }
+                    }
+                }
+
+                Beaprint.NoColorPrint("    Installer\\Folders contains Config.Msi: " + report.InstallerFoldersHasConfigMsi);
+                Beaprint.NoColorPrint("    " + report.ConfigMsiPath + " exists: " + report.ConfigMsiExists);
+                if (report.ConfigMsiExists)
+                {
+                    Beaprint.NoColorPrint("    Config.Msi owner: " + report.ConfigMsiOwner);
+                    Beaprint.NoColorPrint("    Config.Msi created/last write UTC: " + report.ConfigMsiCreationUtc.ToString("u") + " / " + report.ConfigMsiLastWriteUtc.ToString("u"));
+                    if (report.ConfigMsiNullDacl)
+                    {
+                        Beaprint.BadPrint("Config.Msi has a NULL DACL (all users receive full access).");
+                    }
+                    if (report.ConfigMsiUnusualOwner)
+                    {
+                        Beaprint.BadPrint("Config.Msi has an unexpected non-system owner.");
+                    }
+                    foreach (string acl in report.ConfigMsiDangerousAcls)
+                    {
+                        Beaprint.BadPrint("    Potentially dangerous Config.Msi ACL: " + acl);
+                    }
+                    if (report.ConfigMsiRecentlyChanged)
+                    {
+                        Beaprint.InfoPrint("Config.Msi changed within the last seven days; correlate with legitimate installations.");
+                    }
+                    foreach (string rollbackFile in report.RollbackFiles)
+                    {
+                        Beaprint.BadPrint("    Rollback artifact: " + rollbackFile);
+                    }
+                }
+
+                if (report.InstallerFoldersHasConfigMsi && !report.ConfigMsiExists)
+                {
+                    Beaprint.InfoPrint("Config.Msi is absent while Installer\\Folders metadata remains (stale metadata alone can be normal).");
+                }
+
+                foreach (string error in report.CollectionErrors)
+                {
+                    Beaprint.InfoPrint("Collection note: " + error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        private static void PrintCrossDeviceComCve66804()
+        {
+            try
+            {
+                Beaprint.MainPrint("CrossDevice dangling COM LPE (CVE-2026-66804)", "T1068,T1546.015");
+                Beaprint.LinkPrint("https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-66804", "Microsoft advisory and security updates");
+                Beaprint.LinkPrint("https://projectzero.google/2026/09/windows-dangling-com.html", "Project Zero technical analysis");
+                Beaprint.InfoPrint("Passive/read-only check; it does not create files/events, load registered DLLs, start the task, activate COM, or inspect combase internals.");
+
+                var basicInfo = _basicSystemInfo ?? Info.SystemInfo.SystemInfo.GetBasicOSInfo();
+                CrossDeviceComReport report = CrossDeviceComCve66804.GetReport(basicInfo);
+
+                Beaprint.NoColorPrint("    Product/architecture: " + report.ProductName + " / " + report.Architecture);
+                Beaprint.NoColorPrint("    OS build: " + (string.IsNullOrEmpty(report.BuildVersion) ? "unknown" : report.BuildVersion));
+                if (report.BuildApplicable)
+                {
+                    Beaprint.NoColorPrint("    First fixed build: " + report.FixedVersion + " (KB" + report.ApplicableKb + ")");
+                    Beaprint.NoColorPrint("    Applicable fix KB directly present: " + report.DirectFixInstalled +
+                        " (later cumulative updates are recognized by build revision)");
+                }
+
+                foreach (CrossDeviceComRegistration registration in report.CrossDeviceRegistrations)
+                {
+                    if (!registration.Present)
+                    {
+                        Beaprint.NoColorPrint("    " + registration.RegistryView + " CrossDevice InprocServer32: not present");
+                        continue;
+                    }
+
+                    Beaprint.NoColorPrint("    " + registration.RegistryView + " CrossDevice InprocServer32: " + registration.RawServerPath);
+                    Beaprint.NoColorPrint("        Resolved path: " + registration.ResolvedServerPath);
+                    Beaprint.NoColorPrint("        Expected path / DLL exists: " + registration.MatchesExpectedPath + " / " + registration.ServerExists);
+                    if (!string.IsNullOrEmpty(registration.NearestExistingParent))
+                    {
+                        Beaprint.NoColorPrint("        Nearest existing parent: " + registration.NearestExistingParent);
+                    }
+                    if (!string.IsNullOrEmpty(registration.PathControlReason))
+                    {
+                        Beaprint.BadPrint("        Path control: " + registration.PathControlReason);
+                    }
+                    if (!string.IsNullOrEmpty(registration.ParentAclSddl))
+                    {
+                        Beaprint.NoColorPrint("        Relevant file/parent DACL: " + registration.ParentAclSddl);
+                    }
+                    if (!string.IsNullOrEmpty(registration.CollectionError))
+                    {
+                        Beaprint.GrayPrint("        Collection note: " + registration.CollectionError);
+                    }
+                }
+
+                Beaprint.NoColorPrint("    Shell Create Object Handler present/view: " +
+                    report.ShellClassPresent + " / " + report.ShellClassRegistryView);
+                if (report.ShellClassPresent)
+                {
+                    Beaprint.NoColorPrint("        Name/AppID/RunAs: " + report.ShellClassName + " / " +
+                        report.ShellAppId + " / " + report.ShellRunAs);
+                    Beaprint.NoColorPrint("        Configured to run as SYSTEM: " + report.ShellRunsAsSystem);
+                }
+
+                Beaprint.NoColorPrint("    " + CrossDeviceComCve66804.CreateObjectTaskPath +
+                    " present/enabled/state: " + report.TaskPresent + " / " + report.TaskEnabled + " / " + report.TaskState);
+                if (report.TaskPresent)
+                {
+                    Beaprint.NoColorPrint("        Principal / runs as SYSTEM: " + report.TaskPrincipal + " / " + report.TaskRunsAsSystem);
+                    Beaprint.NoColorPrint("        Execute DACL readable / runnable by low privilege: " +
+                        report.TaskExecuteAclKnown + " / " + report.TaskRunnableByLowPrivilege);
+                    if (report.TaskRunnableByLowPrivilege)
+                    {
+                        Beaprint.BadPrint("        Task execute access granted by: " + report.TaskExecuteTrustee);
+                    }
+                    if (!string.IsNullOrEmpty(report.TaskAclSddl))
+                    {
+                        Beaprint.NoColorPrint("        Task DACL: " + report.TaskAclSddl);
+                    }
+                }
+
+                if (report.CompleteStaticChain)
+                {
+                    Beaprint.BadPrint("HIGH: The unpatched build, writable dangling CrossDevice COM path, SYSTEM COM registration, and user-executable CreateObjectTask match the static CVE-2026-66804 chain.");
+                    Beaprint.BadPrint("Install KB" + report.ApplicableKb + " or a later cumulative update. Treat any unexpected DLL at the registered ProgramData path as suspicious.");
+                }
+                else if (report.PatchStatus == CrossDevicePatchStatus.Susceptible && report.HasControllableRegistration)
+                {
+                    Beaprint.BadPrint("The build is susceptible and the dangling COM server path is controllable, but every prerequisite for the documented trigger chain was not confirmed. " + report.PatchEvidence);
+                }
+                else if (report.PatchStatus == CrossDevicePatchStatus.Patched)
+                {
+                    Beaprint.GoodPrint("The running system is at or above Microsoft's fixed level for CVE-2026-66804. " + report.PatchEvidence);
+                }
+                else if (report.PatchStatus == CrossDevicePatchStatus.NotAffected)
+                {
+                    Beaprint.GoodPrint(report.PatchEvidence);
+                }
+                else
+                {
+                    Beaprint.InfoPrint("No complete static CVE-2026-66804 chain was confirmed. " + report.PatchEvidence);
+                }
+
+                Beaprint.InfoPrint("Custom-marshaling policy is not inferred: EOAC_NO_CUSTOM_MARSHAL or COMGLB_UNMARSHALING_POLICY_STRONG can block exploitation.");
+                foreach (string error in report.CollectionErrors)
+                {
+                    Beaprint.GrayPrint("    Collection note: " + error);
+                }
             }
             catch (Exception ex)
             {
@@ -263,13 +727,12 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("PS default transcripts history", "T1552.001");
-                Beaprint.InfoPrint("Read the PS history inside these files (if any)");
+                Beaprint.MainPrint("PowerShell transcript paths", "T1552.001");
+                Beaprint.InfoPrint("Transcripts can contain commands and secrets; review readable files separately.");
                 string drive = Path.GetPathRoot(Environment.SystemDirectory);
                 string transcriptsPath = drive + @"transcripts\";
                 string usersPath = $"{drive}users";
 
-                var users = Directory.EnumerateDirectories(usersPath, "*", SearchOption.TopDirectoryOnly);
                 string powershellTranscriptFilter = "powershell_transcript*";
 
                 var colors = new Dictionary<string, string>()
@@ -279,6 +742,17 @@ namespace winPEAS.Checks
 
                 var results = new List<string>();
 
+                // A configured transcript directory may sit at the system drive root.
+                // Inspect only its immediate children; never follow directory junctions.
+                bool rootTranscriptPartial;
+                string rootTranscriptPath = Path.Combine(drive, "PSTranscripts");
+                var rootTranscriptFiles = FindRootPowerShellTranscripts(rootTranscriptPath, out rootTranscriptPartial);
+                if (rootTranscriptFiles.Count > 0)
+                    Beaprint.ListPrint(rootTranscriptFiles.Select(file => "[path only] - " + file).ToList(), colors);
+                if (rootTranscriptPartial)
+                    Beaprint.GrayPrint("    Root transcript inventory is partial (entry limit or inaccessible path).");
+
+                var users = Directory.EnumerateDirectories(usersPath, "*", SearchOption.TopDirectoryOnly);
                 var dict = new Dictionary<string, string>()
                 {
                     // check \\transcripts\ folder
@@ -326,6 +800,77 @@ namespace winPEAS.Checks
             {
                 Beaprint.PrintException(ex.Message);
             }
+        }
+
+        internal static List<string> FindRootPowerShellTranscripts(string rootPath, out bool partial,
+            Func<string, FileAttributes> getAttributes = null)
+        {
+            const int maxRootEntries = 16;
+            const int maxChildEntries = 64;
+            var files = new List<string>();
+            partial = false;
+            getAttributes = getAttributes ?? File.GetAttributes;
+
+            try
+            {
+                if (string.IsNullOrEmpty(rootPath) || rootPath.StartsWith(@"\\", StringComparison.Ordinal) ||
+                    !Path.IsPathRooted(rootPath) ||
+                    new DriveInfo(Path.GetPathRoot(rootPath)).DriveType != DriveType.Fixed)
+                    return files;
+
+                var rootAttributes = getAttributes(rootPath);
+                if ((rootAttributes & FileAttributes.Directory) == 0 ||
+                    (rootAttributes & FileAttributes.ReparsePoint) != 0)
+                    return files;
+
+                int rootEntries = 0;
+                int childEntries = 0;
+                foreach (var child in Directory.EnumerateFileSystemEntries(rootPath, "*", SearchOption.TopDirectoryOnly))
+                {
+                    if (++rootEntries > maxRootEntries)
+                    {
+                        partial = true;
+                        break;
+                    }
+
+                    try
+                    {
+                        var childAttributes = getAttributes(child);
+                        if ((childAttributes & FileAttributes.Directory) == 0 ||
+                            (childAttributes & FileAttributes.ReparsePoint) != 0)
+                            continue;
+
+                        foreach (var file in Directory.EnumerateFileSystemEntries(child, "*", SearchOption.TopDirectoryOnly))
+                        {
+                            // Count every entry, including nonmatches and skipped reparse points.
+                            if (childEntries++ >= maxChildEntries)
+                            {
+                                partial = true;
+                                return files;
+                            }
+
+                            if (!Path.GetFileName(file).StartsWith("PowerShell_transcript", StringComparison.OrdinalIgnoreCase))
+                                continue;
+                            var attributes = getAttributes(file);
+                            if ((attributes & (FileAttributes.Directory | FileAttributes.ReparsePoint)) == 0)
+                                files.Add(file);
+                        }
+                    }
+                    catch (UnauthorizedAccessException) { partial = true; }
+                    catch (PathTooLongException) { partial = true; }
+                    catch (IOException) { partial = true; }
+                    catch (System.Security.SecurityException) { partial = true; }
+                }
+            }
+            catch (FileNotFoundException) { }
+            catch (DirectoryNotFoundException) { }
+            catch (UnauthorizedAccessException) { partial = true; }
+            catch (PathTooLongException) { partial = true; }
+            catch (IOException) { partial = true; }
+            catch (ArgumentException) { partial = true; }
+            catch (NotSupportedException) { partial = true; }
+            catch (System.Security.SecurityException) { partial = true; }
+            return files;
         }
 
         private static void PrintAuditInfo()
@@ -634,6 +1179,9 @@ namespace winPEAS.Checks
                 string policyPath = "Software\\Policies\\Microsoft\\Windows\\WindowsUpdate";
                 string policyAUPath = "Software\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU";
                 string wsusPolicyValue = RegistryHelper.GetRegValue("HKLM", policyPath, "WUServer");
+                string wuStatusServerValue = RegistryHelper.GetRegValue("HKLM", policyPath, "WUStatusServer");
+                string alternateUpdateServerValue = RegistryHelper.GetRegValue("HKLM", policyPath, "UpdateServiceUrlAlternate");
+                string acceptTrustedPublisherCertsValue = RegistryHelper.GetRegValue("HKLM", policyPath, "AcceptTrustedPublisherCerts");
                 string useWUServerValue = RegistryHelper.GetRegValue("HKLM", policyAUPath, "UseWUServer");
 
                 if (!string.IsNullOrEmpty(wsusPolicyValue) && wsusPolicyValue.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
@@ -652,8 +1200,17 @@ namespace winPEAS.Checks
                     if (string.IsNullOrEmpty(wsusPolicyValue))
                         Beaprint.NotFoundPrint();
                     else
-                        Beaprint.GoodPrint("    WSUS value: " + wsusPolicyValue);
+                        Beaprint.InfoPrint("    WSUS value: " + wsusPolicyValue);
                 }
+
+                if (!string.IsNullOrEmpty(wuStatusServerValue))
+                    Beaprint.InfoPrint("    WUStatusServer: " + wuStatusServerValue);
+                if (!string.IsNullOrEmpty(alternateUpdateServerValue))
+                    Beaprint.InfoPrint("    UpdateServiceUrlAlternate: " + alternateUpdateServerValue);
+                if (acceptTrustedPublisherCertsValue == "1")
+                    Beaprint.InfoPrint("    AcceptTrustedPublisherCerts=1: updates from an intranet update service may be signed by a certificate in the local computer's Trusted Publishers store.");
+                if (!string.IsNullOrEmpty(wsusPolicyValue) && wsusPolicyValue.StartsWith("https://", StringComparison.OrdinalIgnoreCase) && useWUServerValue == "1")
+                    Beaprint.InfoPrint("    HTTPS WSUS still depends on DNS and TLS certificate trust for this endpoint; review control of the configured name and issuing CA.");
 
                 if (!string.IsNullOrEmpty(wsusPolicyValue))
                 {
@@ -732,14 +1289,24 @@ namespace winPEAS.Checks
                 Beaprint.MainPrint("Checking KrbRelayUp", "T1187,T1558");
                 Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#krbrelayup");
 
-                if (Checks.CurrentAdDomainName.Length > 0)
+                var policy = Ntlm.GetLocalDcLdapPolicy();
+                if (policy.Role == LocalDomainRole.DomainController)
                 {
-                    Beaprint.BadPrint("  The system is inside a domain (" + Checks.CurrentAdDomainName + ") so it could be vulnerable.");
-                    Beaprint.InfoPrint("You can try https://github.com/Dec0ne/KrbRelayUp to escalate privileges");
+                    if (policy.HasObservedRelayCondition)
+                    {
+                        Beaprint.BadPrint("  Local DC LDAP policy shows a relay precondition; this does not establish a usable coercion or account path.");
+                        Beaprint.InfoPrint("  LDAP signing: " + policy.SigningStatus + "; LDAPS channel binding: " + policy.ChannelBindingStatus + ".");
+                    }
+                    else
+                        Beaprint.InfoPrint("  No permissive local DC LDAP policy was established; see the server policy values below.");
                 }
+                else if (policy.Role == LocalDomainRole.Member && !string.IsNullOrEmpty(Checks.CurrentAdDomainName))
+                    Beaprint.InfoPrint("  Domain member: DC server-side LDAP policy is unknown from this host.");
+                else if (policy.Role == LocalDomainRole.Unknown)
+                    Beaprint.InfoPrint("  Local domain role and DC server-side LDAP policy are unknown.");
                 else
                 {
-                    Beaprint.GoodPrint("  The system isn't inside a domain, so it isn't vulnerable");
+                    Beaprint.InfoPrint("  No current AD domain was identified; local relay prerequisites were not assessed.");
                 }
             }
             catch (Exception ex)
@@ -780,20 +1347,20 @@ namespace winPEAS.Checks
                 string path = "Software\\Policies\\Microsoft\\Windows\\Installer";
                 string HKLM_AIE = RegistryHelper.GetRegValue("HKLM", path, "AlwaysInstallElevated");
                 string HKCU_AIE = RegistryHelper.GetRegValue("HKCU", path, "AlwaysInstallElevated");
+                Beaprint.GrayPrint("    HKLM policy value: " + DescribeAlwaysInstallElevatedValue(HKLM_AIE));
+                Beaprint.GrayPrint("    HKCU policy value: " + DescribeAlwaysInstallElevatedValue(HKCU_AIE));
 
-                if (HKLM_AIE == "1")
+                switch (AssessAlwaysInstallElevated(HKLM_AIE, HKCU_AIE))
                 {
-                    Beaprint.BadPrint("    AlwaysInstallElevated set to 1 in HKLM!");
-                }
-
-                if (HKCU_AIE == "1")
-                {
-                    Beaprint.BadPrint("    AlwaysInstallElevated set to 1 in HKCU!");
-                }
-
-                if (HKLM_AIE != "1" && HKCU_AIE != "1")
-                {
-                    Beaprint.GoodPrint("    AlwaysInstallElevated isn't available");
+                    case AlwaysInstallElevatedStatus.BothEnabled:
+                        Beaprint.BadPrint("    Both AlwaysInstallElevated policy values are 1: review elevated MSI installation for this user (value types and effective policy are unverified).");
+                        break;
+                    case AlwaysInstallElevatedStatus.OneEnabled:
+                        Beaprint.GrayPrint("    Only one AlwaysInstallElevated policy value is 1; the two-policy condition for unmanaged elevated MSI installation is not confirmed.");
+                        break;
+                    default:
+                        Beaprint.GrayPrint("    The two-policy AlwaysInstallElevated condition is not confirmed.");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -819,6 +1386,57 @@ namespace winPEAS.Checks
                 else
                 {
                     Beaprint.InfoPrint($"    Could not create a test event under \\BaseNamedObjects ({error}). The namespace might be locked down.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        private static void PrintClfsAuthentication()
+        {
+            try
+            {
+                ClfsAuthenticationReport report = ClfsAuthentication.GetReport();
+                if (report.Status == ClfsAuthenticationStatus.NotAvailable)
+                {
+                    return;
+                }
+
+                Beaprint.MainPrint("CLFS logfile authentication mitigation", "T1068");
+                Beaprint.LinkPrint(
+                    "https://support.microsoft.com/en-us/servicing/os/windows/2025/03/common-log-file-system-clfs-authentication-mitigation",
+                    "CLFS authentication blocks maliciously modified logfiles before the kernel driver parses them.");
+
+                switch (report.Status)
+                {
+                    case ClfsAuthenticationStatus.Enforced:
+                        Beaprint.GoodPrint("    Enforced (Mode 0): CLFS rejects logfiles with missing or invalid authentication codes.");
+                        break;
+                    case ClfsAuthenticationStatus.Learning:
+                        Beaprint.InfoPrint("    Learning mode (Mode 1): unauthenticated logfiles are still accepted during the adoption period.");
+                        if (report.EnforcementTransitionPeriod.HasValue)
+                        {
+                            Beaprint.InfoPrint($"    Automatic enforcement transition: {report.EnforcementTransitionPeriod.Value} seconds.");
+                        }
+                        break;
+                    case ClfsAuthenticationStatus.LearningWithoutAutoEnforcement:
+                        Beaprint.BadPrint("    Learning mode has no automatic enforcement transition (Mode 1, EnforcementTransitionPeriod 0).");
+                        break;
+                    case ClfsAuthenticationStatus.DisabledByAdministrator:
+                        Beaprint.BadPrint("    Disabled by an administrator (Mode 2): maliciously modified CLFS logfiles are not rejected by this mitigation.");
+                        break;
+                    case ClfsAuthenticationStatus.DisabledBySystem:
+                        Beaprint.BadPrint("    Disabled automatically by the system (Mode 3): maliciously modified CLFS logfiles are not rejected by this mitigation.");
+                        break;
+                    case ClfsAuthenticationStatus.AccessDenied:
+                        Beaprint.InfoPrint("    The CLFS authentication registry configuration could not be read (access denied).");
+                        break;
+                    default:
+                        string mode = report.Mode.HasValue ? report.Mode.Value.ToString() : "missing or invalid";
+                        Beaprint.InfoPrint($"    Unknown CLFS authentication mode: {mode}.");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -854,8 +1472,24 @@ namespace winPEAS.Checks
                                    $"      ClientNegotiateSigning  : {info.ClientNegotiateSigning}\n" +
                                    $"      ServerRequireSigning    : {info.ServerRequireSigning}\n" +
                                    $"      ServerNegotiateSigning  : {info.ServerNegotiateSigning}\n" +
-                                   $"      LdapSigning             : {(info.LdapSigning != null ? info.LdapSigningString : "null")} ({info.LdapSigningString})",
+                                   $"      LDAP client signing     : {(info.LdapSigning != null ? info.LdapSigning.ToString() : "missing")} ({info.LdapSigningString})",
                                    ntlmSettingsColors);
+
+                var dcPolicy = info.DcLdapPolicy;
+                Beaprint.ColorPrint("\n  Local DC LDAP server policy", Beaprint.LBLUE);
+                if (dcPolicy.Role != LocalDomainRole.DomainController)
+                    Beaprint.InfoPrint("      DC server policy         : unknown (" + dcPolicy.Role + "); client signing cannot substitute for it.");
+                else
+                {
+                    Beaprint.NoColorPrint("      LDAPServerIntegrity     : " + FormatDcPolicyValue(dcPolicy.SigningReadState, dcPolicy.SigningValue) + " (" + dcPolicy.SigningStatus + ")");
+                    Beaprint.NoColorPrint("      LdapEnforceChannelBinding: " + FormatDcPolicyValue(dcPolicy.ChannelBindingReadState, dcPolicy.ChannelBindingValue) + " (" + dcPolicy.ChannelBindingStatus + "; LDAPS only)");
+                    if (dcPolicy.SigningReadState == LdapPolicyReadState.Missing)
+                        Beaprint.InfoPrint(dcPolicy.Generation == DomainControllerGeneration.Before2025
+                            ? "      Absent signing policy: older DC default does not require signing."
+                            : "      Absent signing policy: effective default unknown; new Server 2025 deployments have different enforcement defaults.");
+                    if (dcPolicy.ChannelBindingStatus == LdapsChannelBindingStatus.WhenSupported)
+                        Beaprint.InfoPrint("      When Supported is partial LDAPS protection: capable clients need a valid channel binding token.");
+                }
 
                 Beaprint.ColorPrint("\n  Session Security", Beaprint.LBLUE);
 
@@ -903,32 +1537,50 @@ namespace winPEAS.Checks
             }
         }
 
+        private static string FormatDcPolicyValue(LdapPolicyReadState state, uint? value)
+        {
+            if (state == LdapPolicyReadState.Missing) return "missing";
+            if (state == LdapPolicyReadState.Error) return "unavailable (read error)";
+            return value.HasValue ? value.Value.ToString() : "unavailable (invalid DWORD)";
+        }
+
         private static void PrintPrintNightmarePointAndPrint()
         {
             Beaprint.MainPrint("PrintNightmare PointAndPrint Policies", "T1068");
-            Beaprint.LinkPrint("https://itm4n.github.io/printnightmare-exploitation/", "Check PointAndPrint policy hardening");
+            Beaprint.LinkPrint("https://support.microsoft.com/en-us/servicing/os/windows/2021/07/kb5005010-restricting-installation-of-new-printer-drivers-after-applying-the-july-6-2021-updates", "Microsoft Point and Print policy guidance");
 
             try
             {
-                string key = @"Software\\Policies\\Microsoft\\Windows NT\\Printers\\PointAndPrint";
+                string key = @"Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint";
                 var restrict = RegistryHelper.GetDwordValue("HKLM", key, "RestrictDriverInstallationToAdministrators");
                 var noWarn = RegistryHelper.GetDwordValue("HKLM", key, "NoWarningNoElevationOnInstall");
                 var updatePrompt = RegistryHelper.GetDwordValue("HKLM", key, "UpdatePromptSettings");
 
-                if (restrict == null && noWarn == null && updatePrompt == null)
-                {
-                    Beaprint.NotFoundPrint();
-                    return;
-                }
+                Beaprint.NoColorPrint($"      RestrictDriverInstallationToAdministrators: {(restrict.HasValue ? restrict.Value.ToString() : "not set or unavailable")}\n" +
+                                      $"      NoWarningNoElevationOnInstall: {(noWarn.HasValue ? noWarn.Value.ToString() : "not set or unavailable")}\n" +
+                                      $"      UpdatePromptSettings: {(updatePrompt.HasValue ? updatePrompt.Value.ToString() : "not set or unavailable")}");
 
-                Beaprint.NoColorPrint($"      RestrictDriverInstallationToAdministrators: {restrict}\n" +
-                                      $"      NoWarningNoElevationOnInstall: {noWarn}\n" +
-                                      $"      UpdatePromptSettings: {updatePrompt}");
+                string spoolerState = _spoolerReport == null ? "unknown" :
+                    !string.IsNullOrEmpty(_spoolerReport.State) ? _spoolerReport.State :
+                    _spoolerReport.ServiceExists && _spoolerReport.RegistryStart == 4 ? "disabled (registry)" : "unknown";
+                Beaprint.NoColorPrint("      Spooler state (earlier service check): " + spoolerState);
 
-                if (restrict == 0 && noWarn == 1 && updatePrompt == 2)
+                switch (AssessPointAndPrintPolicy(restrict, noWarn, updatePrompt))
                 {
-                    Beaprint.BadPrint("      [!] Potentially vulnerable to PrintNightmare misconfiguration");
+                    case PointAndPrintPolicyStatus.ExplicitAdminOnly:
+                        Beaprint.InfoPrint("      Administrator-only driver installation is explicitly configured; verify installed security updates and effective policy.");
+                        break;
+                    case PointAndPrintPolicyStatus.ReviewCandidate:
+                        Beaprint.BadPrint("      [!] Point and Print policy review candidate: an explicit value permits or weakens non-administrator driver installation.");
+                        break;
+                    case PointAndPrintPolicyStatus.UnknownValue:
+                        Beaprint.InfoPrint("      Unrecognized administrator restriction value; review effective policy.");
+                        break;
+                    default:
+                        Beaprint.InfoPrint("      No explicit weak value found; an absent restriction has update-dependent defaults.");
+                        break;
                 }
+                Beaprint.NoColorPrint("      Registry values alone do not establish exploitability; verify security updates, effective policy, Spooler state and access.");
             }
             catch (Exception ex)
             {
@@ -955,6 +1607,33 @@ namespace winPEAS.Checks
             catch (Exception ex)
             {
                 //Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        private static void PrintPrinterDriverAclReview()
+        {
+            Beaprint.MainPrint("Printer driver support-file ACL candidates", "T1574");
+            try
+            {
+                var report = Printers.GetDriverAclReview();
+                if (!report.RootPresent)
+                {
+                    Beaprint.NotFoundPrint();
+                    return;
+                }
+
+                Beaprint.NoColorPrint("      Fixed-depth ProgramData driver-support metadata review; no DLL is opened or loaded.");
+                foreach (var finding in report.Findings)
+                {
+                    Beaprint.BadPrint($"      ACL allow candidate: {finding.Path} ({finding.Rights})");
+                }
+                Beaprint.NoColorPrint($"      Reviewed {report.DriversInspected} driver folders and {report.DllsInspected} DLL paths." +
+                    (report.Partial ? " Result is partial (limit or access error)." : ""));
+                Beaprint.NoColorPrint("      Verify effective ACLs and denies, installed driver/load path, service identity, and vendor patch state before treating a candidate as exploitable.");
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
             }
         }
 
@@ -1114,9 +1793,137 @@ namespace winPEAS.Checks
             }
         }
 
+        internal static IEnumerable<string> FormatDefenderPathExclusions(
+            IList<string> pathExclusions, IList<string> policyManagerPathExclusions)
+        {
+            if (pathExclusions.Count != 0)
+            {
+                yield return "\n  Path Exclusions:";
+                foreach (var path in pathExclusions)
+                    yield return $"    {path}";
+            }
+
+            if (policyManagerPathExclusions.Count != 0)
+            {
+                yield return "\n  PolicyManagerPathExclusions:";
+                foreach (var path in policyManagerPathExclusions)
+                    yield return $"    {path}";
+            }
+        }
+
+        internal static string ExtractHistoricalDefenderExclusion(string newValue)
+        {
+            if (string.IsNullOrEmpty(newValue))
+                return null;
+
+            foreach (var kind in new[] { "Paths", "Processes", "Extensions" })
+            {
+                var marker = "\\Exclusions\\" + kind + "\\";
+                var start = newValue.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+                if (start < 0)
+                    continue;
+
+                var name = newValue.Substring(start + marker.Length);
+                var equals = name.IndexOf(" = ", StringComparison.Ordinal);
+                if (equals >= 0)
+                    name = name.Substring(0, equals);
+                name = name.Replace('\r', ' ').Replace('\n', ' ').Trim();
+                if (name.Length == 0)
+                    return null;
+                return kind + ": " + (name.Length > 160 ? name.Substring(0, 160) + "..." : name);
+            }
+            return null;
+        }
+
+        internal static string ExtractDefenderEventNewValue(string eventXml)
+        {
+            if (string.IsNullOrEmpty(eventXml) || eventXml.Length > 32768)
+                return null;
+            try
+            {
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null };
+                using (var xmlReader = XmlReader.Create(new StringReader(eventXml), settings))
+                {
+                    var document = XDocument.Load(xmlReader);
+                    return document.Descendants().Where(element => element.Name.LocalName == "Data")
+                        .Where(element => string.Equals((string)element.Attribute("Name"), "New Value",
+                            StringComparison.OrdinalIgnoreCase))
+                        .Select(element => element.Value).FirstOrDefault();
+                }
+            }
+            catch (XmlException)
+            {
+                return null;
+            }
+        }
+
+        private static IList<string> GetRecentDefenderExclusionChanges()
+        {
+            var changes = new List<string>();
+            try
+            {
+                // Query only recent configuration events, newest first; never scan an entire log.
+                const string query = "*[System[(EventID=5007) and TimeCreated[timediff(@SystemTime) <= 604800000]]]";
+                using (var reader = MyUtils.GetEventLogReader("Microsoft-Windows-Windows Defender/Operational", query))
+                {
+                    var started = System.Diagnostics.Stopwatch.StartNew();
+                    for (var inspected = 0; inspected < 48 && changes.Count < 5 &&
+                        started.ElapsedMilliseconds < 1500; inspected++)
+                    {
+                        using (var record = reader.ReadEvent(TimeSpan.FromMilliseconds(200)))
+                        {
+                            if (record == null)
+                                break;
+                            var exclusion = ExtractHistoricalDefenderExclusion(
+                                ExtractDefenderEventNewValue(record.ToXml()));
+                            if (exclusion != null)
+                                changes.Add("    " + record.TimeCreated?.ToString("u") + " " + exclusion);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Defender or its operational log may be absent or inaccessible.
+            }
+            return changes;
+        }
+
         private static void PrintWindowsDefenderInfo()
         {
             Beaprint.MainPrint("Windows Defender configuration", "T1518.001");
+
+            Beaprint.ColorPrint("  Defender engine CVE-2026-41091", Beaprint.LBLUE);
+            Beaprint.LinkPrint(
+                "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-41091",
+                "Actively exploited link-following LPE; Microsoft fixed the engine in 1.1.26040.8");
+
+            var engineInfo = WindowsDefender.GetDefenderEngineInfo();
+            var engineStatus = WindowsDefender.AssessCve41091Engine(engineInfo?.EngineVersion);
+            if (engineStatus == DefenderCve41091Status.Candidate && engineInfo.ServiceEnabled == true)
+            {
+                Beaprint.BadPrint("    Microsoft Defender engine " + engineInfo.EngineVersion +
+                    " predates the CVE-2026-41091 fix and the antimalware service is enabled. This is a local SYSTEM escalation candidate; update the Defender engine.");
+            }
+            else if (engineStatus == DefenderCve41091Status.Candidate && engineInfo.ServiceEnabled == false)
+            {
+                Beaprint.InfoPrint("    Microsoft Defender engine " + engineInfo.EngineVersion +
+                    " predates the CVE-2026-41091 fix, but WMI reports the antimalware service disabled. Exposure is not confirmed; update before enabling Defender.");
+            }
+            else if (engineStatus == DefenderCve41091Status.Candidate)
+            {
+                Beaprint.InfoPrint("    Microsoft Defender engine " + engineInfo.EngineVersion +
+                    " predates the CVE-2026-41091 fix, but service state is unavailable. Verify that Defender is active and update the engine.");
+            }
+            else if (engineStatus == DefenderCve41091Status.Fixed)
+            {
+                Beaprint.GoodPrint("    Microsoft Defender engine " + engineInfo.EngineVersion +
+                    " is at or above the CVE-2026-41091 fixed version (1.1.26040.8).");
+            }
+            else
+            {
+                Beaprint.GrayPrint("    Defender engine version unavailable or unparsable; CVE-2026-41091 status is unknown.");
+            }
 
             void DisplayDefenderSettings(WindowsDefenderSettings settings)
             {
@@ -1125,23 +1932,8 @@ namespace winPEAS.Checks
                 var extensionExclusions = settings.ExtensionExclusions;
                 var asrSettings = settings.AsrSettings;
 
-                if (pathExclusions.Count != 0)
-                {
-                    Beaprint.NoColorPrint("\n  Path Exclusions:");
-                    foreach (var path in pathExclusions)
-                    {
-                        Beaprint.NoColorPrint($"    {path}");
-                    }
-                }
-
-                if (pathExclusions.Count != 0)
-                {
-                    Beaprint.NoColorPrint("\n  PolicyManagerPathExclusions:");
-                    foreach (var path in pathExclusions)
-                    {
-                        Beaprint.NoColorPrint($"    {path}");
-                    }
-                }
+                foreach (var line in FormatDefenderPathExclusions(pathExclusions, settings.PolicyManagerPathExclusions))
+                    Beaprint.NoColorPrint(line);
 
                 if (processExclusions.Count != 0)
                 {
@@ -1205,6 +1997,24 @@ namespace winPEAS.Checks
 
                 Beaprint.ColorPrint("  Group Policy Settings", Beaprint.LBLUE);
                 DisplayDefenderSettings(info.GroupPolicySettings);
+
+                if (info.LocalSettings.PathExclusions.Count == 0 &&
+                    info.LocalSettings.PolicyManagerPathExclusions.Count == 0 &&
+                    info.LocalSettings.ProcessExclusions.Count == 0 &&
+                    info.LocalSettings.ExtensionExclusions.Count == 0 &&
+                    info.GroupPolicySettings.PathExclusions.Count == 0 &&
+                    info.GroupPolicySettings.PolicyManagerPathExclusions.Count == 0 &&
+                    info.GroupPolicySettings.ProcessExclusions.Count == 0 &&
+                    info.GroupPolicySettings.ExtensionExclusions.Count == 0)
+                {
+                    var changes = GetRecentDefenderExclusionChanges();
+                    if (changes.Count != 0)
+                    {
+                        Beaprint.NoColorPrint("\n  Recent exclusion changes in Defender event log (historical; verify current policy):");
+                        foreach (var change in changes)
+                            Beaprint.NoColorPrint(change);
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -1415,7 +2225,8 @@ namespace winPEAS.Checks
                         fileSysPath,
                         System.IO.Path.Combine(fileSysPath, @"Machine\Scripts\Startup"),
                         System.IO.Path.Combine(fileSysPath, @"User\Scripts\Logon"),
-                        System.IO.Path.Combine(fileSysPath, @"Machine\Preferences\ScheduledTasks")
+                        System.IO.Path.Combine(fileSysPath, @"Machine\Preferences\ScheduledTasks"),
+                        System.IO.Path.Combine(fileSysPath, @"Machine\Microsoft\Windows NT\SecEdit")
                     };
 
                     foreach (var p in pathsToCheck)
@@ -1425,10 +2236,10 @@ namespace winPEAS.Checks
                         {
                             if (!anyFinding)
                             {
-                                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/active-directory-methodology/gpo-abuse.html", "Why it matters");
+                                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/active-directory-methodology/index.html", "Why it matters");
                             }
                             anyFinding = true;
-                            Beaprint.BadPrint($"    [!] Writable applied GPO detected");
+                            Beaprint.BadPrint("    [!] Applied GPO path write candidate");
                             Beaprint.NoColorPrint($"        GPO Display Name : {info.DisplayName}");
                             Beaprint.NoColorPrint($"        GPO Name         : {info.GPOName}");
                             Beaprint.NoColorPrint($"        GPO Link         : {info.Link}");
@@ -1437,7 +2248,7 @@ namespace winPEAS.Checks
                             {
                                 Beaprint.NoColorPrint($"          -> {entry}");
                             }
-                            Beaprint.GrayPrint("        Hint: Abuse by adding an immediate Scheduled Task or Startup script to execute as SYSTEM on gpupdate.");
+                            Beaprint.GrayPrint("        Review effective share/GPT and GPC rights, scope, and filtering. An applicable machine-side immediate task can run at policy refresh; startup scripts wait for startup, and user logon scripts run at logon under that user.");
                         }
                     }
                 }

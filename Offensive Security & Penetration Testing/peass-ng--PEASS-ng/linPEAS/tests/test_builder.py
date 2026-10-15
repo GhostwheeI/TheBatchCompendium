@@ -3,6 +3,7 @@ import re
 import shlex
 import stat
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -20,6 +21,83 @@ class LinpeasBuilderTests(unittest.TestCase):
             raise AssertionError(
                 f"linpeas_builder failed:\nstdout:\n{result.stdout}\nstderr:\n{result.stderr}"
             )
+
+    def test_generated_find_groups_name_alternatives_under_directory_type(self):
+        """A second directory name must not admit an ordinary file via find -o."""
+        sys.path.insert(0, str(self.linpeas_dir))
+        try:
+            from builder.src.linpeasBuilder import LinpeasBuilder
+        finally:
+            sys.path.pop(0)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "dir-first").mkdir()
+            (root / "dir-second").mkdir()
+            (root / "file-first.conf").write_text("", encoding="utf-8")
+            (root / "file-second.yaml").write_text("", encoding="utf-8")
+            (root / "dir-second-file").write_text("", encoding="utf-8")
+            (root / "other").write_text("", encoding="utf-8")
+            # The second alternative has the same basename as this file in a
+            # nested directory; it must never enter a directory-only cache.
+            (root / "nested").mkdir()
+            (root / "nested" / "dir-second").write_text("", encoding="utf-8")
+
+            builder = object.__new__(LinpeasBuilder)
+            builder.dict_to_search = {
+                "d": {str(root): {"dir-first", "dir-second"}},
+                "f": {str(root): {"*.conf", "*.yaml"}},
+            }
+            builder.bash_find_f_vars = set()
+            builder.bash_find_d_vars = set()
+            standard, custom = builder._LinpeasBuilder__generate_finds()
+
+            def run_find(call):
+                _, variable, arguments = call.strip().split(" ", 2)
+                script = "\n".join((
+                    f"SEARCH_IN_FOLDER={shlex.quote(str(root))}",
+                    f"find {arguments}",
+                ))
+                result = subprocess.run(
+                    ["sh", "-c", script], capture_output=True, text=True,
+                    cwd=str(root),
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                return variable, set(result.stdout.splitlines())
+
+            expected_dirs = {str(root / "dir-first"), str(root / "dir-second")}
+            expected_files = {str(root / "file-first.conf"), str(root / "file-second.yaml")}
+            for call in standard + custom:
+                if not call.strip().startswith("cache_find "):
+                    continue
+                variable, found = run_find(call)
+                if variable.startswith("FIND_DIR_"):
+                    self.assertEqual(found, expected_dirs, call)
+                else:
+                    self.assertEqual(found, expected_files, call)
+
+    def test_generated_storages_deduplicate_in_sort(self):
+        """Every catalog storage should deduplicate without a separate uniq process."""
+        sys.path.insert(0, str(self.linpeas_dir))
+        try:
+            from builder.src.linpeasBuilder import LinpeasBuilder
+            from builder.src.peasLoaded import PEASLoaded
+        finally:
+            sys.path.pop(0)
+
+        builder = object.__new__(LinpeasBuilder)
+        builder.ploaded = PEASLoaded()
+        builder.hidden_files = set()
+        builder.bash_find_f_vars = set()
+        builder.bash_find_d_vars = set()
+        builder.bash_storages = set()
+        builder._LinpeasBuilder__get_files_to_search()
+        builder._LinpeasBuilder__generate_finds()
+
+        storages = builder._LinpeasBuilder__generate_storages()
+        self.assertTrue(storages)
+        self.assertTrue(all(" | sort -u | head -n 70)" in line for line in storages))
+        self.assertTrue(all(" | sort | uniq " not in line for line in storages))
 
     def test_small_build_creates_executable(self):
         with tempfile.TemporaryDirectory() as tmpdir:
