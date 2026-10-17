@@ -9,12 +9,12 @@
 # Functions Used: print_2title, print_3title, print_info
 # Global Variables: $HOMESEARCH, $SED_RED
 # Initial Functions:
-# Generated Global Variables: $h, $firefox_ini, $chrome_base, $profiles
+# Generated Global Variables: $h, $firefox_ini, $chrome_base, $profiles, $profile, $profile_count, $extension_settings, $passbolt_store
 # Fat linpeas: 0
 # Small linpeas: 1
 
 print_2title "Browser Profiles" "T1539,T1217"
-print_info "https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html#browser-data"
+print_info "https://book.hacktricks.wiki/en/generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/browser-artifacts.html"
 
 echo ""
 
@@ -57,6 +57,16 @@ for h in $HOMESEARCH; do
       if [ "$profiles" ]; then
         print_3title "Chromium profiles ($chrome_base)" "T1539,T1217"
         printf "%s\n" "$profiles" | sed -${E} "s,.*,${SED_RED},"
+        profile_count=0
+        printf "%s\n" "$profiles" | while IFS= read -r profile; do
+          profile_count=$((profile_count + 1))
+          [ "$profile_count" -le 8 ] || break
+          extension_settings="$profile/Local Extension Settings"
+          passbolt_store="$extension_settings/didegimhafipceonhjepacocaffmoppf"
+          [ -d "$extension_settings" ] && [ ! -L "$extension_settings" ] || continue
+          [ -d "$passbolt_store" ] && [ ! -L "$passbolt_store" ] && [ -r "$passbolt_store" ] && [ -x "$passbolt_store" ] || continue
+          printf '  Passbolt extension local storage (path only; key availability unknown): %s\n' "$passbolt_store"
+        done
         echo ""
       fi
     fi
