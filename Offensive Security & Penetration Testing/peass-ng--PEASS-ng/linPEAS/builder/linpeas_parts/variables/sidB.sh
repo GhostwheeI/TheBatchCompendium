@@ -1,10 +1,10 @@
 # Title: Variables - sidB
 # ID: sidB
 # Author: Carlos Polop
-# Last Update: 22-08-2023
+# Last Update: 12-10-2026
 # Description: Dangerous sid binaries
 # License: GNU GPL
-# Version: 1.0
+# Version: 1.1
 # Functions Used:
 # Global Variables:
 # Initial Functions:
@@ -18,6 +18,7 @@ sidB="/apache2$%Read_root_passwd__apache2_-f_/etc/shadow\(CVE-2019-0211\)\
  /at$%RTru64_UNIX_4.0g\(CVE-2002-1614\)\
  /abrt-action-install-debuginfo-to-abrt-cache$%CENTOS 7.1/Fedora22\
  /chfn$%SuSE_9.3/10\
+ /check_icmp$%Monitoring_Plugins<3.0.1_if_setuid-root\(07-2026\)\
  /chkey$%Solaris_2.5.1\
  /chkperm$%Solaris_7.0_\
  /chpass$%2Vulns:OpenBSD_6.1_to_OpenBSD 6.6\(CVE-2019-19726\)--OpenBSD_2.7_i386/OpenBSD_2.6_i386/OpenBSD_2.5_1999/08/06/OpenBSD_2.5_1998/05/28/FreeBSD_4.0-RELEASE/FreeBSD_3.5-RELEASE/FreeBSD_3.4-RELEASE/NetBSD_1.4.2\
@@ -25,8 +26,6 @@ sidB="/apache2$%Read_root_passwd__apache2_-f_/etc/shadow\(CVE-2019-0211\)\
  /dtappgather$%Solaris_7_<_11_\(SPARC/x86\)\(CVE-2017-3622\)\
  /dtprintinfo$%Solaris_10_\(x86\)_and_lower_versions_also_SunOS_5.7_to_5.10\
  /dtsession$%Oracle_Solaris_10_1/13_and_earlier\(CVE-2020-2696\)\
- /enlightenment_backlight$%Before_0.25.4_\(CVE-2022-37706\)\
- /enlightenment_ckpasswd$%Before_0.25.4_\(CVE-2022-37706\)\
  /enlightenment_sys$%Before_0.25.4_\(CVE-2022-37706\)\
  /eject$%FreeBSD_mcweject_0.9/SGI_IRIX_6.2\
  /ibstat$%IBM_AIX_Version_6.1/7.1\(09-2013\)\
@@ -37,7 +36,7 @@ sidB="/apache2$%Read_root_passwd__apache2_-f_/etc/shadow\(CVE-2019-0211\)\
  /lpc$%S.u.S.E_Linux_5.2\
  /lpr$%BSD/OS2.1/FreeBSD2.1.5/NeXTstep4.x/IRIX6.4/SunOS4.1.3/4.1.4\(09-1996\)\
  /mail.local$%NetBSD_7.0-7.0.1__6.1-6.1.5__6.0-6.0.6\
- /mount$%Apple_Mac_OSX\(Lion\)_Kernel_xnu-1699.32.7_except_xnu-1699.24.8\
+ /mount$%Apple_Mac_OSX\(Lion\)_Kernel_xnu-1699.32.7_except_xnu-1699.24.8/util-linux_mount<=2.41.3\(CVE-2026-27456\)/util-linux_mount>=2.39_before_2.41.5_or_2.42.2\(CVE-2026-53612\)/util-linux_mount>=2.39.1_before_2.41.5_or_2.42.2\(CVE-2026-53614\)/util-linux_mount_2.39_to_2.41.5_or_2.42_to_2.42.2\(CVE-2026-76642\)/util-linux_mount_2.42.x_before_2.42.3\(CVE-2026-78409\)/util-linux_mount<=2.42.2\(CVE-2026-78410\)\
  /movemail$%Emacs\(08-1986\)\
  /mrinfo$%NetBSD_Sep_17_2002_https://securitytracker.com/id/1005234\
  /mtrace$%NetBSD_Sep_17_2002_https://securitytracker.com/id/1005234\
@@ -53,9 +52,10 @@ sidB="/apache2$%Read_root_passwd__apache2_-f_/etc/shadow\(CVE-2019-0211\)\
  /rdist$%Solaris_10/OpenSolaris\
  /rsh$%Apple_Mac_OSX_10.9.5/10.10.5\(09-2015\)\
  /screen$%GNU_Screen_4.5.0\
+ /screen-4\.5\.0$%GNU_Screen_logfile_policy_candidate_verify_SUID_and_vendor_patch\
  /sdtcm_convert$%Sun_Solaris_7.0\
  /sendmail$%Sendmail_8.10.1/Sendmail_8.11.x/Linux_Kernel_2.2.x_2.4.0-test1_\(SGI_ProPack_1.2/1.3\)\
- /snap-confine$%Ubuntu_snapd<2.37_dirty_sock_Local_Privilege_Escalation\(CVE-2019-7304\)\
+ /snap-confine$%snap-confine_SUID_helper_review_effective_identity_and_mount_policy\
  /sudo%check_if_the_sudo_version_is_vulnerable\
  /Serv-U%FTP_Server<15.1.7(CVE-2019-12181)\
  /sudoedit$%Sudo/SudoEdit_1.6.9p21/1.7.2p4/\(RHEL_5/6/7/Ubuntu\)/Sudo<=1.8.14\
@@ -65,6 +65,7 @@ sidB="/apache2$%Read_root_passwd__apache2_-f_/etc/shadow\(CVE-2019-0211\)\
  /umount$%BSD/Linux\(08-1996\)\
  /umount-loop$%Rocks_Clusters<=4.1\(07-2006\)\
  /uucp$%Taylor_UUCP_1.0.6\
+ /worker-launcher$%Apache_Storm_3.0.0_before_3.1.0_\(CVE-2026-82429,CVE-2026-82430\)\
  /XFree86$%XFree86_X11R6_3.3.x/4.0/4.x/3.3\(03-2003\)\
  /xlock$%BSD/OS_2.1/DG/UX_7.0/Debian_1.3/HP-UX_10.34/IBM_AIX_4.2/SGI_IRIX_6.4/Solaris_2.5.1\(04-1997\)\
  /xscreensaver%Solaris_11.x\(CVE-2019-3010\)\
