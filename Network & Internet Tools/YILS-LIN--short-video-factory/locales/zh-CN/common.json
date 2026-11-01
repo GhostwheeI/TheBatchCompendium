@@ -49,7 +49,9 @@
       "test": "测试",
       "close": "关闭",
       "refreshAssets": "刷新素材库",
-      "copyErrorDetail": "复制报错详细信息"
+      "copyErrorDetail": "复制报错详细信息",
+      "add": "添加",
+      "remove": "移除"
     },
     "states": {
       "noData": "无数据"
@@ -57,6 +59,9 @@
     "messages": {
       "success": {
         "copySuccess": "已复制到剪贴板"
+      },
+      "error": {
+        "copyFailed": "复制失败"
       }
     }
   },
@@ -74,6 +79,60 @@
   "footer": {
     "poweredBy": "Powered by YILS（博客地址：https://yils.blog）"
   },
+  "topBar": {
+    "poweredByHint": "访问作者主页",
+    "poweredBy": "由 {{name}} 强力驱动",
+    "documentation": "使用手册",
+    "exportDiagnostics": "导出诊断信息",
+    "diagnosticsExported": "诊断信息已导出",
+    "diagnosticsExportFailed": "导出诊断信息失败",
+    "diagnosticsCollecting": "正在收集诊断信息...",
+    "diagnosticsArchiving": "正在整理日志文件...",
+    "workflow": {
+      "text": "文案",
+      "voice": "配音",
+      "assets": "素材",
+      "render": "合成"
+    }
+  },
+  "version": {
+    "copy": "复制版本号",
+    "checkUpdate": "检查更新",
+    "updateAvailable": "检查更新（有可用更新）"
+  },
+  "update": {
+    "title": "发现新版本",
+    "minimumVersionRequired": "需要升级到受支持版本",
+    "currentVersion": "当前版本",
+    "latestVersion": "最新版本",
+    "minimumSupportedVersion": "最低支持版本",
+    "releaseDate": "发布日期",
+    "releaseNotes": "更新内容",
+    "checking": "正在检查更新",
+    "upToDate": "当前已是最新版本",
+    "noRelease": "暂无版本发布信息",
+    "mandatory": "此版本包含升级要求，请尽快前往官网获取受支持的版本。",
+    "noCompatibleAsset": "未找到适用于当前系统的安装包，请访问官网查看下载选项。",
+    "updateError": "检查更新失败",
+    "unknownError": "未知错误，请稍后重试",
+    "updateLater": "稍后更新",
+    "visitWebsite": "前往官网下载"
+  },
+  "announcements": {
+    "title": "公告",
+    "open": "打开公告",
+    "openWithTitle": "打开公告：{{title}}，共 {{count}} 条",
+    "unread": "未读",
+    "viewDetails": "查看详情",
+    "noLongerAvailable": "此公告已过期或不再适用于当前版本。",
+    "close": "关闭",
+    "severity": {
+      "info": "通知",
+      "success": "好消息",
+      "warning": "重要",
+      "critical": "紧急"
+    }
+  },
   "features": {
     "llm": {
       "config": {
@@ -83,15 +142,94 @@
         "modelName": "模型名称",
         "apiUrl": "API 地址",
         "apiKey": "API Key",
-        "compatibleNote": "兼容任意 OpenAI 标准接口"
+        "compatibleNote": "兼容任意 OpenAI 标准接口",
+        "protocol": "接口类型",
+        "connectionTab": "模型连接",
+        "copywritingTab": "文案规则",
+        "advancedTab": "高级设置",
+        "protocolCompatible": "通用 OpenAI 兼容接口",
+        "protocolChat": "OpenAI Chat Completions",
+        "protocolResponses": "OpenAI Responses",
+        "protocolAnthropic": "Anthropic Messages/兼容接口",
+        "requestUrl": "最终请求地址",
+        "apiUrlRequired": "请输入 API 基础地址",
+        "modelNameRequired": "请输入模型名称",
+        "invalidApiUrl": "API 基础地址无效。请使用 http:// 或 https://，并移除查询参数、片段和嵌入式凭据。",
+        "fullEndpointApiUrl": "请填写 API 基础地址，不要包含完整的 API 端点路径。",
+        "invalidProtocol": "请选择受支持的 API 协议。",
+        "invalidTimeoutSeconds": "超时时间必须为正整数秒。",
+        "invalidMaxOutputTokens": "最大输出 Token 必须为正整数，也可以留空。",
+        "anthropicAuthMode": "认证方式",
+        "copywritingRules": "文案规则",
+        "systemPromptMode": "系统提示词",
+        "builtin": "内置（推荐）",
+        "custom": "自定义",
+        "off": "关闭",
+        "builtinDescription": "使用内置口播规则，生成可直接用于语音合成的正文。",
+        "customDescription": "使用你填写的完整提示词替换内置规则。",
+        "offDescription": "不附加系统提示词，仅发送创作需求。",
+        "customPrompt": "自定义提示词",
+        "customPromptHint": "自定义内容将完整替换内置提示词。",
+        "fillBuiltin": "填入内置内容",
+        "diversityEnabled": "增强文案多样性",
+        "diversityDescription": "轮换创作角度，并参考近期文案，尽量避免相同开头和结构；不改变用户明确要求。有限历史仅保存在本机，生成时会将少量文案片段发送给当前服务商。",
+        "rewriteOnSimilarity": "检测到高度相似时自动重写一次",
+        "rewriteDescription": "通常最多增加一次模型生成调用；网络重试可能让实际请求次数更多，并增加费用和等待时间。",
+        "historyCount": "近期创作任务记录：{{count}}",
+        "clearHistory": "清除近期记录",
+        "clearHistoryConfirm": "确定清除本机保存的近期文案及策略轮换记录吗？",
+        "advanced": "高级连接设置",
+        "instructionDelivery": "系统指令发送方式",
+        "standardDelivery": "标准方式（推荐）",
+        "userMessageDelivery": "合并到用户消息",
+        "timeoutSeconds": "请求超时（秒）",
+        "maxOutputTokens": "最大输出 Token",
+        "sampling": "采样参数（可选）",
+        "temperature": "Temperature（0–2）",
+        "topP": "Top P（0–1）",
+        "samplingDescription": "留空时使用模型默认值。通常只调整 Temperature 或 Top P 其中一项；不同模型支持范围可能不同。",
+        "samplingCompatibilityUnknown": "兼容性无法仅由接口类型判断，请确认具体服务商和模型文档；不支持的参数可能导致请求失败。",
+        "restoreSamplingDefaults": "恢复模型默认采样参数",
+        "invalidTemperature": "Temperature 必须是 0 到 2 之间的有限数值，或留空。具体模型可能支持更窄范围。",
+        "invalidTopP": "Top P 必须是 0 到 1 之间的有限数值，或留空。",
+        "replacePromptConfirm": "这会覆盖当前自定义提示词，是否继续？",
+        "customHeaders": "自定义请求头",
+        "headerName": "名称",
+        "headerValue": "值",
+        "invalidHeaderName": "请求头名称无效，请使用标准 HTTP 请求头名称。",
+        "invalidHeaderValue": "请求头值不能包含控制字符或换行符。",
+        "protectedHeaderName": "该请求头由协议或认证方式管理，不能作为自定义请求头。",
+        "duplicateHeaderName": "请求头名称不能重复。"
       },
       "errors": {
         "promptRequired": "提示词不能为空",
         "connectionFailed": "大模型连接失败，请检查配置是否正确",
-        "generateFailed": "生成失败，请检查大模型配置是否正确"
+        "generateFailed": "生成失败，请检查大模型配置是否正确",
+        "customPromptRequired": "请填写自定义提示词，或选择关闭",
+        "cancelled": "文案生成已取消",
+        "failed": "未收到有效文案",
+        "truncated": "文案生成不完整",
+        "textNotReady": "当前文案未完成，无法用于语音合成",
+        "historyClearFailed": "清除近期记录失败，请检查本地存储是否可用"
       },
       "success": {
-        "connectionSucceeded": "大模型连接成功"
+        "connectionSucceeded": "大模型连接成功",
+        "historyCleared": "近期创作记录已清除"
+      },
+      "info": {
+        "checkingSimilarity": "正在检查文案与近期创作的相似度…",
+        "rewritingSimilarCopy": "文案与近期创作较相似，正在尝试不同角度重写…",
+        "similarityRemains": "文案仍与近期创作较相似，可调整提示词或手动修改。",
+        "similarityRewriteFailed": "差异化重写未能完成，已保留首稿。"
+      },
+      "status": {
+        "idle": "待生成",
+        "generating": "生成中",
+        "completed": "已完成",
+        "cancelled": "已取消",
+        "failed": "失败",
+        "truncated": "不完整",
+        "edited": "已编辑"
       }
     },
     "tts": {
@@ -132,6 +270,7 @@
         "noMp4InFolder": "选择的文件夹中不包含MP4视频文件",
         "audioDurationInvalid": "音频时长无效，请检查语音合成结果或音频文件是否正常",
         "noVideoAssets": "没有可用的视频素材，请先选择包含 MP4 视频的素材文件夹",
+        "noUsableVideoAssets": "没有可读取的视频素材，请检查视频文件是否损坏或编码是否受支持",
         "durationInsufficient": "可用视频素材总时长不足"
       },
       "success": {
@@ -139,6 +278,28 @@
       }
     },
     "render": {
+      "batch": {
+        "label": "批量合成",
+        "enabled": "批量 · {{count}}次",
+        "settings": "批量设置",
+        "count": "合成次数",
+        "invalidCount": "请输入 1–999 的整数次数",
+        "onError": "失败后",
+        "stopOnError": "停止批量",
+        "continueOnError": "跳过并继续",
+        "hint": "失败也计入次数；连续 3 次异常自动停止。不自动重试。",
+        "stop": "停止批量",
+        "stopping": "正在停止批量",
+        "progress": "第 {{current}} / {{total}} 次 · 待开始 {{remaining}} 次",
+        "summary": "成功 {{success}} · 失败 {{failed}} · 字幕异常 {{warnings}}",
+        "reasons": {
+          "completed": "批量已完成",
+          "user_cancelled": "批量已停止",
+          "generation_failed": "批量因错误停止",
+          "consecutive_failures": "连续 3 次异常，批量已停止",
+          "unrecoverable_error": "发生不可恢复错误，批量已停止"
+        }
+      },
       "config": {
         "startLabel": "开始合成",
         "stopLabel": "停止合成",
@@ -146,6 +307,12 @@
         "autoBatchOff": "批量合成已关闭",
         "autoBatchOn": "批量合成已开启",
         "bgmFolderLabel": "背景音乐文件夹（随机选取.mp3，为空则无背景音）",
+        "subtitlePanel": "字幕",
+        "subtitlesEnabled": "显示字幕",
+        "openOutputDirectory": "打开输出目录",
+        "subtitlesHint": "在导出视频中显示字幕，关闭不影响配音",
+        "exportSubtitles": "同步导出SRT",
+        "exportSubtitlesHint": "在视频旁保存同名 .srt 字幕文件",
         "output": {
           "width": "导出视频宽度",
           "height": "导出视频高度",
@@ -182,6 +349,8 @@
         "failed": "失败"
       },
       "errors": {
+        "subtitleExportFailed": "视频已生成，字幕导出失败",
+        "openOutputDirectoryFailed": "打开输出目录失败",
         "failed": "视频合成失败，请检查各项配置是否正确",
         "bgmListFailed": "获取背景音乐列表失败，请检查文件夹是否存在",
         "outputFileNameRequired": "请先配置导出文件名",

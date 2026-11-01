@@ -63,6 +63,7 @@ import { useToast } from 'vue-toastification'
 import { useTranslation } from 'i18next-vue'
 import ActionToastEmbed from '@/components/ActionToastEmbed.vue'
 import { formatErrorForCopy } from '@/lib/error-copy'
+import { createAnalyticsOperationId, trackAnalytics } from '@/lib/analytics'
 
 const toast = useToast()
 const appStore = useAppStore()
@@ -87,6 +88,7 @@ const configValid = (text?: string) => {
 }
 
 const tryListeningLoading = ref(false)
+let synthesisRequestSequence = 0
 let currentAudio: HTMLAudioElement | null = null
 const handleTryListening = async () => {
   if (!configValid(appStore.tryListeningText)) return
@@ -98,6 +100,9 @@ const handleTryListening = async () => {
   }
 
   tryListeningLoading.value = true
+  const startedAt = performance.now()
+  const operationId = createAnalyticsOperationId()
+  let analyticsReported = false
   try {
     const speech = await window.electron.edgeTtsSynthesizeToBase64({
       text: appStore.tryListeningText,
@@ -106,10 +111,26 @@ const handleTryListening = async () => {
         rate: appStore.speed,
       },
     })
+    trackAnalytics('tts_preview_finished', {
+      operation_id: operationId,
+      outcome: 'success',
+      duration_ms: Math.max(0, Math.floor(performance.now() - startedAt)),
+      tts_characters: appStore.tryListeningText.length,
+    })
+    analyticsReported = true
     currentAudio = new Audio(`data:audio/mp3;base64,${speech}`)
     currentAudio.play()
     toast.info(t('features.tts.info.playTryAudio'))
   } catch (error: any) {
+    if (!analyticsReported) {
+      trackAnalytics('tts_preview_finished', {
+        operation_id: operationId,
+        outcome: 'failed',
+        duration_ms: Math.max(0, Math.floor(performance.now() - startedAt)),
+        tts_characters: appStore.tryListeningText.length,
+        error_code: 'unknown',
+      })
+    }
     console.log('试听语音合成失败', error)
     const errorMessage = error?.error?.message || error?.message || error
     toast.error({
@@ -165,7 +186,7 @@ const speedItems = computed(() => {
 const fetchVoices = async () => {
   try {
     appStore.originalVoicesList = await window.electron.edgeTtsGetVoiceList()
-    console.log('EdgeTTS语音列表更新：', appStore.originalVoicesList)
+    console.info('EdgeTTS语音列表已更新', { voiceCount: appStore.originalVoicesList.length })
   } catch (error: any) {
     console.log('获取EdgeTTS语音列表失败', error)
     const errorMessage = error?.error?.message || error?.message || error
@@ -206,8 +227,21 @@ onUnmounted(() => {
   }
 })
 
-const synthesizedSpeechToFile = async (option: { text: string; withCaption?: boolean }) => {
+const synthesizedSpeechToFile = async (option: {
+  text: string
+  withCaption?: boolean
+  abortSignal?: AbortSignal
+}) => {
   if (!configValid(option.text)) throw new Error(t('features.tts.errors.configInvalid'))
+  if (option.abortSignal?.aborted) {
+    const error = new Error('语音合成已取消')
+    error.name = 'AbortError'
+    throw error
+  }
+
+  const requestId = `tts-${Date.now()}-${++synthesisRequestSequence}`
+  const onAbort = () => window.ipcRenderer.send('cancel-edge-tts-synthesis', requestId)
+  option.abortSignal?.addEventListener('abort', onAbort, { once: true })
 
   try {
     const result = await window.electron.edgeTtsSynthesizeToFile({
@@ -217,11 +251,24 @@ const synthesizedSpeechToFile = async (option: { text: string; withCaption?: boo
         rate: appStore.speed,
       },
       withCaption: option?.withCaption,
+      requestId,
     })
+    if (option.abortSignal?.aborted) {
+      const error = new Error('语音合成已取消')
+      error.name = 'AbortError'
+      throw error
+    }
     return result
   } catch (error) {
+    if (option.abortSignal?.aborted || (error as { name?: string })?.name === 'AbortError') {
+      const abortError = new Error('语音合成已取消')
+      abortError.name = 'AbortError'
+      throw abortError
+    }
     console.log('语音合成失败', error)
     throw new Error(t('features.tts.errors.synthesisFailed') + ' ' + String(error))
+  } finally {
+    option.abortSignal?.removeEventListener('abort', onAbort)
   }
 }
 

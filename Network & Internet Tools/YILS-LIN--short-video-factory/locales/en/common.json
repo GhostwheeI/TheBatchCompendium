@@ -49,7 +49,9 @@
       "test": "Test",
       "close": "Close",
       "refreshAssets": "Refresh Assets",
-      "copyErrorDetail": "Copy error details"
+      "copyErrorDetail": "Copy error details",
+      "add": "Add",
+      "remove": "Remove"
     },
     "states": {
       "noData": "No data"
@@ -57,6 +59,9 @@
     "messages": {
       "success": {
         "copySuccess": "Copied to clipboard"
+      },
+      "error": {
+        "copyFailed": "Failed to copy"
       }
     }
   },
@@ -74,6 +79,60 @@
   "footer": {
     "poweredBy": "Powered by YILS (Blog: https://yils.blog)"
   },
+  "topBar": {
+    "poweredByHint": "Visit the author's homepage",
+    "poweredBy": "Powered by {{name}}",
+    "documentation": "Documentation",
+    "exportDiagnostics": "Export diagnostics",
+    "diagnosticsExported": "Diagnostics exported",
+    "diagnosticsExportFailed": "Failed to export diagnostics",
+    "diagnosticsCollecting": "Collecting diagnostics...",
+    "diagnosticsArchiving": "Preparing log archive...",
+    "workflow": {
+      "text": "Script",
+      "voice": "Voice",
+      "assets": "Assets",
+      "render": "Render"
+    }
+  },
+  "version": {
+    "copy": "Copy version",
+    "checkUpdate": "Check for updates",
+    "updateAvailable": "Check for updates (update available)"
+  },
+  "update": {
+    "title": "Update available",
+    "minimumVersionRequired": "A supported version is required",
+    "currentVersion": "Current version",
+    "latestVersion": "Latest version",
+    "minimumSupportedVersion": "Minimum supported version",
+    "releaseDate": "Release date",
+    "releaseNotes": "What's new",
+    "checking": "Checking for updates",
+    "upToDate": "You're up to date",
+    "noRelease": "No release information is available yet",
+    "mandatory": "This version is below the supported range. Please visit the website to get a supported version.",
+    "noCompatibleAsset": "No installer is available for this platform. Visit the website for download options.",
+    "updateError": "Failed to check for updates",
+    "unknownError": "Unknown error. Please try again later.",
+    "updateLater": "Later",
+    "visitWebsite": "Visit website"
+  },
+  "announcements": {
+    "title": "Announcements",
+    "open": "Open announcements",
+    "openWithTitle": "Open announcement: {{title}}. {{count}} total.",
+    "unread": "Unread",
+    "viewDetails": "View details",
+    "noLongerAvailable": "This announcement has expired or no longer applies to this version.",
+    "close": "Close",
+    "severity": {
+      "info": "Notice",
+      "success": "Good news",
+      "warning": "Important",
+      "critical": "Urgent"
+    }
+  },
   "features": {
     "llm": {
       "config": {
@@ -83,15 +142,94 @@
         "modelName": "Model Name",
         "apiUrl": "API URL",
         "apiKey": "API Key",
-        "compatibleNote": "Compatible with any OpenAI-compatible API"
+        "compatibleNote": "Compatible with any OpenAI-compatible API",
+        "protocol": "Protocol",
+        "connectionTab": "Connection",
+        "copywritingTab": "Copywriting",
+        "advancedTab": "Advanced",
+        "protocolCompatible": "OpenAI-compatible API",
+        "protocolChat": "OpenAI Chat Completions",
+        "protocolResponses": "OpenAI Responses",
+        "protocolAnthropic": "Anthropic Messages/compatible API",
+        "requestUrl": "Final request URL",
+        "apiUrlRequired": "Enter an API base URL",
+        "modelNameRequired": "Enter a model name",
+        "invalidApiUrl": "Invalid API base URL. Use http:// or https:// and remove query strings, fragments, and embedded credentials.",
+        "fullEndpointApiUrl": "Enter the API base URL without the complete API endpoint path.",
+        "invalidProtocol": "Select a supported API protocol.",
+        "invalidTimeoutSeconds": "Timeout must be a positive whole number of seconds.",
+        "invalidMaxOutputTokens": "Maximum output tokens must be a positive whole number or left empty.",
+        "anthropicAuthMode": "Authentication",
+        "copywritingRules": "Copywriting rules",
+        "systemPromptMode": "System prompt",
+        "builtin": "Built-in (recommended)",
+        "custom": "Custom",
+        "off": "Off",
+        "builtinDescription": "Use built-in voiceover rules to generate text ready for speech synthesis.",
+        "customDescription": "Use your complete custom prompt instead of the built-in rules.",
+        "offDescription": "Do not add a system prompt; send only the creative request.",
+        "customPrompt": "Custom prompt",
+        "customPromptHint": "The custom content completely replaces the built-in prompt.",
+        "fillBuiltin": "Use built-in content",
+        "diversityEnabled": "Enhance copy diversity",
+        "diversityDescription": "Rotate creative angles and refer to recent scripts to vary openings and structure. Explicit user requirements remain authoritative. Limited history stays on this device; a few text excerpts are sent to the selected provider during generation.",
+        "rewriteOnSimilarity": "Rewrite once when highly similar copy is detected",
+        "rewriteDescription": "A rewrite usually adds one generation call; network retries may make the actual request count higher, increasing cost and latency.",
+        "historyCount": "Recent task records: {{count}}",
+        "clearHistory": "Clear recent records",
+        "clearHistoryConfirm": "Clear locally stored recent scripts and strategy rotation history?",
+        "advanced": "Advanced connection settings",
+        "instructionDelivery": "Instruction delivery",
+        "standardDelivery": "Standard (recommended)",
+        "userMessageDelivery": "Merge into user message",
+        "timeoutSeconds": "Request timeout (seconds)",
+        "maxOutputTokens": "Maximum output tokens",
+        "sampling": "Sampling parameters (optional)",
+        "temperature": "Temperature (0–2)",
+        "topP": "Top P (0–1)",
+        "samplingDescription": "Leave empty to use model defaults. Usually adjust either Temperature or Top P, not both. Supported ranges vary by model.",
+        "samplingCompatibilityUnknown": "Compatibility cannot be inferred from protocol alone. Check the provider and model documentation; unsupported parameters may cause request failures.",
+        "restoreSamplingDefaults": "Restore model sampling defaults",
+        "invalidTemperature": "Temperature must be a finite number from 0 to 2, or empty. A specific model may support a narrower range.",
+        "invalidTopP": "Top P must be a finite number from 0 to 1, or empty.",
+        "replacePromptConfirm": "This will replace the current custom prompt. Continue?",
+        "customHeaders": "Custom headers",
+        "headerName": "Name",
+        "headerValue": "Value",
+        "invalidHeaderName": "Invalid header name. Use a standard HTTP header name.",
+        "invalidHeaderValue": "Header values cannot contain control characters or line breaks.",
+        "protectedHeaderName": "This header is managed by the protocol or authentication and cannot be customized.",
+        "duplicateHeaderName": "Header names must be unique."
       },
       "errors": {
         "promptRequired": "Prompt cannot be empty",
         "connectionFailed": "LLM connection failed, please check your configuration",
-        "generateFailed": "Generation failed, please check LLM configuration"
+        "generateFailed": "Generation failed, please check LLM configuration",
+        "customPromptRequired": "Enter a custom prompt or choose Off",
+        "cancelled": "Generation was cancelled",
+        "failed": "No valid text was received",
+        "truncated": "Generation is incomplete",
+        "textNotReady": "The current script is not ready for speech synthesis",
+        "historyClearFailed": "Could not clear recent records. Check local storage availability."
       },
       "success": {
-        "connectionSucceeded": "LLM connected successfully"
+        "connectionSucceeded": "LLM connected successfully",
+        "historyCleared": "Recent copy history cleared"
+      },
+      "info": {
+        "checkingSimilarity": "Checking similarity with recent copy…",
+        "rewritingSimilarCopy": "This script is similar to recent copy. Trying a different angle…",
+        "similarityRemains": "The script is still similar to recent copy. Consider changing the prompt or editing it.",
+        "similarityRewriteFailed": "The diversity rewrite did not finish; the first draft was kept."
+      },
+      "status": {
+        "idle": "Ready",
+        "generating": "Generating",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "failed": "Failed",
+        "truncated": "Incomplete",
+        "edited": "Edited"
       }
     },
     "tts": {
@@ -132,6 +270,7 @@
         "noMp4InFolder": "No MP4 video files found in the selected folder",
         "audioDurationInvalid": "Audio duration is invalid. Please check the speech synthesis result or audio file",
         "noVideoAssets": "No available video assets. Please select an assets folder containing MP4 videos",
+        "noUsableVideoAssets": "No readable video assets. Check whether the files are corrupted or use a supported codec",
         "durationInsufficient": "Total available video assets duration is insufficient"
       },
       "success": {
@@ -139,6 +278,28 @@
       }
     },
     "render": {
+      "batch": {
+        "label": "Batch",
+        "enabled": "Batch · {{count}} runs",
+        "settings": "Batch settings",
+        "count": "Number of runs",
+        "invalidCount": "Enter an integer from 1 to 999",
+        "onError": "On failure",
+        "stopOnError": "Stop batch",
+        "continueOnError": "Skip and continue",
+        "hint": "Failures count toward the limit. Stop after 3 consecutive errors. No automatic retries.",
+        "stop": "Stop batch",
+        "stopping": "Stopping batch",
+        "progress": "Run {{current}} / {{total}} · {{remaining}} not started",
+        "summary": "Succeeded {{success}} · Failed {{failed}} · Subtitle errors {{warnings}}",
+        "reasons": {
+          "completed": "Batch completed",
+          "user_cancelled": "Batch stopped",
+          "generation_failed": "Batch stopped on error",
+          "consecutive_failures": "Stopped after 3 consecutive errors",
+          "unrecoverable_error": "Stopped on unrecoverable error"
+        }
+      },
       "config": {
         "startLabel": "Start Rendering",
         "stopLabel": "Stop Rendering",
@@ -146,6 +307,12 @@
         "autoBatchOff": "Batch render is off",
         "autoBatchOn": "Batch render is on",
         "bgmFolderLabel": "Background music folder (.mp3, pick randomly)",
+        "subtitlePanel": "Subtitles",
+        "subtitlesEnabled": "Show subtitles",
+        "openOutputDirectory": "Open folder",
+        "subtitlesHint": "Show subtitles in the exported video; turning this off does not affect narration",
+        "exportSubtitles": "Export SRT",
+        "exportSubtitlesHint": "Save a same-named .srt subtitle file beside the video",
         "output": {
           "width": "Output width",
           "height": "Output height",
@@ -182,6 +349,8 @@
         "failed": "Fail"
       },
       "errors": {
+        "subtitleExportFailed": "Video created, but subtitle export failed",
+        "openOutputDirectoryFailed": "Failed to open output folder",
         "failed": "Video rendering failed. Please check all configurations",
         "bgmListFailed": "Failed to load BGM list. Please check the folder exists",
         "outputFileNameRequired": "Please set an output file name first",

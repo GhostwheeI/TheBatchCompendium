@@ -1,20 +1,12 @@
-# Short Video Factory
-
-A tool built with batch scripts for processing short videos.
-
-## Features
-- Batch processing of videos
-- Various transformation and formatting commands
-
----
-
-## Original Readme
-
 <a id="readme-top"></a>
+
+<p align="center">
+  <strong>简体中文</strong> | <a href="./README.en.md">English</a>
+</p>
 
 <!-- 项目海报 -->
 <div align="center">
-  <img src="images/ScreenShot.png" alt="Poster" width="100%">
+  <img src="images/ScreenShot-zh.png" alt="短视频工厂中文界面截图" width="100%">
 </div>
 
 ---
@@ -43,6 +35,16 @@ A tool built with batch scripts for processing short videos.
 <!-- ![发布日期][release-date-shield] -->
 
 [![许可证][license-shield]][license-url]
+
+<p align="center">
+  <a href="https://www.star-history.com/yils-lin/short-video-factory">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=YILS-LIN/short-video-factory&type=trending&theme=dark" />
+      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=YILS-LIN/short-video-factory&type=trending" />
+      <img alt="GitHub Trending Repository of the Day" src="https://api.star-history.com/badge?repo=YILS-LIN/short-video-factory&type=trending" />
+    </picture>
+  </a>
+</p>
 
   <p align="center">
     <a href="https://github.com/YILS-LIN/short-video-factory/issues/new?labels=bug&template=bug-report---.md">报告Bug</a>
@@ -82,6 +84,18 @@ A tool built with batch scripts for processing short videos.
 
 <p align="right">(<a href="#readme-top">返回顶部</a>)</p>
 
+## 💬 交流社区
+
+欢迎加入「短视频工厂」微信交流群，与开发者一起交流使用心得、分享创作经验、获取最新更新。
+
+<div align="left">
+  <img src="images/wechat-community-group-1-qr.png" alt="短视频工厂微信交流 1 群二维码" width="320">
+</div>
+
+注：群二维码有效期有限，请以图片中标注的有效期为准。
+
+<p align="right">(<a href="#readme-top">返回顶部</a>)</p>
+
 ## 🗺️ 路线图
 
 **喜欢可以点个 Star 支持一下哦！**
@@ -113,7 +127,7 @@ A tool built with batch scripts for processing short videos.
 </thead>
 <tbody>
 <tr>
-<td align="center"><video src="https://github.com/user-attachments/assets/165a8f96-861b-4cf3-946c-444b9692cef8"></video></td>
+<td align="center"><video src="https://github.com/user-attachments/assets/90945332-9e7c-4dae-b784-3c0ac5ec874d"></video></td>
 <td align="center"><video src="https://github.com/user-attachments/assets/12694618-e0fe-4848-8a7e-98b3f3a7aece"></video></td>
 </tr>
 </tbody>
@@ -170,7 +184,7 @@ Copyright © 2025 YILS.
 你的 **Star ⭐** 和 **捐赠** 是我持续更新的最大动力！
 
 <div align="left">
-  <img src="https://github.com/user-attachments/assets/6b832dd3-38ea-4927-9c3b-97549c77a1f0" alt="YILS的微信赞赏码" width="400">
+  <img src="images/wechat-donation-qr.jpg" alt="YILS的微信赞赏码" width="320">
 </div>
 
 👉 在此处查看捐赠者名单：[千古留名 - 捐赠者留言板](https://short-video-factory.yils.blog/donate/list.html)
@@ -181,11 +195,13 @@ Copyright © 2025 YILS.
 
 ## ⭐ 星标历史
 
-<div align="center">
-  <a href="https://star-history.com/#YILS-LIN/short-video-factory">
-    <img src="https://api.star-history.com/svg?repos=YILS-LIN/short-video-factory&type=Date" alt="Star History Chart" width="800">
-  </a>
-</div>
+<a href="https://www.star-history.com/?repos=YILS-LIN/short-video-factory">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=YILS-LIN/short-video-factory&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=YILS-LIN/short-video-factory&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=YILS-LIN/short-video-factory&type=date&legend=top-left" />
+ </picture>
+</a>
 
 <p align="right">(<a href="#readme-top">返回顶部</a>)</p>
 

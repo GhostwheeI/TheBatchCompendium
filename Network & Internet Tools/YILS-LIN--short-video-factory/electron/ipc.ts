@@ -3,15 +3,24 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { BrowserWindow, ipcMain, dialog, app, shell } from 'electron'
 import { sqBulkInsertOrUpdate, sqDelete, sqInsert, sqQuery, sqUpdate } from './sqlite'
-import {
-  ListFilesFromFolderParams,
-  OpenExternalParams,
-  SelectFolderParams,
-  StatEventParams,
-} from './types'
+import { ListFilesFromFolderParams, OpenExternalParams, SelectFolderParams } from './types'
+import type { AnalyticsContextParams, AnalyticsTrackParams } from './analytics-types'
 import { edgeTtsGetVoiceList, edgeTtsSynthesizeToBase64, edgeTtsSynthesizeToFile } from './tts'
+import type { EdgeTtsSynthesizeToFileParams } from './tts/types'
 import { renderVideo } from './ffmpeg'
-import { sendStatEvent } from './lib/stat'
+import {
+  isTrustedAnalyticsSender,
+  markAnalyticsActive,
+  setAnalyticsContext,
+  trackAnalyticsEvent,
+} from './lib/analytics/service'
+import { exportDiagnostics } from './diagnostics'
+import { AppLogLevel, writeRendererLog } from './logger'
+import { checkForUpdates } from './updater'
+import { setupEffectRendererFrameWriter } from './effect-engine/export-task-manager'
+import { getMetadataState } from './metadata/runtime'
+import { validateExternalHttpsUrl } from './lib/external-url'
+import { openDirectory } from './lib/open-directory'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 let windowMaximizedByApp = false
@@ -76,6 +85,21 @@ function resolveDefaultFolderPath(customPath?: string | null) {
 }
 
 export default function initIPC() {
+  const activeTtsSynthesisControllers = new Map<string, AbortController>()
+  setupEffectRendererFrameWriter()
+  ipcMain.on('app-log', (_event, payload: { level: AppLogLevel; args: unknown[] }) => {
+    const level = payload?.level
+    const args = payload?.args
+    if (
+      !level ||
+      !Array.isArray(args) ||
+      !['log', 'info', 'warn', 'error', 'debug'].includes(level)
+    ) {
+      return
+    }
+    writeRendererLog(level, ...args)
+  })
+
   // sqlite 查询
   ipcMain.handle('sqlite-query', (_event, params) => sqQuery(params))
   // sqlite 插入
@@ -161,10 +185,36 @@ export default function initIPC() {
 
   // 打开外部链接
   ipcMain.handle('open-external', (_event, params: OpenExternalParams) => {
-    shell.openExternal(params.url)
+    return shell.openExternal(validateExternalHttpsUrl(params?.url))
   })
 
+  ipcMain.handle('metadata-get-state', (event) => {
+    const frame = event.senderFrame
+    if (!frame || frame !== event.sender.mainFrame) {
+      throw new Error('Metadata state is only available to the main application frame.')
+    }
+    const frameUrl = new URL(frame.url)
+    if (VITE_DEV_SERVER_URL) {
+      const devOrigin = new URL(VITE_DEV_SERVER_URL).origin
+      if (frameUrl.origin !== devOrigin) throw new Error('Untrusted metadata IPC sender.')
+    } else if (frameUrl.protocol !== 'file:') {
+      throw new Error('Untrusted metadata IPC sender.')
+    }
+    return getMetadataState()
+  })
+
+  ipcMain.handle('export-diagnostics', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    return exportDiagnostics(win, (phase) =>
+      event.sender.send('diagnostics-export-progress', phase),
+    )
+  })
+
+  ipcMain.handle('check-for-updates', () => checkForUpdates(app.getVersion()))
+
   // 选择文件夹
+  ipcMain.handle('open-directory', (_event, folderPath: string) => openDirectory(folderPath))
+
   ipcMain.handle('select-folder', async (event, params?: SelectFolderParams) => {
     const win = BrowserWindow.fromWebContents(event.sender)
     if (!win) {
@@ -205,8 +255,25 @@ export default function initIPC() {
   // 获取EdgeTTS语音列表
   ipcMain.handle('edge-tts-get-voice-list', () => edgeTtsGetVoiceList())
 
-  // 统计事件上报
-  ipcMain.handle('stat-track', (_event, params: StatEventParams) => sendStatEvent(params))
+  // 匿名统计：仅接受主窗口主 frame 的白名单事件，不接受渲染器控制身份或目标站点。
+  ipcMain.handle('analytics-track', (event, params: AnalyticsTrackParams) => {
+    if (!isTrustedAnalyticsSender(event.sender.id, event.frameId === 0, event.senderFrame.url)) {
+      return
+    }
+    return trackAnalyticsEvent(params)
+  })
+  ipcMain.handle('analytics-set-context', (event, params: AnalyticsContextParams) => {
+    if (!isTrustedAnalyticsSender(event.sender.id, event.frameId === 0, event.senderFrame.url)) {
+      return
+    }
+    return setAnalyticsContext(params)
+  })
+  ipcMain.handle('analytics-mark-active', (event, durationMs: unknown) => {
+    if (!isTrustedAnalyticsSender(event.sender.id, event.frameId === 0, event.senderFrame.url)) {
+      return
+    }
+    return markAnalyticsActive(durationMs)
+  })
 
   // 语音合成并获取Base64
   ipcMain.handle('edge-tts-synthesize-to-base64', (_event, params) =>
@@ -214,7 +281,24 @@ export default function initIPC() {
   )
 
   // 保存语音合成到文件
-  ipcMain.handle('edge-tts-synthesize-to-file', (_event, params) => edgeTtsSynthesizeToFile(params))
+  ipcMain.on('cancel-edge-tts-synthesis', (event, requestId: unknown) => {
+    if (typeof requestId !== 'string' || !requestId) return
+    activeTtsSynthesisControllers.get(`${event.sender.id}:${requestId}`)?.abort()
+  })
+  ipcMain.handle('edge-tts-synthesize-to-file', (event, params: EdgeTtsSynthesizeToFileParams) => {
+    const requestId = params?.requestId
+    if (!requestId) return edgeTtsSynthesizeToFile(params)
+
+    const requestKey = `${event.sender.id}:${requestId}`
+    const controller = new AbortController()
+    activeTtsSynthesisControllers.set(requestKey, controller)
+
+    return edgeTtsSynthesizeToFile({ ...params, abortSignal: controller.signal }).finally(() => {
+      if (activeTtsSynthesisControllers.get(requestKey) === controller) {
+        activeTtsSynthesisControllers.delete(requestKey)
+      }
+    })
+  })
 
   // 渲染视频
   ipcMain.handle('render-video', (_event, params) => {
@@ -225,11 +309,16 @@ export default function initIPC() {
 
     // 创建 AbortController
     const controller = new AbortController()
-    // 监听取消事件
-    ipcMain.once('cancel-render-video', () => {
-      controller.abort()
-    })
+    const onCancel = (event: Electron.IpcMainEvent) => {
+      if (event.sender === _event.sender) {
+        controller.abort()
+      }
+    }
 
-    return renderVideo({ ...params, onProgress, abortSignal: controller.signal })
+    ipcMain.on('cancel-render-video', onCancel)
+
+    return renderVideo({ ...params, onProgress, abortSignal: controller.signal }).finally(() => {
+      ipcMain.off('cancel-render-video', onCancel)
+    })
   })
 }

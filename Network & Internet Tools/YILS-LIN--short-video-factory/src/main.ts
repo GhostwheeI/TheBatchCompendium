@@ -20,9 +20,62 @@ import i18next from 'i18next'
 import I18NextVue from 'i18next-vue'
 import i18nInitialized from './lib/i18n.ts'
 
+function serializeLogArg(arg: unknown): unknown {
+  if (arg instanceof Error) {
+    return {
+      name: arg.name,
+      message: arg.message,
+      stack: arg.stack,
+    }
+  }
+
+  if (typeof arg !== 'object' || arg === null) {
+    return arg
+  }
+
+  try {
+    // Vue reactive proxies cannot cross Electron's structured-clone boundary directly.
+    return JSON.parse(JSON.stringify(arg))
+  } catch {
+    return String(arg)
+  }
+}
+
+function setupRendererConsoleLogging() {
+  const rawConsole = {
+    log: console.log.bind(console),
+    info: console.info.bind(console),
+    warn: console.warn.bind(console),
+    error: console.error.bind(console),
+    debug: console.debug.bind(console),
+  }
+
+  for (const level of Object.keys(rawConsole) as (keyof typeof rawConsole)[]) {
+    console[level] = (...args: unknown[]) => {
+      rawConsole[level](...args)
+      try {
+        window.electron.log(level, ...args.map(serializeLogArg))
+      } catch {
+        // Logging must never alter the result of the business operation being logged.
+      }
+    }
+  }
+}
+
+setupRendererConsoleLogging()
+
 const vuetify = createVuetify({
   components,
   directives,
+  theme: {
+    themes: {
+      light: {
+        colors: {
+          primary: '#651FFF',
+        },
+      },
+    },
+  },
   icons: {
     defaultSet: 'mdi',
     aliases,

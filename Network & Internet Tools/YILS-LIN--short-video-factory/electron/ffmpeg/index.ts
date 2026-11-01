@@ -5,6 +5,10 @@ import { ExecuteFFmpegResult, RenderVideoParams } from './types'
 import { getTempTtsVoiceFilePath } from '../tts'
 import path from 'node:path'
 import { generateUniqueFileName } from '../lib/tools'
+import {
+  isEffectRenderCancelledError,
+  renderSubtitleFramesToPngSequence,
+} from '../effect-engine/subtitle-render-service'
 
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 const isWindows = process.platform === 'win32'
@@ -29,37 +33,111 @@ export async function renderVideo(
     abortSignal?: AbortSignal
   },
 ): Promise<ExecuteFFmpegResult> {
+  let cleanupSubtitleFrames: (() => void) | undefined
+  const tempTtsVoiceFilePath = getTempTtsVoiceFilePath()
+  const cleanupTtsFilePaths = [
+    params.audioFiles?.voice ? undefined : tempTtsVoiceFilePath,
+    params.subtitleFile
+      ? undefined
+      : path
+          .join(
+            path.dirname(tempTtsVoiceFilePath),
+            path.basename(tempTtsVoiceFilePath, '.mp3') + '.srt',
+          )
+          .replace(/\\/g, '/'),
+  ].filter((filePath): filePath is string => !!filePath)
+
   try {
     // 解构参数
     const { videoFiles, timeRanges, outputSize, outputDuration, onProgress, abortSignal } = params
 
     // 音频默认配置
-    const audioFiles = params.audioFiles ?? {}
-    audioFiles.voice = params.audioFiles?.voice ?? getTempTtsVoiceFilePath()
+    const audioFiles = {
+      ...params.audioFiles,
+      voice: params.audioFiles?.voice ?? tempTtsVoiceFilePath,
+    }
 
     // 字幕默认配置
     const subtitleFile =
       params.subtitleFile ??
       path
         .join(
-          path.dirname(getTempTtsVoiceFilePath()),
-          path.basename(getTempTtsVoiceFilePath(), '.mp3') + '.srt',
+          path.dirname(tempTtsVoiceFilePath),
+          path.basename(tempTtsVoiceFilePath, '.mp3') + '.srt',
         )
         .replace(/\\/g, '/')
+
+    const generatedSubtitleAsset =
+      params.subtitleAsset ??
+      (params.subtitleText?.trim()
+        ? {
+            srtText: params.subtitleText,
+            source: 'tts' as const,
+          }
+        : params.subtitleFile && params.subtitlesEnabled !== false
+          ? {
+              srtText: fs.readFileSync(params.subtitleFile, 'utf8'),
+              source: 'external' as const,
+            }
+          : undefined)
+    const subtitleAsset = params.subtitlesEnabled === false ? undefined : generatedSubtitleAsset
+    if (params.subtitlesEnabled !== false && !subtitleAsset?.srtText.trim()) {
+      throw new Error('字幕已开启，但未生成有效字幕内容，请重新生成语音字幕后重试')
+    }
+    let subtitleSequenceInputPath: string | undefined
+    let subtitleInputIndex: number | undefined
+    let subtitleRenderProgress = 0
+    let ffmpegProgress = 0
+    const emitProgress = () => {
+      if (!subtitleAsset) {
+        onProgress?.(ffmpegProgress)
+        return
+      }
+      onProgress?.(Math.round(subtitleRenderProgress * 0.35 + ffmpegProgress * 0.65))
+    }
+
+    if (subtitleAsset) {
+      const durationMs = Math.max(1, Math.floor(Number.parseFloat(outputDuration ?? '1') * 1000))
+      const subtitleRender = await renderSubtitleFramesToPngSequence({
+        subtitleAsset,
+        outputSize,
+        fps: 30,
+        durationMs,
+        style: params.subtitleStyle,
+        abortSignal,
+        onProgress: (progress) => {
+          subtitleRenderProgress = progress
+          emitProgress()
+        },
+      })
+      cleanupSubtitleFrames = subtitleRender.cleanup
+      subtitleSequenceInputPath = path
+        .join(subtitleRender.manifest.framesDir, subtitleRender.manifest.framePattern)
+        .replace(/\\/g, '/')
+    }
 
     // 输出路径默认配置
     if (!fs.existsSync(path.dirname(params.outputPath))) {
       throw new Error(`输出路径不存在`)
     }
-    const outputPath = generateUniqueFileName(params.outputPath)
+    const outputPath = generateUniqueFileName(
+      params.outputPath,
+      params.exportSubtitles ? '.srt' : undefined,
+    )
 
     // 构建args指令
-    const args = []
+    const args: string[] = []
 
     // 添加所有视频输入
     videoFiles.forEach((file) => {
       args.push('-i', `${file}`)
     })
+
+    // 添加字幕序列输入
+    if (subtitleSequenceInputPath) {
+      subtitleInputIndex = args.filter((item) => item === '-i').length
+      args.push('-framerate', '30', '-start_number', '1', '-i', subtitleSequenceInputPath)
+    }
 
     // 添加音频输入
     // 语音音轨
@@ -90,12 +168,17 @@ export async function renderVideo(
     // 重置时间基、帧率、色彩空间
     filters.push(`[vconcat]fps=30,format=yuv420p,setpts=PTS-STARTPTS[vout]`)
 
-    // 在视频拼接后添加字幕
-    filters.push(`[vout]subtitles=${subtitleFile.replace(/\:/g, '\\\\:')}[with_subs]`)
+    // 基于 PixiJS 的自研字幕引擎，自主掌控文本排版、样式与逐帧渲染，不依赖 libass 的排版与样式实现。
+    // 让字幕表现力由自研引擎驱动，让成熟的 FFmpeg 发挥合成与编码优势。
+    if (subtitleInputIndex !== undefined) {
+      filters.push(
+        `[vout][${subtitleInputIndex}:v]overlay=0:0:shortest=1:eof_action=pass[with_subs]`,
+      )
+    }
 
     // 音频处理：使用响度归一化(loudnorm)确保音量均衡
-    const voiceStreamIdx = videoFiles.length
-    const bgmStreamIdx = audioFiles?.bgm ? videoFiles.length + 1 : null
+    const voiceStreamIdx = videoFiles.length + (subtitleInputIndex === undefined ? 0 : 1)
+    const bgmStreamIdx = audioFiles?.bgm ? voiceStreamIdx + 1 : null
 
     if (outputDuration) {
       // 先对音频trim到目标时长，避免loudnorm导致的截断
@@ -136,7 +219,12 @@ export async function renderVideo(
     args.push('-filter_complex', `${filters.join(';')}`)
 
     // 映射输出流
-    args.push('-map', '[with_subs]', '-map', '[final_audio]')
+    args.push(
+      '-map',
+      params.subtitlesEnabled === false ? '[vout]' : '[with_subs]',
+      '-map',
+      '[final_audio]',
+    )
 
     // 编码参数
     args.push(
@@ -168,20 +256,53 @@ export async function renderVideo(
     // console.log('执行命令:', args.join(' '))
 
     // 执行命令
-    const result = await executeFFmpeg(args, { onProgress, abortSignal })
+    const durationSeconds = outputDuration ? Number.parseFloat(outputDuration) : undefined
+    const result = await executeFFmpeg(args, {
+      onProgress: (progress) => {
+        ffmpegProgress = progress
+        emitProgress()
+      },
+      abortSignal,
+      durationSeconds,
+    })
 
-    // 移除临时文件
-    if (fs.existsSync(audioFiles.voice)) {
-      fs.unlinkSync(audioFiles.voice)
+    if (result.code === 0 && params.exportSubtitles && !abortSignal?.aborted) {
+      const subtitleOutputPath = path.join(
+        path.dirname(outputPath),
+        path.basename(outputPath, path.extname(outputPath)) + '.srt',
+      )
+      try {
+        const srtText = generatedSubtitleAsset?.srtText ?? fs.readFileSync(subtitleFile, 'utf8')
+        if (!srtText.trim()) throw new Error('生成的字幕为空')
+        fs.writeFileSync(subtitleOutputPath, srtText, { encoding: 'utf8', flag: 'wx' })
+      } catch (error) {
+        return {
+          ...result,
+          outputPath,
+          subtitleExportError: error instanceof Error ? error.message : String(error),
+        }
+      }
     }
-    if (fs.existsSync(subtitleFile)) {
-      fs.unlinkSync(subtitleFile)
-    }
-
     // 返回结果
     return result
   } catch (error) {
+    if (isEffectRenderCancelledError(error) || params.abortSignal?.aborted) {
+      return {
+        stdout: '',
+        stderr: error instanceof Error ? error.message : String(error),
+        code: 255,
+      }
+    }
     throw error
+  } finally {
+    cleanupSubtitleFrames?.()
+    for (const filePath of cleanupTtsFilePaths) {
+      try {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
+      } catch (error) {
+        console.warn('清理语音合成临时文件失败:', filePath, error)
+      }
+    }
   }
 }
 
@@ -191,54 +312,120 @@ export async function executeFFmpeg(
     cwd?: string
     onProgress?: (progress: number) => void
     abortSignal?: AbortSignal
+    durationSeconds?: number
   },
 ): Promise<ExecuteFFmpegResult> {
+  if (options?.abortSignal?.aborted) {
+    throw new Error('FFmpeg execution cancelled')
+  }
+
   isWindows && validateExecutables()
 
   return new Promise((resolve, reject) => {
     const defaultOptions = {
-      cwd: process.cwd(),
+      cwd: options?.cwd ?? process.cwd(),
       env: process.env,
-      ...options,
     }
 
     const child = spawn(ffmpegPath, args, defaultOptions)
+    let settled = false
+    const cleanupAbortListener = () => {
+      options?.abortSignal?.removeEventListener('abort', onAbort)
+    }
+    const settle = (handler: () => void) => {
+      if (settled) return
+      settled = true
+      cleanupAbortListener()
+      handler()
+    }
+    const onAbort = () => {
+      if (!settled) child.kill('SIGTERM')
+    }
 
     let stdout = ''
     let stderr = ''
+    let stdoutBuffer = ''
     let progress = 0
 
+    const totalDuration = options?.durationSeconds
+    const pushProgressBySeconds = (seconds: number) => {
+      if (!totalDuration || !Number.isFinite(totalDuration) || totalDuration <= 0) {
+        return
+      }
+
+      const percent = Math.max(0, Math.min(99, Math.floor((seconds / totalDuration) * 100)))
+      if (percent > progress) {
+        progress = percent
+        options?.onProgress?.(progress)
+      }
+    }
+
+    const parseProgressFromStdout = (output: string) => {
+      stdoutBuffer += output
+      const lines = stdoutBuffer.split(/\r?\n/)
+      stdoutBuffer = lines.pop() || ''
+
+      for (const line of lines) {
+        const separator = line.indexOf('=')
+        if (separator <= 0) {
+          continue
+        }
+
+        const key = line.slice(0, separator)
+        const value = line.slice(separator + 1)
+        if (key === 'out_time_ms') {
+          const outTimeMs = Number(value)
+          if (Number.isFinite(outTimeMs) && outTimeMs >= 0) {
+            pushProgressBySeconds(outTimeMs / 1000000)
+          }
+        }
+      }
+    }
+
+    const parseProgressFromStderr = (output: string) => {
+      const matches = output.matchAll(/time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/g)
+      for (const match of matches) {
+        const hours = Number.parseInt(match[1], 10)
+        const minutes = Number.parseInt(match[2], 10)
+        const seconds = Number.parseFloat(match[3])
+        if ([hours, minutes, seconds].some((value) => Number.isNaN(value))) {
+          continue
+        }
+        pushProgressBySeconds(hours * 3600 + minutes * 60 + seconds)
+      }
+    }
+
     child.stdout.on('data', (data) => {
-      stdout += data.toString()
-      // 处理进度信息
-      progress = parseProgress(data.toString()) ?? 0
-      options?.onProgress?.(progress >= 100 ? 99 : progress)
+      const chunk = data.toString()
+      stdout += chunk
+      parseProgressFromStdout(chunk)
     })
 
     child.stderr.on('data', (data) => {
-      stderr += data.toString()
-      // 实时输出进度信息
-      options?.onProgress?.(progress >= 100 ? 99 : progress)
+      const chunk = data.toString()
+      stderr += chunk
+      parseProgressFromStderr(chunk)
     })
 
     child.on('close', (code) => {
       if (code === 0) {
-        options?.onProgress?.(100)
-        resolve({ stdout, stderr, code })
+        settle(() => {
+          options?.onProgress?.(100)
+          resolve({ stdout, stderr, code })
+        })
       } else {
-        reject(new Error(`FFmpeg exited with code ${code}: ${stderr}`))
+        settle(() => reject(new Error(`FFmpeg exited with code ${code}: ${stderr}`)))
       }
     })
 
     child.on('error', (error) => {
-      reject(new Error(`Failed to start FFmpeg: ${error.message}`))
+      settle(() => reject(new Error(`Failed to start FFmpeg: ${error.message}`)))
     })
 
     // 提供取消功能
     if (options?.abortSignal) {
-      options.abortSignal.addEventListener('abort', () => {
-        child.kill('SIGTERM')
-      })
+      options.abortSignal.addEventListener('abort', onAbort, { once: true })
+      if (options.abortSignal.aborted) onAbort()
     }
   })
 }
@@ -256,16 +443,4 @@ function validateExecutables() {
       throw new Error('FFmpeg executables do not have execute permissions')
     }
   }
-}
-
-function parseProgress(stderrLine: string) {
-  // 解析时间信息：frame=  123 fps= 45 q=25.0 size=    1024kB time=00:00:05.00 bitrate=1677.7kbits/s speed=1.5x
-  const timeMatch = stderrLine.match(/time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/)
-  if (timeMatch) {
-    const hours = parseInt(timeMatch[1])
-    const minutes = parseInt(timeMatch[2])
-    const seconds = parseFloat(timeMatch[3])
-    return hours * 3600 + minutes * 60 + seconds
-  }
-  return null
 }

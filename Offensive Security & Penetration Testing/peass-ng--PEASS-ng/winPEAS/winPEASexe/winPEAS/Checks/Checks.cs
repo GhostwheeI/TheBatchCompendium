@@ -24,6 +24,7 @@ namespace winPEAS.Checks
         public static bool IsLinpeas = false;
         public static bool IsLolbas = false;
         public static bool IsNetworkScan = false;
+        public static bool CheckOnlineVulnPackages = false;
         public static bool SearchProgramFiles = false;
 
         public static IEnumerable<int> PortScannerPorts = null;
@@ -141,6 +142,7 @@ namespace winPEAS.Checks
                 if (string.Equals(arg, "all", StringComparison.CurrentCultureIgnoreCase))
                 {
                     print_fileanalysis_warn = false;
+                    CheckOnlineVulnPackages = true;
                 }
 
                 if (arg.StartsWith("log", StringComparison.CurrentCultureIgnoreCase))
@@ -182,6 +184,12 @@ namespace winPEAS.Checks
                 if (string.Equals(arg, "dont-check-hostname", StringComparison.CurrentCultureIgnoreCase))
                 {
                     DontCheckHostname = true;
+                }
+
+                if (string.Equals(arg, "-vulnpackages", StringComparison.CurrentCultureIgnoreCase) ||
+                    string.Equals(arg, "vulnpackages", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    CheckOnlineVulnPackages = true;
                 }
 
                 if (string.Equals(arg, "quiet", StringComparison.CurrentCultureIgnoreCase))
@@ -321,6 +329,11 @@ namespace winPEAS.Checks
                 _systemCheckSelectedKeysHashSet.Add("networkscan");
             }
 
+            if (CheckOnlineVulnPackages && !isAllChecks)
+            {
+                _systemCheckSelectedKeysHashSet.Add("applicationsinfo");
+            }
+
             if (isAllChecks)
             {
                 isFileSearchEnabled = true;
@@ -345,6 +358,10 @@ namespace winPEAS.Checks
                     Beaprint.PrintInit();
 
                     CheckRunner.Run(() => CreateDynamicLists(isFileSearchEnabled), IsDebug);
+
+                    Info.NetworkInfo.HackTricksHostChecker.Start(
+                        includeHostname: !DontCheckHostname,
+                        includePackages: CheckOnlineVulnPackages);
 
                     RunChecks(isAllChecks, wait);
 
@@ -616,7 +633,7 @@ namespace winPEAS.Checks
         {
             try
             {
-                if (RegistryHelper.GetRegValue("HKCU", "CONSOLE", "VirtualTerminalLevel") == "" && RegistryHelper.GetRegValue("HKCU", "CONSOLE", "VirtualTerminalLevel") == "")
+                if (RegistryHelper.GetRegValue("HKCU", "CONSOLE", "VirtualTerminalLevel") != "1")
                     Console.WriteLine(@"ANSI color bit for Windows is not set. If you are executing this from a Windows terminal inside the host you should run 'REG ADD HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1' and then start a new CMD");
             }
             catch (Exception ex)
@@ -631,7 +648,7 @@ namespace winPEAS.Checks
             {
                 if (RegistryHelper.GetRegValue("HKLM", @"SYSTEM\CurrentControlSet\Control\FileSystem", "LongPathsEnabled") != "1")
                 {
-                    Console.WriteLine(@"Long paths are disabled, so the maximum length of a path supported is 260 chars (this may cause false negatives when looking for files). If you are admin, you can enable it with 'REG ADD HKLM\SYSTEM\CurrentControlSet\Control\FileSystem /v VirtualTerminalLevel /t REG_DWORD /d 1' and then start a new CMD");
+                    Console.WriteLine(@"Long paths are disabled, so the maximum length of a path supported is 260 chars (this may cause false negatives when looking for files). If you are admin, you can enable it with 'REG ADD HKLM\SYSTEM\CurrentControlSet\Control\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1' and then start a new CMD");
                     IsLongPath = false;
                 }
                 else
