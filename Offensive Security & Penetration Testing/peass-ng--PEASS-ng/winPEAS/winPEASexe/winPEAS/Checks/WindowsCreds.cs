@@ -5,9 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using Microsoft.Win32;
 using winPEAS.Helpers;
 using winPEAS.Helpers.CredentialManager;
 using winPEAS.Helpers.Registry;
+using winPEAS.Info.WindowsCreds;
 using winPEAS.Info.WindowsCreds.AppCmd;
 using winPEAS.KnownFileCreds;
 using winPEAS.KnownFileCreds.Kerberos;
@@ -19,18 +21,25 @@ namespace winPEAS.Checks
 {
     internal class WindowsCreds : ISystemCheck
     {
-        public string[] MitreAttackIds { get; } = new[] { "T1552.001", "T1552.002", "T1555.003", "T1555.004", "T1558", "T1547.005", "T1563.002" };
+        private const string CredentialLockerMitreId = "T1555.004";
+        private const string CredentialLockerLink = "https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#credentials-manager--windows-vault";
+        private const string DpapiLink = "https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#dpapi";
+        private const string RdcManLink = "https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#remote-desktop-credential-manager";
+
+        public string[] MitreAttackIds { get; } = new[] { "T1552.001", "T1552.002", "T1555.003", "T1555.004", "T1558", "T1547.005", "T1546.008", "T1563.002" };
 
         public void PrintInfo(bool isDebug)
         {
-            Beaprint.GreatPrint("Windows Credentials", "T1552.001,T1552.002,T1555.003,T1555.004,T1558,T1547.005,T1563.002");
+            Beaprint.GreatPrint("Windows Credentials", "T1552.001,T1552.002,T1555.003,T1555.004,T1558,T1547.005,T1546.008,T1563.002");
 
             new List<Action>
             {
                 PrintVaultCreds,
                 PrintCredentialManager,
+                PrintUWPPasswordVault,
                 PrintSavedRDPInfo,
                 PrintRDPSettings,
+                PrintAccessibilityBinaryIntegrity,
                 PrintRecentRunCommands,
                 PrintDPAPIMasterKeys,
                 PrintDpapiCredFiles,
@@ -41,6 +50,7 @@ namespace winPEAS.Checks
                 PrintAppCmd,
                 PrintSCClient,
                 PrintSCCM,
+                PrintTeamViewerRegistryArtifacts,
                 PrintSecurityPackagesCredentials,
             }.ForEach(action => CheckRunner.Run(action, isDebug));
         }
@@ -49,8 +59,8 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("Checking Windows Vault", "T1555.004");
-                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#credentials-manager--windows-vault");
+                Beaprint.MainPrint("Checking Windows Vault", CredentialLockerMitreId);
+                Beaprint.LinkPrint(CredentialLockerLink);
                 var vaultCreds = VaultCli.DumpVault();
 
                 var colorsC = new Dictionary<string, string>()
@@ -69,8 +79,8 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("Checking Credential manager", "T1555.004");
-                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#credentials-manager--windows-vault");
+                Beaprint.MainPrint("Checking Credential manager", CredentialLockerMitreId);
+                Beaprint.LinkPrint(CredentialLockerLink);
 
                 var colorsC = new Dictionary<string, string>()
                 {
@@ -111,13 +121,100 @@ namespace winPEAS.Checks
             }
         }
 
+        private static void PrintUWPPasswordVault()
+        {
+            try
+            {
+                Beaprint.MainPrint("Checking UWP PasswordVault / Credential Locker", CredentialLockerMitreId);
+                Beaprint.LinkPrint("https://hacktricks.wiki");
+
+                var colorsC = new Dictionary<string, string>()
+        {
+            { "Resource.*|UserName.*|Password.*", Beaprint.ansi_color_bad },
+        };
+
+                Type vaultType = Type.GetType("Windows.Security.Credentials.PasswordVault, Windows, ContentType=WindowsRuntime");
+                if (vaultType == null)
+                {
+                    Beaprint.PrintException("Could not load WindowsRuntime PasswordVault type. Ensure you are running on Windows.");
+                    return;
+                }
+
+                object vaultInstance = Activator.CreateInstance(vaultType);
+                var retrieveAllMethod = vaultType.GetMethod("RetrieveAll");
+                var credentialsList = retrieveAllMethod.Invoke(vaultInstance, null) as System.Collections.IEnumerable;
+
+                if (credentialsList == null)
+                {
+                    Beaprint.AnsiPrint("    [-] No UWP credentials found in the locker.\n", colorsC);
+                    return;
+                }
+
+                int count = 0;
+                foreach (object credential in credentialsList)
+                {
+                    count++;
+                    try
+                    {
+                        Type credType = credential.GetType();
+                        var retrievePasswordMethod = credType.GetMethod("RetrievePassword");
+                        retrievePasswordMethod.Invoke(credential, null);
+
+                        string resource = credType.GetProperty("Resource")?.GetValue(credential)?.ToString() ?? "";
+                        string userName = credType.GetProperty("UserName")?.GetValue(credential)?.ToString() ?? "";
+                        string password = credType.GetProperty("Password")?.GetValue(credential)?.ToString() ?? "";
+
+                        var credData = new Dictionary<string, string>
+                {
+                    { "Resource", resource },
+                    { "UserName", userName },
+                    { "Password", password }
+                };
+
+                        Beaprint.DictPrint(credData, colorsC, true, true);
+                        Beaprint.PrintLineSeparator();
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+                }
+
+                if (count == 0)
+                {
+                    Beaprint.AnsiPrint("    [-] No UWP credentials found in the locker.\n", colorsC);
+                }
+            }
+            catch (Exception ex)
+            {
+                Beaprint.PrintException(ex.Message);
+            }
+        }
+
+        private static List<Dictionary<string, string>> PrintLinkedCredentialFiles(
+            string title,
+            string mitreId,
+            string link,
+            Func<List<Dictionary<string, string>>> getFiles,
+            bool deleteNulls = false,
+            string linkComment = "")
+        {
+            Beaprint.MainPrint(title, mitreId);
+            Beaprint.LinkPrint(link, linkComment);
+
+            var files = getFiles();
+            Beaprint.DictPrint(files, deleteNulls);
+
+            return files;
+        }
+
         static void PrintSavedRDPInfo()
         {
             try
             {
                 Beaprint.MainPrint("Saved RDP connections", "T1552.002");
 
-                List<Dictionary<string, string>> rdps_info = RemoteDesktop.GetSavedRDPConnections();
+                List<Dictionary<string, string>> rdps_info = KnownFileCreds.RemoteDesktop.GetSavedRDPConnections();
                 if (rdps_info.Count > 0)
                     Beaprint.NoColorPrint(string.Format("    {0,-20}{1,-55}{2}", "Host", "Username Hint", "User SID"));
                 else
@@ -154,14 +251,15 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("Checking for DPAPI Master Keys", "T1555.003");
-                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#dpapi");
-                var masterKeys = KnownFileCredsInfo.ListMasterKeys();
+                var masterKeys = PrintLinkedCredentialFiles(
+                    "Checking for DPAPI Master Keys",
+                    "T1555.003",
+                    DpapiLink,
+                    KnownFileCredsInfo.ListMasterKeys,
+                    true);
 
-                if (masterKeys.Count != 0)
+                if (masterKeys.Count > 0)
                 {
-                    Beaprint.DictPrint(masterKeys, true);
-
                     if (MyUtils.IsHighIntegrity())
                     {
                         Beaprint.InfoPrint("Follow the provided link for further instructions in how to decrypt the masterkey.");
@@ -182,12 +280,13 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("Checking for DPAPI Credential Files", "T1555.003");
-                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#dpapi");
-                var credFiles = KnownFileCredsInfo.GetCredFiles();
-                Beaprint.DictPrint(credFiles, false);
+                var credFiles = PrintLinkedCredentialFiles(
+                    "Checking for DPAPI Credential Files",
+                    "T1555.003",
+                    DpapiLink,
+                    KnownFileCredsInfo.GetCredFiles);
 
-                if (credFiles.Count != 0)
+                if (credFiles.Count > 0)
                 {
                     Beaprint.InfoPrint("Follow the provided link for further instructions in how to decrypt the creds file");
                 }
@@ -202,13 +301,14 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("Checking for RDCMan Settings Files", "T1552.001");
-                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#remote-desktop-credential-manager",
-                    "Dump credentials from Remote Desktop Connection Manager");
-                var rdcFiles = RemoteDesktop.GetRDCManFiles();
-                Beaprint.DictPrint(rdcFiles, false);
+                var rdcFiles = PrintLinkedCredentialFiles(
+                    "Checking for RDCMan Settings Files",
+                    "T1552.001",
+                    RdcManLink,
+                    KnownFileCreds.RemoteDesktop.GetRDCManFiles,
+                    linkComment: "Dump credentials from Remote Desktop Connection Manager");
 
-                if (rdcFiles.Count != 0)
+                if (rdcFiles.Count > 0)
                 {
                     Beaprint.InfoPrint("Follow the provided link for further instructions in how to decrypt the .rdg file");
                 }
@@ -392,6 +492,9 @@ namespace winPEAS.Checks
             try
             {
                 Beaprint.MainPrint("Enumerating SSCM - System Center Configuration Manager settings", "T1552.001");
+                Beaprint.LinkPrint(
+                    "https://specterops.io/blog/2022/06/28/the-phantom-credentials-of-sccm-why-the-naa-wont-die/",
+                    "Network Access Account policies place recoverable domain credential material on SCCM clients; prefer Enhanced HTTP and least privilege.");
 
                 var server = RegistryHelper.GetRegValue("HKLM", @"SOFTWARE\Microsoft\CCMSetup", "LastValidMP");
                 var siteCode = RegistryHelper.GetRegValue("HKLM", @"SOFTWARE\Microsoft\SMS\Mobile Client", "AssignedSiteCode");
@@ -404,6 +507,28 @@ namespace winPEAS.Checks
                                                  $"     Site code:                         {siteCode}\n" +
                                                  $"     Product version:                   {productVersion}\n" +
                                                  $"     Last Successful Install Params:    {lastSuccessfulInstallParams}\n");
+                }
+
+                SccmNetworkAccessAccountReport naaReport = SccmNetworkAccessAccount.GetReport();
+                switch (naaReport.Status)
+                {
+                    case SccmNetworkAccessAccountStatus.Configured:
+                        string count = naaReport.LimitReached
+                            ? $"{naaReport.AccountCount} or more"
+                            : naaReport.AccountCount.ToString();
+                        Beaprint.BadPrint($"     SCCM Network Access Account credential policies cached in WMI: {count}");
+                        Beaprint.GrayPrint("       Only non-secret instance metadata was queried; credential blobs were not read or displayed.");
+                        Beaprint.BadPrint("       A local administrator or SYSTEM can recover these domain credentials. Remove or disable unused accounts and review their rights.");
+                        break;
+                    case SccmNetworkAccessAccountStatus.NotConfigured:
+                        Beaprint.GoodPrint("     No active SCCM Network Access Account credential policy is exposed through WMI.");
+                        break;
+                    case SccmNetworkAccessAccountStatus.AccessDenied:
+                        Beaprint.GrayPrint("     SCCM policy WMI access was denied; an elevated context is required to determine whether Network Access Account credentials are cached.");
+                        break;
+                    default:
+                        Beaprint.GrayPrint("     SCCM Network Access Account policy could not be queried in the current environment.");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -453,7 +578,8 @@ namespace winPEAS.Checks
 
                 var server = info.ServerSettings;
                 Beaprint.ColorPrint("  RDP Server Settings", Beaprint.LBLUE);
-                Beaprint.NoColorPrint($"    Network Level Authentication            :       {server.NetworkLevelAuthentication}\n" +
+                Beaprint.NoColorPrint($"    Remote Desktop Enabled                  :       {server.RemoteDesktopEnabled}\n" +
+                                             $"    Network Level Authentication            :       {server.NetworkLevelAuthentication}\n" +
                                              $"    Block Clipboard Redirection             :       {server.BlockClipboardRedirection}\n" +
                                              $"    Block COM Port Redirection              :       {server.BlockComPortRedirection}\n" +
                                              $"    Block Drive Redirection                 :       {server.BlockDriveRedirection}\n" +
@@ -484,7 +610,84 @@ namespace winPEAS.Checks
             }
             catch (Exception ex)
             {
+                Beaprint.PrintException(ex.Message);
             }
+        }
+
+        private static void PrintAccessibilityBinaryIntegrity()
+        {
+            Beaprint.MainPrint("Accessibility Binary Integrity (sethc.exe/utilman.exe)", "T1546.008");
+            Beaprint.LinkPrint(
+                "https://www.praetorian.com/blog/credential-testing-brutus/",
+                "Detect logon-screen accessibility binaries replaced with a SYSTEM shell");
+
+            var server = Info.WindowsCreds.RemoteDesktop.GetRDPSettingsInfo().ServerSettings;
+            string rdpContext =
+                $"RDP exposure context: enabled={FormatNullableBoolean(server.RemoteDesktopEnabled)}, " +
+                $"NLA enabled={FormatEnabledSetting(server.NetworkLevelAuthentication)}";
+            if (server.RemoteDesktopEnabled == true && server.NetworkLevelAuthentication == 0)
+            {
+                Beaprint.BadPrint(rdpContext + " (accessibility backdoors may be remotely reachable pre-authentication)");
+            }
+            else
+            {
+                Beaprint.InfoPrint(rdpContext);
+            }
+
+            foreach (AccessibilityBinaryInfo binary in AccessibilityBinaryIntegrity.GetBinaryInfo())
+            {
+                string finding = binary.Path + (binary.IsSuspicious
+                    ? " -> suspicious: " + string.Join("; ", binary.Issues)
+                    : " -> no integrity indicators found");
+
+                if (binary.IsSuspicious)
+                {
+                    Beaprint.BadPrint(finding);
+                }
+                else
+                {
+                    Beaprint.GoodPrint(finding);
+                }
+
+                Beaprint.NoColorPrint(
+                    $"    SHA-256          : {binary.Sha256}\n" +
+                    $"    Size              : {binary.Size}\n" +
+                    $"    Last write (UTC)  : {binary.LastWriteTimeUtc}\n" +
+                    $"    Original filename : {binary.OriginalFileName}\n" +
+                    $"    File version      : {binary.FileVersion}\n" +
+                    $"    Signature         : {binary.SignatureStatus}\n" +
+                    $"    Signer            : {binary.Signer}\n" +
+                    $"    Owner             : {binary.Owner}\n" +
+                    $"    Attributes        : {binary.Attributes}\n" +
+                    $"    Hard-link count   : {binary.HardLinkCount}\n" +
+                    $"    Low-priv write ACEs: {string.Join(" | ", binary.LowPrivilegeWriteAces)}");
+            }
+        }
+
+        private static void PrintTeamViewerRegistryArtifacts()
+        {
+            var artifacts = TeamViewerRegistryArtifacts.Scan(TeamViewerRegistryArtifacts.ReadKnownNames);
+            if (artifacts.Count == 0)
+            {
+                return;
+            }
+
+            Beaprint.MainPrint("TeamViewer registry credential artifacts (value names only)", "T1552.002");
+            foreach (var artifact in artifacts)
+            {
+                Beaprint.NoColorPrint("    " + artifact);
+            }
+            Beaprint.NoColorPrint("    Review candidate only: format/version, effective registry access, credential validity and OS-account reuse require separate verification.");
+        }
+
+        private static string FormatEnabledSetting(uint? value)
+        {
+            return value.HasValue ? (value.Value != 0).ToString() : "Unknown";
+        }
+
+        private static string FormatNullableBoolean(bool? value)
+        {
+            return value.HasValue ? value.Value.ToString() : "Unknown";
         }
 
         private static string GetDescriptionByType(uint? type)
@@ -504,6 +707,92 @@ namespace winPEAS.Checks
             }
 
             return str;
+        }
+    }
+
+    internal static class TeamViewerRegistryArtifacts
+    {
+        private static readonly string[] CandidateNames =
+        {
+            "OptionsPasswordAES",
+            "SecurityPasswordAES",
+            "SecurityPasswordExported",
+            "ServerPasswordAES",
+            "ProxyPasswordAES"
+        };
+
+        internal static List<string> Scan(Func<RegistryView, string, IEnumerable<string>> readNames)
+        {
+            var result = new List<string>();
+            foreach (var view in new[] { RegistryView.Registry64, RegistryView.Registry32 })
+            {
+                for (int version = 0; version <= 15; version++)
+                {
+                    string path = @"SOFTWARE\TeamViewer" +
+                        (version == 0 ? "" : @"\Version" + version);
+                    IEnumerable<string> found;
+                    try
+                    {
+                        found = readNames(view, path);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    if (found == null)
+                    {
+                        continue;
+                    }
+
+                    var names = new HashSet<string>(found, StringComparer.OrdinalIgnoreCase);
+                    foreach (var candidate in CandidateNames)
+                    {
+                        if (!names.Contains(candidate))
+                        {
+                            continue;
+                        }
+                        result.Add(view + @": HKLM\" + path + " [" + candidate + "]");
+                        if (result.Count == 12)
+                        {
+                            return result;
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        internal static IEnumerable<string> ReadKnownNames(RegistryView view, string path)
+        {
+            var found = new List<string>();
+            try
+            {
+                using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view))
+                using (var key = machine.OpenSubKey(path, false))
+                {
+                    if (key == null)
+                    {
+                        return found;
+                    }
+                    foreach (var name in CandidateNames)
+                    {
+                        try
+                        {
+                            key.GetValueKind(name); // Presence/type only; never read ciphertext.
+                            found.Add(name);
+                        }
+                        catch
+                        {
+                            // Missing or unreadable values are not evidence.
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // A registry view or key can be inaccessible on older systems.
+            }
+            return found;
         }
     }
 }

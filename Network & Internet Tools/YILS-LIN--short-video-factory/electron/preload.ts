@@ -6,25 +6,20 @@ import {
   DeleteParams,
   BulkInsertOrUpdateParams,
 } from './sqlite/types'
-import {
-  ListFilesFromFolderParams,
-  OpenExternalParams,
-  SelectFolderParams,
-  StatEventParams,
-} from './types'
-import { EdgeTtsSynthesizeCommonParams } from './tts/types'
+import { ListFilesFromFolderParams, OpenExternalParams, SelectFolderParams } from './types'
+import type { AnalyticsContextParams, AnalyticsTrackParams } from './analytics-types'
+import { EdgeTtsSynthesizeCommonParams, EdgeTtsSynthesizeToFileParams } from './tts/types'
 import { RenderVideoParams } from './ffmpeg/types'
+import type { AppLogLevel } from './logger'
 
 // --------- 向界面渲染进程暴露某些API ---------
 
 contextBridge.exposeInMainWorld('ipcRenderer', {
   on(...args: Parameters<typeof ipcRenderer.on>) {
-    const [channel, listener] = args
-    return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args))
+    return ipcRenderer.on(...args)
   },
   once(...args: Parameters<typeof ipcRenderer.once>) {
-    const [channel, listener] = args
-    return ipcRenderer.once(channel, (event, ...args) => listener(event, ...args))
+    return ipcRenderer.once(...args)
   },
   off(...args: Parameters<typeof ipcRenderer.off>) {
     const [channel, ...omit] = args
@@ -59,15 +54,32 @@ contextBridge.exposeInMainWorld('electron', {
   setZoomFactor: (factor: number) => ipcRenderer.send('set-zoom-factor', factor),
   openExternal: (params: OpenExternalParams) => ipcRenderer.invoke('open-external', params),
   selectFolder: (params: SelectFolderParams) => ipcRenderer.invoke('select-folder', params),
+  openDirectory: (folderPath: string) => ipcRenderer.invoke('open-directory', folderPath),
   listFilesFromFolder: (params: ListFilesFromFolderParams) =>
     ipcRenderer.invoke('list-files-from-folder', params),
   edgeTtsGetVoiceList: () => ipcRenderer.invoke('edge-tts-get-voice-list'),
   edgeTtsSynthesizeToBase64: (params: EdgeTtsSynthesizeCommonParams) =>
     ipcRenderer.invoke('edge-tts-synthesize-to-base64', params),
-  edgeTtsSynthesizeToFile: (params: EdgeTtsSynthesizeCommonParams) =>
+  edgeTtsSynthesizeToFile: (params: EdgeTtsSynthesizeToFileParams) =>
     ipcRenderer.invoke('edge-tts-synthesize-to-file', params),
   renderVideo: (params: RenderVideoParams) => ipcRenderer.invoke('render-video', params),
-  statTrack: (params: StatEventParams) => ipcRenderer.invoke('stat-track', params),
+  analyticsTrack: (params: AnalyticsTrackParams) => ipcRenderer.invoke('analytics-track', params),
+  analyticsSetContext: (params: AnalyticsContextParams) =>
+    ipcRenderer.invoke('analytics-set-context', params),
+  analyticsMarkActive: (durationMs: number) =>
+    ipcRenderer.invoke('analytics-mark-active', durationMs),
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  getMetadataState: () => ipcRenderer.invoke('metadata-get-state'),
+  onMetadataStateChanged: (listener: (state: import('./metadata/types').MetadataState) => void) => {
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      state: import('./metadata/types').MetadataState,
+    ) => listener(state)
+    ipcRenderer.on('metadata-state-changed', handler)
+    return () => ipcRenderer.off('metadata-state-changed', handler)
+  },
+  exportDiagnostics: () => ipcRenderer.invoke('export-diagnostics'),
+  log: (level: AppLogLevel, ...args: unknown[]) => ipcRenderer.send('app-log', { level, args }),
 })
 
 contextBridge.exposeInMainWorld('sqlite', {

@@ -1,6 +1,14 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { EdgeTTSVoice } from '~/electron/lib/edge-tts'
+import {
+  defaultCopywritingConfig,
+  defaultLlmConfig,
+  normalizeCopywritingConfig,
+  normalizeLlmConfig,
+} from '@/lib/llm/config'
+import type { CopywritingStatus, LlmConfig } from '@/lib/llm/types'
+import { normalizeBatchConfig, type BatchRunState } from '@/lib/batch'
 
 export enum RenderStatus {
   None,
@@ -23,13 +31,17 @@ export const useAppStore = defineStore(
 
     // 大模型文案生成
     const prompt = ref('')
-    const llmConfig = ref({
-      modelName: '',
-      apiUrl: '',
-      apiKey: '',
-    })
-    const updateLLMConfig = (newConfig: typeof llmConfig.value) => {
-      llmConfig.value = newConfig
+    const llmConfig = ref<LlmConfig>(defaultLlmConfig())
+    const copywritingConfig = ref(defaultCopywritingConfig())
+    const copywritingStatus = ref<CopywritingStatus>('idle')
+    const updateLLMConfig = (newConfig: LlmConfig) => {
+      llmConfig.value = normalizeLlmConfig(newConfig)
+    }
+    const updateCopywritingConfig = (newConfig: typeof copywritingConfig.value) => {
+      copywritingConfig.value = normalizeCopywritingConfig(newConfig)
+    }
+    const updateCopywritingStatus = (newStatus: CopywritingStatus) => {
+      copywritingStatus.value = newStatus
     }
 
     // 视频素材管理
@@ -67,11 +79,23 @@ export const useAppStore = defineStore(
       outputPath: '',
       outputFileName: '',
       outputFileExt: '.mp4',
+      subtitlesEnabled: true,
+      exportSubtitles: false,
     })
     const autoBatch = ref(false)
+    const batchConfig = ref({ count: 10, onError: 'stop' as 'stop' | 'continue' })
+    const batchProgress = ref<BatchRunState | null>(null)
     const renderStatus = ref(RenderStatus.None)
-    const updateRenderConfig = (newConfig: typeof renderConfig.value) => {
-      renderConfig.value = newConfig
+    const updateRenderConfig = (
+      newConfig: Omit<typeof renderConfig.value, 'subtitlesEnabled' | 'exportSubtitles'> &
+        Partial<Pick<typeof renderConfig.value, 'subtitlesEnabled' | 'exportSubtitles'>>,
+    ) => {
+      renderConfig.value = {
+        ...newConfig,
+        outputSize: { ...newConfig.outputSize },
+        subtitlesEnabled: newConfig.subtitlesEnabled !== false,
+        exportSubtitles: newConfig.exportSubtitles === true,
+      }
     }
     const updateRenderStatus = (newStatus: RenderStatus) => {
       renderStatus.value = newStatus
@@ -91,6 +115,10 @@ export const useAppStore = defineStore(
       prompt,
       llmConfig,
       updateLLMConfig,
+      copywritingConfig,
+      updateCopywritingConfig,
+      copywritingStatus,
+      updateCopywritingStatus,
 
       videoAssetsFolder,
       videoExportFolder,
@@ -107,6 +135,8 @@ export const useAppStore = defineStore(
 
       renderConfig,
       autoBatch,
+      batchConfig,
+      batchProgress,
       renderStatus,
       updateRenderConfig,
       updateRenderStatus,
@@ -118,7 +148,38 @@ export const useAppStore = defineStore(
   },
   {
     persist: {
-      omit: ['genderList', 'speedList', 'autoBatch', 'renderStatus'],
+      omit: [
+        'genderList',
+        'speedList',
+        'autoBatch',
+        'batchProgress',
+        'renderStatus',
+        'copywritingStatus',
+      ],
+      beforeHydrate: (context) => {
+        // Pinia merges persisted state into default state before afterHydrate, so an old record
+        // without protocol would otherwise inherit the new openai-compatible default. Seed the
+        // migration target first; the subsequent nested patch keeps this protocol value.
+        try {
+          const serializedState = window.localStorage.getItem(context.store.$id)
+          const persistedState = serializedState ? JSON.parse(serializedState) : undefined
+          if (
+            persistedState?.llmConfig &&
+            typeof persistedState.llmConfig === 'object' &&
+            !('protocol' in persistedState.llmConfig)
+          ) {
+            context.store.llmConfig.protocol = 'openai-chat'
+          }
+        } catch {
+          // Let the persistence plugin retain its default state if legacy storage is malformed.
+        }
+      },
+      afterHydrate: (context) => {
+        context.store.batchConfig = normalizeBatchConfig(context.store.batchConfig)
+        context.store.updateRenderConfig(context.store.renderConfig)
+        context.store.updateLLMConfig(context.store.llmConfig)
+        context.store.updateCopywritingConfig(context.store.copywritingConfig)
+      },
     },
   },
 )

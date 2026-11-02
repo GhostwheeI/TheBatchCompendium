@@ -1,0 +1,308 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Security.AccessControl;
+using winPEAS.Info.ApplicationInfo;
+
+namespace winPEAS.Tests
+{
+    [TestClass]
+    public class PrivilegedScheduledTaskTests
+    {
+        private static readonly HashSet<string> StandardUserSids = new HashSet<string>
+        {
+            "S-1-5-32-545",
+        };
+
+        [TestMethod]
+        public void RecognizesOnlyLocalSystemPrincipalForms()
+        {
+            Assert.IsTrue(PrivilegedScheduledTasks.IsLocalSystemPrincipal("S-1-5-18"));
+            Assert.IsTrue(PrivilegedScheduledTasks.IsLocalSystemPrincipal("SYSTEM"));
+            Assert.IsTrue(PrivilegedScheduledTasks.IsLocalSystemPrincipal(@"NT AUTHORITY\SYSTEM"));
+            Assert.IsTrue(PrivilegedScheduledTasks.IsLocalSystemPrincipal("LocalSystem"));
+            Assert.IsFalse(PrivilegedScheduledTasks.IsLocalSystemPrincipal(@"BUILTIN\Administrators"));
+            Assert.IsFalse(PrivilegedScheduledTasks.IsLocalSystemPrincipal("S-1-5-19"));
+        }
+
+        [TestMethod]
+        public void ExtractsPowerShellFileArgument()
+        {
+            List<string> paths = PrivilegedScheduledTasks.ExtractReferencedFilePaths(
+                @"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+                @"-NoProfile -File ""C:\Program Files\Ops\rotate.ps1""",
+                null);
+
+            CollectionAssert.Contains(paths, @"C:\Program Files\Ops\rotate.ps1");
+        }
+
+        [TestMethod]
+        public void RecognizesOnlyPowerShellFileActionsForDemandStartReview()
+        {
+            Assert.AreEqual(
+                @"C:\Program Files\Ops\rotate.ps1",
+                PrivilegedScheduledTasks.GetPowerShellFileScriptPath(
+                    true,
+                    @"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+                    @"-NoProfile -File ""C:\Program Files\Ops\rotate.ps1""",
+                    null));
+            Assert.AreEqual(
+                @"C:\Jobs\nightly.psm1",
+                PrivilegedScheduledTasks.GetPowerShellFileScriptPath(
+                    true,
+                    "pwsh.exe", @"-f C:\Jobs\nightly.psm1", null));
+            Assert.IsNull(PrivilegedScheduledTasks.GetPowerShellFileScriptPath(
+                true, "powershell.exe", @"-Command ""C:\Jobs\nightly.ps1""", null));
+            Assert.IsNull(PrivilegedScheduledTasks.GetPowerShellFileScriptPath(
+                true, "powershell.exe", @"-Command ""Write-Output -File C:\Jobs\nightly.ps1""", null));
+            Assert.IsNull(PrivilegedScheduledTasks.GetPowerShellFileScriptPath(
+                true, "cmd.exe", @"/c powershell.exe -File C:\Jobs\nightly.ps1", null));
+            Assert.IsNull(PrivilegedScheduledTasks.GetPowerShellFileScriptPath(
+                true, "powershell.exe", "-File -", null));
+            Assert.IsNull(PrivilegedScheduledTasks.GetPowerShellFileScriptPath(
+                false, "powershell.exe", @"-File C:\Jobs\nightly.ps1", null));
+        }
+
+        [TestMethod]
+        public void DemandStartReviewRejectsInlineCommandAliasesAndInvalidFileSwitches()
+        {
+            foreach (string commandSwitch in new[] { "-co", "-com", "-ec", "-en", "-cwa", "-CommandWithArgs" })
+            {
+                Assert.IsNull(PrivilegedScheduledTasks.GetPowerShellFileScriptPath(
+                    true, "pwsh.exe", commandSwitch + @" Write-Output -File C:\Jobs\nightly.ps1", null), commandSwitch);
+            }
+            Assert.IsNull(PrivilegedScheduledTasks.GetPowerShellFileScriptPath(
+                true, "pwsh.exe", @"-File:C:\Jobs\nightly.ps1", null));
+            Assert.IsNull(PrivilegedScheduledTasks.GetPowerShellFileScriptPath(
+                true, "pwsh.exe", @"-f:C:\Jobs\nightly.ps1", null));
+        }
+
+        [TestMethod]
+        public void IgnoresDataAndOutputArgumentsForOrdinaryExecutables()
+        {
+            List<string> paths = PrivilegedScheduledTasks.ExtractReferencedFilePaths(
+                @"C:\Tools\processor.exe",
+                @"/copy C:\Data\payload.dll --output C:\Reports\result.jar",
+                null);
+
+            Assert.AreEqual(0, paths.Count);
+        }
+
+        [TestMethod]
+        public void StandaloneRunnerSidecarsUseExplicitTaskWorkingDirectory()
+        {
+            bool inferred;
+            List<string> paths = PrivilegedScheduledTasks.GetStandaloneRunnerSidecarPaths(
+                @"C:\Program Files (x86)\Windows Kits\10\Testing\StandaloneTesting\Internal\x64\standalonerunner.exe",
+                @"C:\Driver Tests\Inputs\", out inferred);
+
+            Assert.IsFalse(inferred);
+            CollectionAssert.AreEqual(new List<string>
+            {
+                @"C:\Driver Tests\Inputs\command.txt",
+                @"C:\Driver Tests\Inputs\reboot.rsf",
+            }, paths);
+        }
+
+        [TestMethod]
+        public void StandaloneRunnerSidecarsMarkExecutableParentAsInferred()
+        {
+            bool inferred;
+            List<string> paths = PrivilegedScheduledTasks.GetStandaloneRunnerSidecarPaths(
+                @"C:\Driver Tests\StandaloneRunner.EXE", null, out inferred);
+
+            Assert.IsTrue(inferred);
+            CollectionAssert.AreEqual(new List<string>
+            {
+                @"C:\Driver Tests\command.txt",
+                @"C:\Driver Tests\reboot.rsf",
+            }, paths);
+        }
+
+        [TestMethod]
+        public void StandaloneRunnerSidecarsRejectOtherToolsAndUnresolvedDirectories()
+        {
+            bool inferred;
+            Assert.AreEqual(0, PrivilegedScheduledTasks.GetStandaloneRunnerSidecarPaths(
+                @"C:\Driver Tests\another-runner.exe", @"C:\Driver Tests", out inferred).Count);
+            Assert.AreEqual(0, PrivilegedScheduledTasks.GetStandaloneRunnerSidecarPaths(
+                @"C:\Driver Tests\StandaloneRunner.exe", @"\\server\share\inputs", out inferred).Count);
+            Assert.AreEqual(0, PrivilegedScheduledTasks.GetStandaloneRunnerSidecarPaths(
+                "StandaloneRunner.exe", null, out inferred).Count);
+            Assert.AreEqual(0, PrivilegedScheduledTasks.GetStandaloneRunnerSidecarPaths(
+                @"C:\Driver Tests\StandaloneRunner.exe", @".\inputs", out inferred).Count);
+        }
+
+        [TestMethod]
+        public void IgnoresInlineInterpreterCodeThatLooksLikeAPath()
+        {
+            List<string> paths = PrivilegedScheduledTasks.ExtractReferencedFilePaths(
+                @"C:\Python311\python.exe",
+                @"-c ""C:\Reports\not-a-script.py""",
+                null);
+
+            Assert.AreEqual(0, paths.Count);
+        }
+
+        [TestMethod]
+        public void ExtractsCmdAndJavaExecutionTargetsOnlyFromKnownSwitches()
+        {
+            List<string> cmdPaths = PrivilegedScheduledTasks.ExtractReferencedFilePaths(
+                @"C:\Windows\System32\cmd.exe",
+                @"/c call C:\Jobs\cleanup.cmd --output C:\Reports\result.jar",
+                null);
+            List<string> javaPaths = PrivilegedScheduledTasks.ExtractReferencedFilePaths(
+                @"C:\Program Files\Java\bin\java.exe",
+                @"--class-path C:\Libraries\support.jar -jar C:\Apps\worker.jar",
+                null);
+
+            CollectionAssert.AreEqual(new List<string> { @"C:\Jobs\cleanup.cmd" }, cmdPaths);
+            CollectionAssert.AreEqual(new List<string> { @"C:\Apps\worker.jar" }, javaPaths);
+        }
+
+        [TestMethod]
+        public void RejectsNetworkDriveTypes()
+        {
+            Assert.IsTrue(PrivilegedScheduledTasks.IsAllowedDriveType(System.IO.DriveType.Fixed));
+            Assert.IsFalse(PrivilegedScheduledTasks.IsAllowedDriveType(System.IO.DriveType.Network));
+            Assert.IsFalse(PrivilegedScheduledTasks.IsAllowedDriveType(System.IO.DriveType.Unknown));
+        }
+
+        [TestMethod]
+        public void EnforcesGlobalTargetAndTimeBudgets()
+        {
+            var targetLimited = new PrivilegedScheduledTaskReport
+            {
+                TargetsInspected = PrivilegedScheduledTasks.MaxTargets,
+            };
+            var timeLimited = new PrivilegedScheduledTaskReport();
+
+            Assert.IsTrue(PrivilegedScheduledTasks.ApplySafetyLimits(targetLimited, 0));
+            Assert.IsTrue(targetLimited.TargetLimitReached);
+            Assert.IsTrue(PrivilegedScheduledTasks.ApplySafetyLimits(
+                timeLimited,
+                PrivilegedScheduledTasks.MaxInspectionMilliseconds));
+            Assert.IsTrue(timeLimited.TimeLimitReached);
+        }
+
+        [TestMethod]
+        public void HonorsWriteDenyBeforeAllow()
+        {
+            var allowed = new RawSecurityDescriptor("O:BAG:SYD:(A;;0x2;;;BU)");
+            var denied = new RawSecurityDescriptor("O:BAG:SYD:(D;;0x2;;;BU)(A;;0x2;;;BU)");
+
+            Assert.AreEqual(
+                "S-1-5-32-545",
+                PrivilegedScheduledTasks.FindWriteTrustee(allowed, StandardUserSids, 0x2));
+            Assert.IsNull(PrivilegedScheduledTasks.FindWriteTrustee(denied, StandardUserSids, 0x2));
+        }
+
+        [TestMethod]
+        public void AllowsTaskExecuteThroughSpecificAndGenericRights()
+        {
+            var execute = new RawSecurityDescriptor("O:BAG:SYD:(A;;0x20;;;BU)");
+            var genericExecute = new RawSecurityDescriptor("O:BAG:SYD:(A;;GX;;;BU)");
+            var genericAll = new RawSecurityDescriptor("O:BAG:SYD:(A;;GA;;;BU)");
+
+            Assert.AreEqual("S-1-5-32-545", PrivilegedScheduledTasks.FindTaskExecuteTrustee(execute, StandardUserSids));
+            Assert.AreEqual("S-1-5-32-545", PrivilegedScheduledTasks.FindTaskExecuteTrustee(genericExecute, StandardUserSids));
+            Assert.AreEqual("S-1-5-32-545", PrivilegedScheduledTasks.FindTaskExecuteTrustee(genericAll, StandardUserSids));
+        }
+
+        [TestMethod]
+        public void ConditionalAndObjectSpecificTaskAllowsDoNotAssertExecuteAccess()
+        {
+            var sid = new System.Security.Principal.SecurityIdentifier("S-1-5-32-545");
+            var conditional = new CommonAce(AceFlags.None, AceQualifier.AccessAllowed, 0x20, sid, true, null);
+            var objectSpecific = new ObjectAce(AceFlags.None, AceQualifier.AccessAllowed, 0x20, sid,
+                ObjectAceFlags.ObjectAceTypePresent, System.Guid.NewGuid(), System.Guid.Empty, false, null);
+
+            foreach (GenericAce ace in new GenericAce[] { conditional, objectSpecific })
+            {
+                var acl = new RawAcl(GenericAcl.AclRevisionDS, 1);
+                acl.InsertAce(0, ace);
+                var descriptor = new RawSecurityDescriptor(ControlFlags.DiscretionaryAclPresent, null, null, null, acl);
+
+                Assert.IsNull(PrivilegedScheduledTasks.FindTaskExecuteTrustee(descriptor, StandardUserSids));
+            }
+        }
+
+        [TestMethod]
+        public void DeniedTaskExecuteAcrossTokenGroupsOverridesAllow()
+        {
+            var tokenSids = new HashSet<string> { "S-1-1-0", "S-1-5-32-545" };
+            var denied = new RawSecurityDescriptor("O:BAG:SYD:(D;;GX;;;BU)(A;;0x20;;;WD)");
+            var deniedAfterAllow = new RawSecurityDescriptor("O:BAG:SYD:(A;;0x20;;;WD)(D;;0x20;;;BU)");
+
+            Assert.IsNull(PrivilegedScheduledTasks.FindTaskExecuteTrustee(denied, tokenSids));
+            Assert.IsNull(PrivilegedScheduledTasks.FindTaskExecuteTrustee(deniedAfterAllow, tokenSids));
+        }
+
+        [TestMethod]
+        public void ReadOnlyTaskAccessDoesNotPermitDemandStart()
+        {
+            var readOnly = new RawSecurityDescriptor("O:BAG:SYD:(A;;FR;;;BU)");
+            var emptyDacl = new RawSecurityDescriptor(
+                ControlFlags.DiscretionaryAclPresent, null, null, null, new RawAcl(GenericAcl.AclRevision, 0));
+
+            Assert.IsNull(PrivilegedScheduledTasks.FindTaskExecuteTrustee(readOnly, StandardUserSids));
+            Assert.IsNull(PrivilegedScheduledTasks.FindTaskExecuteTrustee(emptyDacl, StandardUserSids));
+        }
+
+        [TestMethod]
+        public void DetectsTaskDefinitionAndPermissionControl()
+        {
+            var writable = new RawSecurityDescriptor("O:BAG:SYD:(A;;GW;;;BU)");
+            var changePermissions = new RawSecurityDescriptor("O:BAG:SYD:(A;;0x40000;;;BU)");
+            var changeOwner = new RawSecurityDescriptor("O:BAG:SYD:(A;;0x80000;;;BU)");
+
+            Assert.AreEqual(
+                "task definition is writable by S-1-5-32-545",
+                PrivilegedScheduledTasks.FindTaskControlReason(writable, StandardUserSids));
+            Assert.AreEqual(
+                "task permissions can be changed by S-1-5-32-545",
+                PrivilegedScheduledTasks.FindTaskControlReason(changePermissions, StandardUserSids));
+            Assert.AreEqual(
+                "task ownership can be changed by S-1-5-32-545",
+                PrivilegedScheduledTasks.FindTaskControlReason(changeOwner, StandardUserSids));
+        }
+
+        [TestMethod]
+        public void DetectsUnprivilegedTaskOwnerButIgnoresReadOnlyAccess()
+        {
+            var owned = new RawSecurityDescriptor("O:BUG:SYD:(A;;FR;;;BU)");
+            var readOnly = new RawSecurityDescriptor("O:BAG:SYD:(A;;FR;;;BU)");
+
+            Assert.AreEqual(
+                "task is owned by S-1-5-32-545 (the owner can change its permissions)",
+                PrivilegedScheduledTasks.FindTaskControlReason(owned, StandardUserSids));
+            Assert.IsNull(PrivilegedScheduledTasks.FindTaskControlReason(readOnly, StandardUserSids));
+        }
+
+        [TestMethod]
+        public void RequiresCreateAndDeleteChildForExistingFileReplacement()
+        {
+            var createOnly = new RawSecurityDescriptor("O:BAG:SYD:(A;;0x2;;;BU)");
+            var replace = new RawSecurityDescriptor("O:BAG:SYD:(A;;0x42;;;BU)");
+
+            Assert.IsNull(PrivilegedScheduledTasks.FindDirectoryReplacementTrustee(createOnly, StandardUserSids));
+            Assert.AreEqual(
+                "S-1-5-32-545",
+                PrivilegedScheduledTasks.FindDirectoryReplacementTrustee(replace, StandardUserSids));
+        }
+
+        [TestMethod]
+        public void CombinesReplacementRightsAcrossTokenGroups()
+        {
+            var standardTokenSids = new HashSet<string>
+            {
+                "S-1-1-0",
+                "S-1-5-32-545",
+            };
+            var replace = new RawSecurityDescriptor("O:BAG:SYD:(A;;0x2;;;WD)(A;;0x40;;;BU)");
+
+            Assert.AreEqual(
+                "S-1-1-0 and S-1-5-32-545",
+                PrivilegedScheduledTasks.FindDirectoryReplacementTrustee(replace, standardTokenSids));
+        }
+    }
+}

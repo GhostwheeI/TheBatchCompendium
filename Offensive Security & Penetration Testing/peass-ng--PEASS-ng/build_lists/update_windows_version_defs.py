@@ -29,7 +29,16 @@ MSRC_UPDATES_URL = "https://api.msrc.microsoft.com/cvrf/v3.0/updates"
 MSRC_CVRF_ACCEPT = "application/json"
 NVD_FEED_URL_TEMPLATE = "https://nvd.nist.gov/feeds/json/cve/2.0/nvdcve-2.0-{year}.json.zip"
 USER_AGENT = "PEASS-ng windows_version_definitions updater"
+CVE_2024_30088_RECORD_URL = (
+    "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/"
+    "cves/2024/30xxx/CVE-2024-30088.json"
+)
+CVE_2024_30088_RELEASE_URL = (
+    "https://support.microsoft.com/en-us/servicing/os/windows-server/2024/06/"
+    "june-11-2024-kb5039227-os-build-20348-2527"
+)
 KB_PATTERN = re.compile(r"\b(\d{6,7})\b")
+CVE_PATTERN = re.compile(r"CVE-\d{4}-\d{4,}")
 WINDOWS_TOKEN = "windows"
 LEGACY_PRODUCT_ALIASES: dict[str, tuple[tuple[str, ...], frozenset[str]]] = {
     "Microsoft Windows XP Service Pack 2": (
@@ -97,7 +106,7 @@ def parse_args() -> argparse.Namespace:
         description=(
             "Generate build_lists/windows_version_exploits.json directly from "
             "Microsoft Security Update Guide data, the legacy Microsoft bulletin "
-            "workbook, and NVD exploit references."
+            "workbook, Microsoft exploitation assessments, and NVD exploit references."
         )
     )
     parser.add_argument(
@@ -282,6 +291,35 @@ def get_threat_value(vuln: dict[str, Any], product_id: str, target_type: str) ->
     return ""
 
 
+def is_msrc_exploited(vuln: dict[str, Any]) -> bool:
+    for threat in vuln.get("Threats", []) or []:
+        if not threat_type_matches(threat, "1"):
+            continue
+
+        description = threat.get("Description")
+        if isinstance(description, dict):
+            description = description.get("Value")
+
+        for assessment in normalize_spaces(description).split(";"):
+            key, separator, value = assessment.partition(":")
+            if (
+                separator
+                and key.strip().lower() == "exploited"
+                and value.strip().lower() == "yes"
+            ):
+                return True
+
+    return False
+
+
+def extract_msrc_exploited_ids_from_document(document: dict[str, Any]) -> set[str]:
+    return {
+        cve
+        for vuln in document.get("Vulnerability", []) or []
+        if (cve := normalize_spaces(vuln.get("CVE"))) and is_msrc_exploited(vuln)
+    }
+
+
 def load_bulletin_entries(*, timeout: int, retries: int) -> list[RawEntry]:
     try:
         from openpyxl import load_workbook
@@ -421,10 +459,13 @@ def extract_msrc_entries_from_document(document: dict[str, Any]) -> list[RawEntr
     return entries
 
 
-def load_msrc_entries(*, timeout: int, retries: int, max_workers: int) -> list[RawEntry]:
+def load_msrc_entries(
+    *, timeout: int, retries: int, max_workers: int
+) -> tuple[list[RawEntry], set[str]]:
     updates = fetch_msrc_update_catalog(timeout=timeout, retries=retries)
     documents = [update["CvrfUrl"] for update in updates if normalize_spaces(update.get("CvrfUrl"))]
     entries: list[RawEntry] = []
+    exploited_cves: set[str] = set()
 
     logging.info("Downloading %d MSRC CVRF documents with up to %d workers", len(documents), max_workers)
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -438,6 +479,7 @@ def load_msrc_entries(*, timeout: int, retries: int, max_workers: int) -> list[R
             document = future.result()
             doc_entries = extract_msrc_entries_from_document(document)
             entries.extend(doc_entries)
+            exploited_cves.update(extract_msrc_exploited_ids_from_document(document))
             completed += 1
             if completed % 10 == 0 or completed == len(documents):
                 logging.info(
@@ -448,8 +490,12 @@ def load_msrc_entries(*, timeout: int, retries: int, max_workers: int) -> list[R
                 )
             logging.debug("MSRC document %s produced %d raw entries", url, len(doc_entries))
 
-    logging.info("Collected %d raw MSRC entries", len(entries))
-    return entries
+    logging.info(
+        "Collected %d raw MSRC entries and %d Microsoft-exploited CVEs",
+        len(entries),
+        len(exploited_cves),
+    )
+    return entries, exploited_cves
 
 
 def extract_exploit_ids_from_feed(payload: bytes, *, year: int) -> set[str]:
@@ -545,7 +591,9 @@ def build_definitions(entries: list[RawEntry], exploit_cves: set[str], generated
                 if superseded:
                     kb_supersedes[kb].add(superseded)
 
-        if not entry.cve or entry.cve not in exploit_cves:
+        # MSRC and NVD also contain advisory identifiers (e.g. ADV160008).
+        # The output schema's cve field accepts CVEs only.
+        if not CVE_PATTERN.fullmatch(entry.cve) or entry.cve not in exploit_cves:
             continue
 
         vuln_key = entry.cve or f"KB{kb}"
@@ -586,6 +634,45 @@ def build_definitions(entries: list[RawEntry], exploit_cves: set[str], generated
     return data
 
 
+def add_server_2022_fixed_build_indicator(data: dict[str, Any], cna_record: dict[str, Any]) -> None:
+    """Add the CNA's affected range, cross-checked against Microsoft's release history."""
+    if cna_record.get("cveMetadata", {}).get("cveId") != "CVE-2024-30088":
+        raise ValueError("Unexpected CVE record")
+    affected = cna_record.get("containers", {}).get("cna", {}).get("affected", [])
+    matching = [
+        version
+        for item in affected
+        if item.get("vendor") == "Microsoft"
+        and item.get("product") == "Windows Server 2022"
+        and "x64-based Systems" in item.get("platforms", [])
+        for version in item.get("versions", [])
+        if version.get("status") == "affected"
+    ]
+    if len(matching) != 1:
+        raise ValueError("Expected one Windows Server 2022 affected range")
+    version = matching[0]
+    start = version.get("version", "")
+    end = version.get("lessThan", "")
+    if not re.fullmatch(r"10\.0\.20348\.\d+", start) or not re.fullmatch(
+        r"10\.0\.20348\.\d+", end
+    ):
+        raise ValueError("Unexpected Windows Server 2022 build range")
+    fixed_ubr = int(end.rsplit(".", 1)[1])
+    # The KB and fixed revision must both match Microsoft's release-history page.
+    if fixed_ubr != 2527:
+        raise ValueError("CNA fixed revision differs from KB5039227 release history")
+    data["fixed_build_indicators"] = {
+        "CVE-2024-30088": {
+            "product": "Windows Server 2022",
+            "build": 20348,
+            "fixed_ubr": fixed_ubr,
+            "fixed_kb": "5039227",
+            "cna_url": CVE_2024_30088_RECORD_URL,
+            "release_url": CVE_2024_30088_RELEASE_URL,
+        }
+    }
+
+
 def validate_output(data: dict[str, Any]) -> None:
     if not re.fullmatch(r"\d{8}", str(data.get("generated", ""))):
         raise RuntimeError("Generated date is missing or malformed")
@@ -595,6 +682,9 @@ def validate_output(data: dict[str, Any]) -> None:
     kb_supersedes = data.get("kb_supersedes")
     if not isinstance(kb_supersedes, dict):
         raise RuntimeError("Output does not contain a kb_supersedes mapping")
+    indicators = data.get("fixed_build_indicators", {})
+    if not isinstance(indicators, dict):
+        raise RuntimeError("Fixed build indicators must be an object")
 
     sample_product = next(iter(products.values()))
     if not isinstance(sample_product, list):
@@ -619,7 +709,7 @@ def main() -> None:
     logging.info("Output path: %s", output_path)
 
     bulletin_entries = load_bulletin_entries(timeout=args.timeout, retries=args.retries)
-    msrc_entries = load_msrc_entries(
+    msrc_entries, msrc_exploited_cves = load_msrc_entries(
         timeout=args.timeout,
         retries=args.retries,
         max_workers=args.msrc_max_workers,
@@ -631,9 +721,10 @@ def main() -> None:
         retries=args.retries,
         max_workers=args.nvd_max_workers,
     )
+    exploit_cves.update(msrc_exploited_cves)
 
     logging.info(
-        "Building final JSON from %d bulletin entries, %d MSRC entries, and %d exploit-tagged CVEs",
+        "Building final JSON from %d bulletin entries, %d MSRC entries, and %d known/exploit-tagged CVEs",
         len(bulletin_entries),
         len(msrc_entries),
         len(exploit_cves),
@@ -641,6 +732,9 @@ def main() -> None:
 
     generated = datetime.now(timezone.utc).strftime("%Y%m%d")
     data = build_definitions(bulletin_entries + msrc_entries, exploit_cves, generated)
+    add_server_2022_fixed_build_indicator(
+        data, download_json(CVE_2024_30088_RECORD_URL, timeout=args.timeout, retries=args.retries)
+    )
     validate_output(data)
 
     output_path.write_text(json.dumps(data, separators=(",", ":")) + "\n", encoding="utf-8")

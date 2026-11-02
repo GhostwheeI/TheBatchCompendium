@@ -11,8 +11,6 @@ using Org.BouncyCastle.Crypto.Modes;
 using System.Linq;
 using Microsoft.Win32;
 using System.Web.Script.Serialization;
-using System;
-using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -229,20 +227,7 @@ namespace winPEAS.Info.CloudInfo
                     AzureCliValues[filePath] = TBRESContent;
             }
 
-            // Format the info in expected CloudInfo format
-            List<EndpointData> _endpointDataList = new List<EndpointData>();
-
-            foreach (var kvp in AzureCliValues)
-            {
-                _endpointDataList.Add(new EndpointData()
-                {
-                    EndpointName = kvp.Key,
-                    Data = kvp.Value?.Trim(),
-                    IsAttackVector = false
-                });
-            }
-
-            return _endpointDataList;
+            return CreateEndpointData(AzureCliValues);
         }
         
 
@@ -260,15 +245,7 @@ namespace winPEAS.Info.CloudInfo
                     }
                     else
                     {
-                        _endpointData.Add("General Info", new List<EndpointData>()
-                        {
-                            new EndpointData()
-                            {
-                                EndpointName = "",
-                                Data = null,
-                                IsAttackVector = false
-                            }
-                        });
+                        _endpointData.Add("General Info", CreateUnavailableEndpointData());
                     }
                 }
                 catch (Exception ex)

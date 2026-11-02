@@ -16,6 +16,8 @@ namespace winPEAS.Checks
 {
     internal class UserInfo : ISystemCheck
     {
+        internal const string DelegationPrivilegeNote = "Enabled SeEnableDelegationPrivilege in this process token: review domain machine-account quota and effective computer-object rights; this alone does not prove unconstrained delegation or a coercion path.";
+
         /* Colors Code
         * RED:
         * ---- Privileges users and groups names
@@ -32,7 +34,12 @@ namespace winPEAS.Checks
 
         static string badgroups = "docker|Remote |DNSAdmins|AD Recycle Bin|Azure Admins|Admins|Server Operators";//The space in Remote is important to not mix with SeShutdownRemotePrivilege
         static readonly string _badPasswd = "NotChange|NotExpi";
-        static readonly string _badPrivileges = "SeImpersonatePrivilege|SeAssignPrimaryPrivilege|SeTcbPrivilege|SeBackupPrivilege|SeRestorePrivilege|SeCreateTokenPrivilege|SeLoadDriverPrivilege|SeTakeOwnershipPrivilege|SeDebugPrivilege";
+        internal static readonly string BadPrivilegesPattern = "SeImpersonatePrivilege|SeAssignPrimaryTokenPrivilege|SeTcbPrivilege|SeBackupPrivilege|SeRestorePrivilege|SeCreateTokenPrivilege|SeLoadDriverPrivilege|SeTakeOwnershipPrivilege|SeDebugPrivilege|SeManageVolumePrivilege";
+        internal static readonly string[] TokenAbusePrivileges = new[]
+        {
+            "SeDebugPrivilege", "SeImpersonatePrivilege", "SeAssignPrimaryTokenPrivilege",
+            "SeIncreaseQuotaPrivilege", "SeTcbPrivilege"
+        };
 
         public string[] MitreAttackIds { get; } = new[] { "T1087.001", "T1087.004", "T1033", "T1134.001", "T1115", "T1563.002", "T1083", "T1552.002", "T1201" };
 
@@ -64,7 +71,7 @@ namespace winPEAS.Checks
                 {
                     { Checks.PaintActiveUsersNoAdministrator, Beaprint.ansi_users_active },
                     { Checks.CurrentUserName + "|"+ Checks.CurrentUserDomainName, Beaprint.ansi_current_user },
-                    { Checks.PaintAdminUsers+"|"+ badgroups + "|" + _badPasswd + "|" + _badPrivileges + "|" + "DefaultPassword.*", Beaprint.ansi_color_bad },
+                    { Checks.PaintAdminUsers+"|"+ badgroups + "|" + _badPasswd + "|" + BadPrivilegesPattern + "|" + "DefaultPassword.*", Beaprint.ansi_color_bad },
                     { @"Disabled", Beaprint.ansi_users_disabled },
                 };
 
@@ -110,10 +117,35 @@ namespace winPEAS.Checks
         {
             try
             {
-                Beaprint.MainPrint("Current Token privileges", "T1134.001");
+                Beaprint.MainPrint("Current process token privileges", "T1134.001");
+                Beaprint.InfoPrint("These privileges belong to this winPEAS process token; another logon or service token for the same account may differ.");
+                CurrentProcessTokenSnapshot tokenState = CurrentProcessToken.Read();
+                Beaprint.InfoPrint("  " + tokenState.Summary);
+                if (tokenState.IsFilteredLocalAdminCandidate)
+                {
+                    Beaprint.BadPrint("  [!] Confirmed medium, limited local administrator token: the Administrators SID is deny-only and this process is not elevated. UAC policy and consent settings still govern elevation; this does not prove any bypass.");
+                }
                 Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#token-manipulation", "Check if you can escalate privilege using some enabled token");
                 Dictionary<string, string> tokenPrivs = Token.GetTokenGroupPrivs();
-                Beaprint.DictPrint(tokenPrivs, ColorsU(), false);
+                var relevantPrivileges = new List<string>();
+                foreach (string privilege in TokenAbusePrivileges)
+                {
+                    string state;
+                    relevantPrivileges.Add(privilege + "=" +
+                        (tokenPrivs.TryGetValue(privilege, out state) ? state : "not present"));
+                }
+                Beaprint.InfoPrint("  Token-manipulation context: " + string.Join(", ", relevantPrivileges));
+                bool delegationEnabled = Token.IsPrivilegeEnabled(tokenPrivs, "SeEnableDelegationPrivilege");
+                Dictionary<string, string> colors = ColorsU();
+                if (delegationEnabled)
+                {
+                    colors["SeEnableDelegationPrivilege"] = Beaprint.ansi_color_bad;
+                }
+                Beaprint.DictPrint(tokenPrivs, colors, false);
+                if (delegationEnabled)
+                {
+                    Beaprint.BadPrint("  [!] " + DelegationPrivilegeNote);
+                }
             }
             catch (Exception ex)
             {
@@ -158,16 +190,21 @@ namespace winPEAS.Checks
             try
             {
                 Beaprint.MainPrint("RDP Sessions", "T1563.002");
-                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/credentials-mgmt/rdp-sessions", "Disconnected high-privilege RDP sessions keep reusable tokens inside LSASS.");
-                List<Dictionary<string, string>> rdp_sessions = UserInfoHelper.GetRDPSessions();
-                if (rdp_sessions.Count > 0)
+                Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/active-directory-methodology/rdp-sessions-abuse.html", "Disconnected high-privilege RDP sessions keep reusable tokens inside LSASS.");
+                var enumeration = UserInfoHelper.GetRDPSessions();
+                if (enumeration.Visibility == RdpSessionVisibility.Unknown)
+                {
+                    Beaprint.GrayPrint("  [-] Session visibility unavailable" +
+                        (string.IsNullOrEmpty(enumeration.FailureReason) ? "." : ": " + enumeration.FailureReason));
+                }
+                else if (enumeration.Visibility == RdpSessionVisibility.Observed)
                 {
                     string format = "    {0,-8}{1,-15}{2,-20}{3,-22}{4,-15}{5,-18}{6,-10}";
                     string header = string.Format(format, "SessID", "Session", "User", "Domain", "State", "SourceIP", "HighPriv");
                     Beaprint.GrayPrint(header);
                     var colors = ColorsU();
                     List<Dictionary<string, string>> flaggedSessions = new List<Dictionary<string, string>>();
-                    foreach (Dictionary<string, string> rdpSes in rdp_sessions)
+                    foreach (Dictionary<string, string> rdpSes in enumeration.Sessions)
                     {
                         string sessionId = GetSessionValue(rdpSes, "SessionID");
                         string sessionName = GetSessionValue(rdpSes, "pSessionName");
@@ -202,12 +239,12 @@ namespace winPEAS.Checks
                             string source = string.IsNullOrEmpty(flaggedIp) ? "local" : flaggedIp;
                             Beaprint.BadPrint(string.Format("        -> Session {0} ({1}) from {2}", flaggedSessionId, userDisplay, source));
                         }
-                        Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/credentials-mgmt/rdp-sessions", "Dump LSASS / steal tokens (e.g., comsvcs.dll, LsaLogonSessions, custom SSPs) to reuse those privileges.");
+                        Beaprint.LinkPrint("https://book.hacktricks.wiki/en/windows-hardening/active-directory-methodology/rdp-sessions-abuse.html", "Dump LSASS / steal tokens (e.g., comsvcs.dll, LsaLogonSessions, custom SSPs) to reuse those privileges.");
                     }
                 }
                 else
                 {
-                    Beaprint.NotFoundPrint();
+                    Beaprint.GrayPrint("  [-] No user sessions observed by WTS.");
                 }
             }
             catch (Exception ex)
@@ -270,29 +307,26 @@ namespace winPEAS.Checks
             try
             {
                 Beaprint.MainPrint("Looking for AutoLogon credentials", "T1552.002");
-                bool ban = false;
                 Dictionary<string, string> autologon = UserInfoHelper.GetAutoLogon();
-                if (autologon.Count > 0)
+                AutoLogonFinding finding = UserInfoHelper.ClassifyAutoLogon(autologon);
+                if (finding == AutoLogonFinding.PlaintextPassword)
                 {
-                    foreach (KeyValuePair<string, string> entry in autologon)
-                    {
-                        if (!string.IsNullOrEmpty(entry.Value))
-                        {
-                            if (!ban)
-                            {
-                                Beaprint.BadPrint("    Some AutoLogon credentials were found");
-                                ban = true;
-                            }
-                            Beaprint.AnsiPrint(string.Format("    {0,-30}:  {1}", entry.Key, entry.Value), ColorsU());
-                        }
-                    }
+                    Beaprint.BadPrint("    Plaintext AutoLogon password found in Winlogon registry values");
+                }
+                else if (finding == AutoLogonFinding.EnabledWithoutPlaintextPassword)
+                {
+                    Beaprint.GrayPrint("    AutoAdminLogon=1 with no readable plaintext password; possible LSA-backed autologon storage (unverified, no secret read)");
+                }
 
-                    if (!ban)
+                foreach (KeyValuePair<string, string> entry in autologon)
+                {
+                    if (!string.IsNullOrEmpty(entry.Value))
                     {
-                        Beaprint.NotFoundPrint();
+                        Beaprint.AnsiPrint(string.Format("    {0,-30}:  {1}", entry.Key, entry.Value), ColorsU());
                     }
                 }
-                else
+
+                if (finding == AutoLogonFinding.None)
                 {
                     Beaprint.NotFoundPrint();
                 }
