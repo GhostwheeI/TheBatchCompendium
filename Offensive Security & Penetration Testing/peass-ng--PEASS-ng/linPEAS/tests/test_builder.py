@@ -1,8 +1,10 @@
 import os
 import re
 import shlex
+import shutil
 import stat
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -21,6 +23,83 @@ class LinpeasBuilderTests(unittest.TestCase):
                 f"linpeas_builder failed:\nstdout:\n{result.stdout}\nstderr:\n{result.stderr}"
             )
 
+    def test_generated_find_groups_name_alternatives_under_directory_type(self):
+        """A second directory name must not admit an ordinary file via find -o."""
+        sys.path.insert(0, str(self.linpeas_dir))
+        try:
+            from builder.src.linpeasBuilder import LinpeasBuilder
+        finally:
+            sys.path.pop(0)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "dir-first").mkdir()
+            (root / "dir-second").mkdir()
+            (root / "file-first.conf").write_text("", encoding="utf-8")
+            (root / "file-second.yaml").write_text("", encoding="utf-8")
+            (root / "dir-second-file").write_text("", encoding="utf-8")
+            (root / "other").write_text("", encoding="utf-8")
+            # The second alternative has the same basename as this file in a
+            # nested directory; it must never enter a directory-only cache.
+            (root / "nested").mkdir()
+            (root / "nested" / "dir-second").write_text("", encoding="utf-8")
+
+            builder = object.__new__(LinpeasBuilder)
+            builder.dict_to_search = {
+                "d": {str(root): {"dir-first", "dir-second"}},
+                "f": {str(root): {"*.conf", "*.yaml"}},
+            }
+            builder.bash_find_f_vars = set()
+            builder.bash_find_d_vars = set()
+            standard, custom = builder._LinpeasBuilder__generate_finds()
+
+            def run_find(call):
+                _, variable, arguments = call.strip().split(" ", 2)
+                script = "\n".join((
+                    f"SEARCH_IN_FOLDER={shlex.quote(str(root))}",
+                    f"find {arguments}",
+                ))
+                result = subprocess.run(
+                    ["sh", "-c", script], capture_output=True, text=True,
+                    cwd=str(root),
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                return variable, set(result.stdout.splitlines())
+
+            expected_dirs = {str(root / "dir-first"), str(root / "dir-second")}
+            expected_files = {str(root / "file-first.conf"), str(root / "file-second.yaml")}
+            for call in standard + custom:
+                if not call.strip().startswith("cache_find "):
+                    continue
+                variable, found = run_find(call)
+                if variable.startswith("FIND_DIR_"):
+                    self.assertEqual(found, expected_dirs, call)
+                else:
+                    self.assertEqual(found, expected_files, call)
+
+    def test_generated_storages_deduplicate_in_sort(self):
+        """Every catalog storage should deduplicate without a separate uniq process."""
+        sys.path.insert(0, str(self.linpeas_dir))
+        try:
+            from builder.src.linpeasBuilder import LinpeasBuilder
+            from builder.src.peasLoaded import PEASLoaded
+        finally:
+            sys.path.pop(0)
+
+        builder = object.__new__(LinpeasBuilder)
+        builder.ploaded = PEASLoaded()
+        builder.hidden_files = set()
+        builder.bash_find_f_vars = set()
+        builder.bash_find_d_vars = set()
+        builder.bash_storages = set()
+        builder._LinpeasBuilder__get_files_to_search()
+        builder._LinpeasBuilder__generate_finds()
+
+        storages = builder._LinpeasBuilder__generate_storages()
+        self.assertTrue(storages)
+        self.assertTrue(all(" | sort -u | head -n 70)" in line for line in storages))
+        self.assertTrue(all(" | sort | uniq " not in line for line in storages))
+
     def test_small_build_creates_executable(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "linpeas_small.sh"
@@ -28,6 +107,77 @@ class LinpeasBuilderTests(unittest.TestCase):
             self.assertTrue(output_path.exists(), "linpeas_small.sh was not created.")
             mode = output_path.stat().st_mode
             self.assertTrue(mode & stat.S_IXUSR, "linpeas_small.sh is not executable.")
+
+    def test_base_startup_helpers_do_not_require_seq_or_awk(self):
+        """The startup helpers work in POSIX shells without seq or awk."""
+        base_file = self.linpeas_dir / "builder" / "linpeas_parts" / "linpeas_base" / "0_variables_base.sh"
+        content = base_file.read_text(encoding="utf-8")
+        title_function = content[content.index("repeat_character(){"):content.index("check_mitre_filter(){")]
+        cache_function = content[content.index("filter_writable_folders_by_depth(){"):content.index("print_title(){")]
+        paths = ["/", "/a", "/a/b", "/a/b/", "/a//b", "relative", "relative/path"]
+        path_input = "printf '%s\\n' " + " ".join(shlex.quote(path) for path in paths)
+        shells = [Path("/bin/sh"), Path("/bin/bash"), Path("/bin/dash"), Path("/bin/ksh"), Path("/bin/zsh")]
+        for shell in shells:
+            if not shell.exists():
+                continue
+            shell_prefix = "emulate sh\n" if shell.name == "zsh" else ""
+            for depth in range(4):
+                expected = [path for path in paths if path.count("/") <= depth]
+                script = shell_prefix + (
+                    title_function + "\n"
+                    "repeat_character x 3; printf '\\n'\n"
+                    f"{path_input} | filter_writable_folders_by_depth {depth}\n"
+                )
+                with self.subTest(shell=str(shell), depth=depth):
+                    result = subprocess.run(
+                        [str(shell), "-c", script],
+                        capture_output=True,
+                        text=True,
+                        env={"PATH": ""},
+                    )
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(result.stdout.splitlines(), ["xxx", *expected])
+
+            # Keep wc available to print_title, but deliberately omit seq.
+            with tempfile.TemporaryDirectory() as tmpdir:
+                (Path(tmpdir) / "wc").symlink_to(shutil.which("wc"))
+                result = subprocess.run(
+                    [str(shell), "-c", shell_prefix + title_function + "\nprint_title Portable"],
+                    capture_output=True,
+                    text=True,
+                    env={"PATH": tmpdir},
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stderr, "")
+                self.assertIn("Portable", result.stdout)
+
+        # Also exercise the fast path when awk is installed.
+        if subprocess.run(["/bin/sh", "-c", "command -v awk"], capture_output=True).returncode == 0:
+            result = subprocess.run(
+                ["/bin/sh", "-c", cache_function + "\n" + path_input + " | filter_writable_folders_by_depth 2"],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.splitlines(), [path for path in paths if path.count("/") <= 2])
+
+    def test_explicit_zsh_invocation_uses_sh_globbing(self):
+        zsh = Path("/bin/zsh")
+        if not zsh.exists():
+            self.skipTest("zsh is not installed")
+
+        base_file = self.linpeas_dir / "builder" / "linpeas_parts" / "linpeas_base" / "0_variables_base.sh"
+        startup = next(
+            line for line in base_file.read_text(encoding="utf-8").splitlines()
+            if "command -v emulate" in line and "emulate sh" in line
+        )
+        result = subprocess.run(
+            [str(zsh), "-c", startup + "\nprintf '%s\\n' /__linpeas_no_such_directory__/*"],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "/__linpeas_no_such_directory__/*\n")
 
     def test_include_exclude_modules(self):
         with tempfile.TemporaryDirectory() as tmpdir:

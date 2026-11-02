@@ -1,0 +1,276 @@
+import { EventEmitter } from 'node:events'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+const mocks = vi.hoisted(() => ({
+  spawn: vi.fn(),
+  ttsVoicePath: '',
+}))
+
+vi.mock('child_process', () => ({ spawn: mocks.spawn }))
+vi.mock('../../electron/tts', () => ({
+  getTempTtsVoiceFilePath: () => mocks.ttsVoicePath,
+}))
+vi.mock('../../electron/lib/tools', () => ({
+  generateUniqueFileName: (filePath: string) => filePath,
+}))
+vi.mock('../../electron/effect-engine/subtitle-render-service', () => ({
+  isEffectRenderCancelledError: (error: unknown) =>
+    error instanceof Error && error.name === 'EffectRendererCancelledError',
+  renderSubtitleFramesToPngSequence: vi.fn(),
+}))
+
+import { executeFFmpeg, renderVideo } from '../../electron/ffmpeg'
+import { renderSubtitleFramesToPngSequence } from '../../electron/effect-engine/subtitle-render-service'
+
+const createChildProcess = () => {
+  const child = Object.assign(new EventEmitter(), {
+    kill: vi.fn(),
+    stderr: new EventEmitter(),
+    stdout: new EventEmitter(),
+  })
+  mocks.spawn.mockReturnValue(child)
+  return child
+}
+
+describe('FFmpeg execution and render inputs', () => {
+  let tempDir: string
+
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'short-video-ffmpeg-test-'))
+    mocks.ttsVoicePath = path.join(tempDir, 'generated voice.mp3')
+    mocks.spawn.mockReset()
+    vi.mocked(renderSubtitleFramesToPngSequence).mockReset()
+    vi.mocked(renderSubtitleFramesToPngSequence).mockResolvedValue({
+      manifest: { framesDir: tempDir, framePattern: '%06d.png' },
+      cleanup: vi.fn(),
+    } as unknown as Awaited<ReturnType<typeof renderSubtitleFramesToPngSequence>>)
+  })
+
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true })
+  })
+
+  it('keeps paths with spaces as intact FFmpeg argv values and preserves caller-owned inputs', async () => {
+    const videoPath = path.join(tempDir, 'video assets', 'scene one.mp4')
+    const voicePath = path.join(tempDir, 'voice input.mp3')
+    const bgmPath = path.join(tempDir, 'music assets', 'background track.mp3')
+    const subtitlePath = path.join(tempDir, 'subtitle assets', 'caption file.srt')
+    for (const filePath of [videoPath, voicePath, bgmPath, subtitlePath]) {
+      fs.mkdirSync(path.dirname(filePath), { recursive: true })
+      fs.writeFileSync(filePath, 'input')
+    }
+    const outputPath = path.join(tempDir, 'render output', 'my video.mp4')
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true })
+    const child = createChildProcess()
+
+    const render = renderVideo({
+      videoFiles: [videoPath],
+      timeRanges: [['1.000', '9.000']],
+      audioFiles: { voice: voicePath, bgm: bgmPath },
+      subtitleFile: subtitlePath,
+      outputSize: { width: 720, height: 1280 },
+      outputDuration: '8',
+      outputPath,
+    })
+
+    await vi.waitFor(() => expect(mocks.spawn).toHaveBeenCalledTimes(1))
+    const args = mocks.spawn.mock.calls[0][1] as string[]
+    const inputPaths = args.flatMap((arg, index) => (arg === '-i' ? [args[index + 1]] : []))
+    expect(inputPaths).toEqual([
+      videoPath,
+      path.join(tempDir, '%06d.png').replace(/\\/g, '/'),
+      voicePath,
+      bgmPath,
+    ])
+    expect(args.at(-1)).toBe(outputPath)
+    expect(args[args.indexOf('-s') + 1]).toBe('720x1280')
+    expect(renderSubtitleFramesToPngSequence).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subtitleAsset: { srtText: 'input', source: 'external' },
+      }),
+    )
+    expect(args[args.indexOf('-filter_complex') + 1]).toContain('overlay=')
+    expect(args[args.indexOf('-filter_complex') + 1]).not.toContain('subtitles=')
+
+    child.emit('close', 0)
+    await expect(render).resolves.toMatchObject({ code: 0 })
+    for (const filePath of [videoPath, voicePath, bgmPath, subtitlePath]) {
+      expect(fs.existsSync(filePath), `expected caller input to remain: ${filePath}`).toBe(true)
+    }
+  })
+
+  it('removes generated voice and subtitle files when the render fails', async () => {
+    const voicePath = mocks.ttsVoicePath
+    const subtitlePath = voicePath.replace(/\.mp3$/i, '.srt')
+    fs.writeFileSync(voicePath, 'generated audio')
+    fs.writeFileSync(subtitlePath, 'generated captions')
+    fs.mkdirSync(path.join(tempDir, 'output'), { recursive: true })
+    const child = createChildProcess()
+
+    const render = renderVideo({
+      videoFiles: [path.join(tempDir, 'scene.mp4')],
+      timeRanges: [['0', '4']],
+      outputSize: { width: 1080, height: 1920 },
+      outputDuration: '4',
+      subtitlesEnabled: false,
+      outputPath: path.join(tempDir, 'output', 'failed.mp4'),
+    })
+
+    await vi.waitFor(() => expect(mocks.spawn).toHaveBeenCalledTimes(1))
+    child.emit('close', 1)
+    await expect(render).rejects.toThrow('FFmpeg exited with code 1')
+    expect(fs.existsSync(voicePath)).toBe(false)
+    expect(fs.existsSync(subtitlePath)).toBe(false)
+  })
+
+  it.each([undefined, '', '   '])(
+    'rejects missing or empty subtitle text (%s) before rendering',
+    async (subtitleText) => {
+      // A stale default SRT must not silently reactivate the legacy FFmpeg subtitle path.
+      fs.writeFileSync(mocks.ttsVoicePath.replace(/\.mp3$/, '.srt'), 'stale captions')
+      await expect(
+        renderVideo({
+          videoFiles: ['scene.mp4'],
+          timeRanges: [['0', '1']],
+          subtitlesEnabled: true,
+          subtitleText,
+          outputSize: { width: 720, height: 1280 },
+          outputPath: path.join(tempDir, 'video.mp4'),
+        }),
+      ).rejects.toThrow('未生成有效字幕内容')
+      expect(mocks.spawn).not.toHaveBeenCalled()
+      expect(renderSubtitleFramesToPngSequence).not.toHaveBeenCalled()
+    },
+  )
+
+  it.each(['missing', 'empty'])('rejects a %s subtitle file before rendering', async (state) => {
+    const subtitleFile = path.join(tempDir, 'captions.srt')
+    if (state === 'empty') fs.writeFileSync(subtitleFile, '   ')
+    await expect(
+      renderVideo({
+        videoFiles: ['scene.mp4'],
+        timeRanges: [['0', '1']],
+        subtitleFile,
+        outputSize: { width: 720, height: 1280 },
+        outputPath: path.join(tempDir, 'video.mp4'),
+      }),
+    ).rejects.toThrow(state === 'empty' ? '未生成有效字幕内容' : 'ENOENT')
+    expect(mocks.spawn).not.toHaveBeenCalled()
+    expect(renderSubtitleFramesToPngSequence).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    [false, false],
+    [false, true],
+    [true, false],
+    [true, true],
+  ])(
+    'supports overlay=%s and export=%s independently',
+    async (subtitlesEnabled, exportSubtitles) => {
+      const srtText = '1\n00:00:00,000 --> 00:00:01,000\n字幕测试\n'
+      const outputPath = path.join(tempDir, 'my video.mp4')
+      const subtitleOutputPath = path.join(tempDir, 'my video.srt')
+      const renderer = vi.mocked(renderSubtitleFramesToPngSequence)
+      renderer.mockReset()
+      renderer.mockResolvedValue({
+        manifest: { framesDir: tempDir, framePattern: '%06d.png' },
+        cleanup: vi.fn(),
+      } as unknown as Awaited<ReturnType<typeof renderSubtitleFramesToPngSequence>>)
+      fs.writeFileSync(mocks.ttsVoicePath, 'audio')
+      fs.writeFileSync(mocks.ttsVoicePath.replace(/\.mp3$/, '.srt'), 'stale subtitle')
+      const child = createChildProcess()
+      const render = renderVideo({
+        videoFiles: ['scene.mp4'],
+        timeRanges: [['0', '1']],
+        subtitleText: srtText,
+        subtitlesEnabled,
+        exportSubtitles,
+        outputSize: { width: 720, height: 1280 },
+        outputDuration: '1',
+        outputPath,
+      })
+      await vi.waitFor(() => expect(mocks.spawn).toHaveBeenCalledTimes(1))
+      const args = mocks.spawn.mock.calls[0][1] as string[]
+      const filter = args[args.indexOf('-filter_complex') + 1]
+      expect(renderer).toHaveBeenCalledTimes(subtitlesEnabled ? 1 : 0)
+      expect(filter.includes('overlay=')).toBe(subtitlesEnabled)
+      expect(filter).not.toContain('subtitles=')
+      expect(filter).toContain('loudnorm')
+      expect(args[args.indexOf('-map') + 1]).toBe(subtitlesEnabled ? '[with_subs]' : '[vout]')
+      child.emit('close', 0)
+      await expect(render).resolves.toMatchObject({ code: 0 })
+      expect(fs.existsSync(subtitleOutputPath)).toBe(exportSubtitles)
+      if (exportSubtitles) expect(fs.readFileSync(subtitleOutputPath, 'utf8')).toBe(srtText)
+      expect(fs.existsSync(mocks.ttsVoicePath)).toBe(false)
+    },
+  )
+
+  it('reports subtitle export failure without discarding the successful video', async () => {
+    const outputPath = path.join(tempDir, 'video.mp4')
+    const subtitlePath = path.join(tempDir, 'video.srt')
+    fs.writeFileSync(subtitlePath, 'existing captions')
+    const child = createChildProcess()
+    const render = renderVideo({
+      videoFiles: ['scene.mp4'],
+      timeRanges: [['0', '1']],
+      subtitlesEnabled: false,
+      exportSubtitles: true,
+      subtitleText: 'new captions',
+      outputSize: { width: 720, height: 1280 },
+      outputPath,
+    })
+    await vi.waitFor(() => expect(mocks.spawn).toHaveBeenCalledTimes(1))
+    child.emit('close', 0)
+    await expect(render).resolves.toMatchObject({
+      code: 0,
+      outputPath,
+      subtitleExportError: expect.any(String),
+    })
+    expect(fs.readFileSync(subtitlePath, 'utf8')).toBe('existing captions')
+  })
+
+  it('terminates FFmpeg on cancellation and removes the abort listener after exit', async () => {
+    const child = createChildProcess()
+    const controller = new AbortController()
+    const removeEventListener = vi.spyOn(controller.signal, 'removeEventListener')
+    const execution = executeFFmpeg(['-i', 'input.mp4', 'output.mp4'], {
+      abortSignal: controller.signal,
+    })
+
+    controller.abort()
+    expect(child.kill).toHaveBeenCalledWith('SIGTERM')
+    child.emit('close', 255)
+    await expect(execution).rejects.toThrow('FFmpeg exited with code 255')
+    expect(removeEventListener).toHaveBeenCalledWith('abort', expect.any(Function))
+  })
+
+  it('does not spawn FFmpeg for a signal that was already aborted', async () => {
+    const controller = new AbortController()
+    controller.abort()
+
+    await expect(
+      executeFFmpeg(['-i', 'input.mp4', 'output.mp4'], { abortSignal: controller.signal }),
+    ).rejects.toThrow()
+    expect(mocks.spawn).not.toHaveBeenCalled()
+  })
+
+  it('reports monotonically increasing progress and completes at 100 percent', async () => {
+    const child = createChildProcess()
+    const onProgress = vi.fn()
+    const execution = executeFFmpeg(['-i', 'input.mp4', 'output.mp4'], {
+      durationSeconds: 10,
+      onProgress,
+    })
+
+    child.stdout.emit('data', Buffer.from('out_time_ms=5000000\n'))
+    child.stdout.emit('data', Buffer.from('out_time_ms=3000000\n'))
+    expect(onProgress.mock.calls.map(([progress]) => progress)).toEqual([50])
+    child.emit('close', 0)
+
+    await expect(execution).resolves.toMatchObject({ code: 0 })
+    expect(onProgress.mock.calls.map(([progress]) => progress)).toEqual([50, 100])
+  })
+})
