@@ -8,12 +8,15 @@
 # Functions Used:
 # Global Variables:
 # Initial Functions:
-# Generated Global Variables: $VERSION, $ADVISORY, $IAMROOT, $MAXPATH_FIND_W, $C, $RED, $SED_RED, $GREEN, $SED_GREEN, $YELLOW, $SED_YELLOW, $RED_YELLOW, $SED_RED_YELLOW, $BLUE, $SED_BLUE, $ITALIC_BLUE, $LIGHT_MAGENTA, $SED_LIGHT_MAGENTA, $LIGHT_CYAN, $SED_LIGHT_CYAN, $LG, $SED_LG, $DG, $SED_DG, $NC, $UNDERLINED, $ITALIC, $MACPEAS, $FAST, $SUPERFAST, $DISCOVERY, $PORTS, $QUIET, $CHECKS, $MITRE_FILTER, $SEARCH_IN_FOLDER, $ROOT_FOLDER, $WAIT, $PASSWORD, $NOCOLOR, $DEBUG, $AUTO_NETWORK_SCAN, $EXTRA_CHECKS, $REGEXES, $PORT_FORWARD, $E, $PING, $FPING, $DISCOVER_BAN_BAD, $DISCOVER_BAN_GOOD, $SCAN_BAN_GOOD, $NMAP_GOOD, $SCRIPTNAME, $FOUND_BASH, $FOUND_NC, $HOMESEARCH, $GREPHOMESEARCH, $SCAN_BAN_BAD, $HOME, $THREADS, $opt, $HELP, $USER, $TOTAL_T1_TIME, $END_T1_TIME, $START_T1_TIME, $title, $title_len, $max_title_len, $rest_len, $CONT_THREADS, $wgroups, $SEDOVERFLOW, $Wfolders, $Wfolder, $grp, $END_T2_TIME, $TOTAL_T2_TIME, $START_T2_TIME, $_mitre_tag, $_mitre_filter, $_mitre_base, $_mitre_tags_left, $_mitre_filters_left
+# Generated Global Variables: $VERSION, $ADVISORY, $IAMROOT, $MAXPATH_FIND_W, $C, $RED, $SED_RED, $GREEN, $SED_GREEN, $YELLOW, $SED_YELLOW, $RED_YELLOW, $SED_RED_YELLOW, $BLUE, $SED_BLUE, $ITALIC_BLUE, $LIGHT_MAGENTA, $SED_LIGHT_MAGENTA, $LIGHT_CYAN, $SED_LIGHT_CYAN, $LG, $SED_LG, $DG, $SED_DG, $NC, $UNDERLINED, $ITALIC, $MACPEAS, $FAST, $SUPERFAST, $DISCOVERY, $PORTS, $QUIET, $CHECKS, $MITRE_FILTER, $SEARCH_IN_FOLDER, $ROOT_FOLDER, $WAIT, $PASSWORD, $NOCOLOR, $DEBUG, $AUTO_NETWORK_SCAN, $EXTRA_CHECKS, $REGEXES, $PORT_FORWARD, $NOT_CHECK_EXTERNAL_HOSTNAME, $ONLINE_VULN_CHECKS, $E, $PING, $FPING, $DISCOVER_BAN_BAD, $DISCOVER_BAN_GOOD, $SCAN_BAN_GOOD, $NMAP_GOOD, $SCRIPTNAME, $FOUND_BASH, $FOUND_NC, $HOMESEARCH, $GREPHOMESEARCH, $SCAN_BAN_BAD, $HOME, $THREADS, $opt, $HELP, $USER, $TOTAL_T1_TIME, $END_T1_TIME, $START_T1_TIME, $title, $title_len, $max_title_len, $rest_len, $CONT_THREADS, $wgroups, $WF_ALL, $WF_TIMEOUT, $WF_STATUS, $bf_limit, $wf_pid, $wf_timer, $wf_rc, $SEDOVERFLOW, $Wfolders, $Wfolder, $grp, $END_T2_TIME, $TOTAL_T2_TIME, $START_T2_TIME, $_mitre_tag, $_mitre_filter, $_mitre_base, $_mitre_tags_left, $_mitre_filters_left, $_repeat_character_value, $_repeat_character_count, $_filter_writable_folders_max_depth, $_filter_writable_folders_path, $_filter_writable_folders_rest, $_filter_writable_folders_depth
 # Fat linpeas: 0
 # Small linpeas: 1
 
 
 #!/bin/sh
+
+# Match /bin/sh behavior when the script is explicitly run with zsh.
+if command -v emulate >/dev/null 2>&1; then emulate sh; fi
 
 VERSION="ng"
 ADVISORY="This script should be used for authorized penetration testing and/or educational purposes only. Any misuse of this software will not be the responsibility of the author or of any other collaborator. Use it at your own computers and/or with the computer owner's permission."
@@ -85,7 +88,8 @@ EXTRA_CHECKS=""
 REGEXES=""
 PORT_FORWARD=""
 NOT_CHECK_EXTERNAL_HOSTNAME=""
-THREADS="$( ( (grep -c processor /proc/cpuinfo 2>/dev/null) || ( (command -v lscpu >/dev/null 2>&1) && (lscpu | grep '^CPU(s):' | awk '{print $2}')) || echo -n 2) | tr -d "\n")"
+ONLINE_VULN_CHECKS=""
+THREADS="$( ( (grep -c processor /proc/cpuinfo 2>/dev/null) || ( (command -v lscpu >/dev/null 2>&1) && (lscpu | grep '^CPU(s):' | awk '{print $2}')) || sysctl -n hw.ncpu 2>/dev/null || echo -n 2) | tr -d "\n")"
 [ "$THREADS" -eq "$THREADS" ] 2>/dev/null && : || THREADS="2" #If THREADS is not a number, put number 2
 [ "$THREADS" -lt 1 ] 2>/dev/null && THREADS="2" #If THREADS is 0 or negative, put number 2 (avoids division-by-zero in eval_bckgrd)
 HELP=$GREEN"Enumerate and search Privilege Escalation vectors.
@@ -97,6 +101,7 @@ ${NC}This tool enum and search possible misconfigurations$DG (known vulns, user,
         ${YELLOW}    -s${BLUE} Stealth & faster (don't check some time consuming checks)
         ${YELLOW}    -e${BLUE} Perform extra enumeration
         ${YELLOW}    -r${BLUE} Enable Regexes (this can take from some mins to hours)
+        ${YELLOW}    -V${BLUE} Send package/kernel inventory to HackTricks for online vulnerability lookup
         ${YELLOW}    -P${BLUE} Indicate a password that will be used to run 'sudo -l' and to bruteforce other users accounts via 'su'
         ${YELLOW}    -n${BLUE} Do not check hostname & IP in known malicious lists and leaks
 	${YELLOW}    -D${BLUE} Debug mode
@@ -123,10 +128,10 @@ ${NC}This tool enum and search possible misconfigurations$DG (known vulns, user,
         ${YELLOW}    -N${BLUE} Do not use colours
         ${YELLOW}    -z <N>${BLUE} Set number of threads for background checks (default: auto-detected CPU count, fallback: 2; must be >= 1)$NC"
 
-while getopts ":h?asd:p:i:P:qo:T:LMwNDterf:F:z:" opt; do
+while getopts ":h?asd:p:i:P:qno:T:LMwNDterVf:F:z:" opt; do
   case "$opt" in
     h|\?) printf "%s\n\n" "$HELP$NC"; exit 0;;
-    a)  FAST="";EXTRA_CHECKS="1";;
+    a)  FAST="";EXTRA_CHECKS="1";ONLINE_VULN_CHECKS="1";;
     s)  SUPERFAST=1;;
     d)  DISCOVERY=$OPTARG;;
     p)  PORTS=$OPTARG;;
@@ -144,6 +149,7 @@ while getopts ":h?asd:p:i:P:qo:T:LMwNDterf:F:z:" opt; do
     t)  AUTO_NETWORK_SCAN="1";;
     e)  EXTRA_CHECKS="1";;
     r)  REGEXES="1";;
+    V)  ONLINE_VULN_CHECKS="1";;
     f)  SEARCH_IN_FOLDER=$OPTARG;
     	if ! [ "$(echo -n $SEARCH_IN_FOLDER | tail -c 1)" = "/" ]; then #Make sure firmware folder ends with "/"
         SEARCH_IN_FOLDER="${SEARCH_IN_FOLDER}/";
@@ -200,6 +206,36 @@ fi
 # on macOS the built-in echo does not support -n, use /bin/echo instead
 if [ "$MACPEAS" ] ; then alias echo=/bin/echo ; fi
 
+repeat_character(){
+  _repeat_character_value=$1
+  _repeat_character_count=$2
+  while [ "$_repeat_character_count" -gt 0 ]; do
+    printf "%s" "$_repeat_character_value"
+    _repeat_character_count=$((_repeat_character_count - 1))
+  done
+}
+
+filter_writable_folders_by_depth(){
+  _filter_writable_folders_max_depth=$1
+  if command -v awk >/dev/null 2>&1; then
+    awk -v maxdepth="$_filter_writable_folders_max_depth" '{ if (gsub(/\//, "/", $0) <= maxdepth) print }'
+    return
+  fi
+
+  while IFS= read -r _filter_writable_folders_path; do
+    [ -z "$_filter_writable_folders_path" ] && continue
+    _filter_writable_folders_rest=$_filter_writable_folders_path
+    _filter_writable_folders_depth=0
+    while [ "$_filter_writable_folders_rest" != "${_filter_writable_folders_rest#*/}" ]; do
+      _filter_writable_folders_depth=$((_filter_writable_folders_depth + 1))
+      _filter_writable_folders_rest=${_filter_writable_folders_rest#*/}
+    done
+    if [ "$_filter_writable_folders_depth" -le "$_filter_writable_folders_max_depth" ]; then
+      printf '%s\n' "$_filter_writable_folders_path"
+    fi
+  done
+}
+
 print_title(){
   if [ "$DEBUG" ]; then
     END_T1_TIME=$(date +%s 2>/dev/null)
@@ -224,23 +260,23 @@ print_title(){
   rest_len=$((($max_title_len - $title_len) / 2))
 
   printf "%s" "${BLUE}"
-  for i in $(seq 1 $rest_len); do printf " "; done
+  repeat_character " " "$rest_len"
   printf "╔"
-  for i in $(seq 1 $title_len); do printf "═"; done; printf "═";
+  repeat_character "═" "$title_len"; printf "═";
   printf "╗"
 
   echo ""
 
-  for i in $(seq 1 $rest_len); do printf "═"; done
+  repeat_character "═" "$rest_len"
   printf "╣ $GREEN${title}${BLUE} ╠"
-  for i in $(seq 1 $rest_len); do printf "═"; done
+  repeat_character "═" "$rest_len"
 
   echo ""
 
   printf "%s" "${BLUE}"
-  for i in $(seq 1 $rest_len); do printf " "; done
+  repeat_character " " "$rest_len"
   printf "╚"
-  for i in $(seq 1 $title_len); do printf "═"; done; printf "═";
+  repeat_character "═" "$title_len"; printf "═";
   printf "╝"
 
   printf "%s" "${NC}"
@@ -406,7 +442,7 @@ printf ${BLUE}"          $SCRIPTNAME-$VERSION ${YELLOW}by carlospolop\n"$NC;
 echo ""
 printf ${YELLOW}"ADVISORY: ${BLUE}$ADVISORY\n$NC"
 echo ""
-printf ${BLUE}"Linux Privesc Checklist: ${YELLOW}https://book.hacktricks.wiki/en/linux-hardening/linux-privilege-escalation-checklist.html\n"$NC
+printf ${BLUE}"Linux Privesc Checklist: ${YELLOW}https://book.hacktricks.wiki/en/linux-hardening/main-system-information/linux-privilege-escalation-checklist.html\n"$NC
 printf ${BLUE}"Best Linux PE & Hardening course: ${YELLOW}https://hacktricks-training.com/courses/lhe/\n"$NC
 echo " LEGEND:" | sed "s,LEGEND,${C}[1;4m&${C}[0m,"
 echo "  RED/YELLOW: 95% a PE vector" | sed "s,RED/YELLOW,${SED_RED_YELLOW},"
@@ -485,10 +521,10 @@ fi
 
 SCAN_BAN_BAD="No port scan capabilities (nc and bash not found)"
 if [ "$FOUND_BASH" ]; then
-  SCAN_BAN_GOOD="$YELLOW[+] $GREEN$FOUND_BASH${BLUE} is available for network discovery, port scanning and port forwarding$LG ($SCRIPTNAME can discover hosts, scan ports, and forward ports. Learn more with -h)\n"
+  SCAN_BAN_GOOD="${YELLOW}[+] $GREEN$FOUND_BASH${BLUE} is available for network discovery, port scanning and port forwarding$LG ($SCRIPTNAME can discover hosts, scan ports, and forward ports. Learn more with -h)\n"
 fi
 if [ "$FOUND_NC" ]; then
-  SCAN_BAN_GOOD="$SCAN_BAN_GOOD$YELLOW[+] $GREEN$FOUND_NC${BLUE} is available for network discovery & port scanning$LG ($SCRIPTNAME can discover hosts and scan ports, learn more with -h)\n"
+  SCAN_BAN_GOOD="$SCAN_BAN_GOOD${YELLOW}[+] $GREEN$FOUND_NC${BLUE} is available for network discovery & port scanning$LG ($SCRIPTNAME can discover hosts and scan ports, learn more with -h)\n"
 fi
 
 if [ "$SCAN_BAN_GOOD" ]; then
@@ -520,14 +556,43 @@ if [ ! "$HOME" ]; then
   fi
 fi
 
+WF_TIMEOUT="$(command -v timeout 2>/dev/null || command -v gtimeout 2>/dev/null || :)"
+bounded_command() {
+  bf_limit=$1
+  shift
+  if [ "$WF_TIMEOUT" ]; then
+    "$WF_TIMEOUT" "$bf_limit" "$@" 2>/dev/null
+    return $?
+  fi
+  # POSIX shell fallback when neither timeout nor gtimeout is installed.
+  "$@" 2>/dev/null &
+  wf_pid=$!
+  (sleep "$bf_limit"; kill "$wf_pid" 2>/dev/null) >/dev/null 2>&1 &
+  wf_timer=$!
+  wait "$wf_pid"
+  wf_rc=$?
+  kill "$wf_timer" 2>/dev/null
+  wait "$wf_timer" 2>/dev/null
+  return "$wf_rc"
+}
+if [ "$CHECKS" = "container" ]; then
+  # Container-only checks never use Wfolders or Wfolder. Avoid a host-wide
+  # writable-directory inventory before inspecting runtime settings.
+  Wfolders='[a-zA-Z]+[a-zA-Z0-9]* +\*'
+  Wfolder=/tmp
+else
+WF_ALL=$(bounded_command 60 find / -maxdepth "$MAXPATH_FIND_W" \
+  '(' -path /proc -o -path /sys -o -path /System/Volumes/Data ')' -prune -o \
+  -type d '(' -user "$USER" -o -perm -o=w -o '(' -perm -g=w -a '(' $wgroups ')' ')' ')' -print)
+WF_STATUS=$?
+case "$WF_STATUS" in 124|143) printf '%s\n' 'Writable directory search reached 60 seconds; results may be incomplete' >&2;; esac
+WF_ALL=$(printf '%s\n' "$WF_ALL" | sort)
 SEDOVERFLOW=true
 while $SEDOVERFLOW; do
-  #WF=`find /dev /srv /proc /home /media /sys /lost+found /run /etc /root /var /tmp /mnt /boot /opt -type d -maxdepth $MAXPATH_FIND_W -writable -or -user $USER 2>/dev/null | sort`
-  #if [ "$MACPEAS" ]; then
-    WF=$(find / -maxdepth $MAXPATH_FIND_W -type d ! -path "/proc/*" '(' '(' -user $USER ')' -or '(' -perm -o=w ')' -or  '(' -perm -g=w -and '(' $wgroups ')' ')' ')'  2>/dev/null | sort) #OpenBSD find command doesn't have "-writable" option
-  #else
-  #  WF=`find / -maxdepth $MAXPATH_FIND_W -type d ! -path "/proc/*" -and '(' -writable -or -user $USER ')' 2>/dev/null | sort`
-  #fi
+  # The maximum-depth result is reused when the sed expression must be
+  # shortened. Re-running find / for every smaller depth is very costly on
+  # large home directories and produces the same filtered list.
+  WF=$(printf '%s\n' "$WF_ALL" | filter_writable_folders_by_depth "$MAXPATH_FIND_W")
   Wfolders=$(printf "%s" "$WF" | tr '\n' '|')"|[a-zA-Z]+[a-zA-Z0-9]* +\*"
   Wfolder="$(printf "%s" "$WF" | grep "/shm" | head -n1)"  # Try to get /dev/shm
   if ! [ "$Wfolder" ]; then
@@ -543,6 +608,7 @@ while $SEDOVERFLOW; do
      SEDOVERFLOW=false
   fi
 done
+fi
 
 #Get HOMESEARCH
 if [ "$SEARCH_IN_FOLDER" ]; then

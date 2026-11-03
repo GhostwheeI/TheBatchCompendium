@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using winPEAS.Helpers;
 using winPEAS.Helpers.Search;
+using winPEAS.Info.FilesInfo;
 using static winPEAS.Helpers.YamlConfig.YamlConfig.SearchParameters;
 
 namespace winPEAS.Checks
@@ -15,6 +16,93 @@ namespace winPEAS.Checks
     internal class FileAnalysis : ISystemCheck
     {
         private const int ListFileLimit = 70;
+        // Only these YAML categories opt into path filtering on Windows. Other
+        // categories retain their established filename-only behavior.
+        private static readonly HashSet<string> ScopedSensitiveFileSearchNames =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "Splunk", "Solar-PuTTY session stores", "Gitea", "Gitea database",
+                "Backdrop CMS settings candidates", "LimeSurvey", "PSWM vault candidates",
+                "PrestaShop database settings candidates", "ChangeDetection backup candidates",
+                "WonderCMS", "Pluck CMS", "Grafana", "Duplicati server state",
+                "Openfire local configuration and database", "Minecraft plugin JAR candidates",
+                "IIS default webroot backup archive candidates", "TeamCity change patch candidates",
+                "Redis Windows service configuration candidates",
+                "FileZilla Server legacy configuration candidates",
+                "NSClient configuration candidates"
+            };
+
+        internal const int MaxTeamCityChangeFiles = 32;
+        internal const int MaxTeamCityChangeEntries = 256;
+
+        // Add only top-level change patches from a conventional local data directory.
+        // The normal user-profile .BuildServer path is already in RootDirUsers.
+        internal static List<CustomFileInfo> ProbeTeamCityChanges(string commonDataPath, out bool isPartial)
+        {
+            isPartial = false;
+            var files = new List<CustomFileInfo>();
+            if (string.IsNullOrWhiteSpace(commonDataPath)) return files;
+            try
+            {
+                string basePath = Path.GetFullPath(commonDataPath);
+                string root = Path.GetPathRoot(basePath);
+                if (!SqlSetupConfigurationIndicator.IsFixedDriveRoot(root) ||
+                    new DriveInfo(root).DriveType != DriveType.Fixed ||
+                    !IsPlainLocalDirectoryChain(basePath)) return files;
+
+                string changes = basePath;
+                foreach (string part in new[] { "JetBrains", "TeamCity", "system", "changes" })
+                {
+                    changes = Path.Combine(changes, part);
+                    if (!IsPlainDirectoryAttributes(File.GetAttributes(changes))) return files;
+                }
+
+                var timer = Stopwatch.StartNew();
+                int inspected = 0;
+                foreach (string path in Directory.EnumerateFileSystemEntries(changes, "*", SearchOption.TopDirectoryOnly))
+                {
+                    if (timer.ElapsedMilliseconds >= 500 || inspected++ >= MaxTeamCityChangeEntries ||
+                        files.Count >= MaxTeamCityChangeFiles)
+                    {
+                        isPartial = true;
+                        break;
+                    }
+                    if (!Path.GetFileName(path).EndsWith(".changes.diff", StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    var info = new FileInfo(path);
+                    if ((info.Attributes & (FileAttributes.ReparsePoint | FileAttributes.Directory)) != 0)
+                        continue;
+                    files.Add(new CustomFileInfo(info.Name, info.Extension, info.FullName, info.Length, false));
+                }
+            }
+            catch (DirectoryNotFoundException) { }
+            catch (FileNotFoundException) { }
+            catch (Exception) { isPartial = true; }
+            return files;
+        }
+
+        internal static bool IsPlainDirectoryAttributes(FileAttributes attributes)
+        {
+            return (attributes & FileAttributes.Directory) != 0 &&
+                (attributes & FileAttributes.ReparsePoint) == 0;
+        }
+
+        private static bool IsPlainLocalDirectoryChain(string path)
+        {
+            string root = Path.GetPathRoot(path);
+            string relative = path.Substring(root.Length).TrimEnd(Path.DirectorySeparatorChar);
+            string[] parts = relative.Split(new[] { Path.DirectorySeparatorChar },
+                StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length > 12) return false;
+            string current = root;
+            foreach (string part in parts)
+            {
+                if (part == "." || part == "..") return false;
+                current = Path.Combine(current, part);
+                if (!IsPlainDirectoryAttributes(File.GetAttributes(current))) return false;
+            }
+            return true;
+        }
 
         public string[] MitreAttackIds { get; } = new[] { "T1552.001", "T1083" };
 
@@ -38,6 +126,11 @@ namespace winPEAS.Checks
             {
                 @$"{systemDrive}inetpub",
                 @$"{systemDrive}usr\etc\snmp",
+                // Windows Kubernetes nodes commonly keep kubelet, kube-proxy,
+                // CNI, and runtime state below these Unix-like paths.
+                @$"{systemDrive}etc",
+                @$"{systemDrive}var",
+                @$"{systemDrive}run",
                 @$"{systemDrive}windows\temp",
                 @$"{systemDrive}xampp",
             };
@@ -86,6 +179,12 @@ namespace winPEAS.Checks
                 pattern = GetRegexpFromString(fileName);
             }
 
+            if (files.Count == 0) return new bool[] { false, somethingFound };
+
+            // These literal search terms do not depend on the inventory entry.
+            string exactFileName = !isFolder && pattern == string.Empty ? fileName.ToLower() : null;
+            string exactFolder = isFolder && pattern == string.Empty ? $"\\{fileName}\\" : null;
+
             foreach (var file in files)
             {
                 bool isFileFound = false;
@@ -94,7 +193,7 @@ namespace winPEAS.Checks
                 {
                     if (pattern == string.Empty)
                     {
-                        isFileFound = file.FullPath.ToLower().Contains($"\\{fileName}\\");
+                        isFileFound = file.FullPath.ToLower().Contains(exactFolder);
                     }
                     else
                     {
@@ -105,7 +204,7 @@ namespace winPEAS.Checks
                                 isFileFound = Regex.IsMatch(fold, pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(20));
                                 if (isFileFound) break;
                             }
-                            catch (RegexMatchTimeoutException e)
+                            catch (RegexMatchTimeoutException)
                             {
                                 if (Checks.IsDebug)
                                 {
@@ -119,7 +218,7 @@ namespace winPEAS.Checks
                 {
                     if (pattern == String.Empty)
                     {
-                        isFileFound = file.Filename.ToLower() == fileName.ToLower();
+                        isFileFound = file.Filename.ToLower() == exactFileName;
                     }
                     else
                     {
@@ -127,7 +226,7 @@ namespace winPEAS.Checks
                         {
                             isFileFound = Regex.IsMatch(file.Filename, pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(20));
                         }
-                        catch (RegexMatchTimeoutException e)
+                        catch (RegexMatchTimeoutException)
                         {
                             if (Checks.IsDebug)
                             {
@@ -140,6 +239,11 @@ namespace winPEAS.Checks
 
                 if (isFileFound)
                 {
+                    // Scope only opted-in YAML selectors; other records retain
+                    // their established Windows matching behavior.
+                    if (!MatchesScopedSensitiveFilePath(searchName, file.FullPath,
+                        fileSettings.check_extra_path)) continue;
+
                     if (!somethingFound)
                     {
                         Beaprint.MainPrint($"Found {searchName} Files", "T1552.001");
@@ -170,48 +274,81 @@ namespace winPEAS.Checks
             return new bool[] { false, somethingFound };
         }
 
-        public static List<string> SearchContent(string text, string regex_str, bool caseinsensitive)
+        internal static bool MatchesScopedSensitiveFilePath(string searchName, string path,
+            string extraPathPattern)
         {
-            List<string> foundMatches = new List<string>();
-
+            if (!ScopedSensitiveFileSearchNames.Contains(searchName ?? string.Empty))
+                return true;
+            if (string.IsNullOrEmpty(extraPathPattern))
+            {
+                // Preserve existing Splunk behavior and Grafana's grafana.ini;
+                // a new Grafana database without a path pattern fails closed.
+                if (string.Equals(searchName, "Splunk", StringComparison.OrdinalIgnoreCase))
+                    return true;
+                if (!string.Equals(searchName, "Grafana", StringComparison.OrdinalIgnoreCase) ||
+                    string.IsNullOrWhiteSpace(path)) return false;
+                string portablePath = path.Replace('\\', '/');
+                return string.Equals(portablePath, "grafana.ini", StringComparison.OrdinalIgnoreCase) ||
+                    portablePath.EndsWith("/grafana.ini", StringComparison.OrdinalIgnoreCase);
+            }
+            if (string.IsNullOrWhiteSpace(path)) return false;
             try
             {
-                Regex rgx;
-                bool is_re_match = false;
+                return Regex.IsMatch(path.Replace('\\', '/'), extraPathPattern,
+                    RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(100));
+            }
+            catch (ArgumentException) { return false; }
+            catch (RegexMatchTimeoutException) { return false; }
+        }
+
+        public static List<string> SearchContent(string text, string regex_str, bool caseinsensitive)
+        {
+            try
+            {
+                Regex matchRegex;
+                Regex captureRegex;
+                CreateSearchRegexes(regex_str, caseinsensitive, out matchRegex, out captureRegex);
+                return SearchContent(text, regex_str, matchRegex, captureRegex);
+            }
+            catch (Exception e)
+            {
+                Beaprint.GrayPrint($"Error looking for regex {regex_str} inside files: {e}");
+                return new List<string>();
+            }
+        }
+
+        private static void CreateSearchRegexes(string regex, bool caseInsensitive,
+            out Regex matchRegex, out Regex captureRegex)
+        {
+            // Keep the existing two-regex behavior: the initial IsMatch is bounded,
+            // while Matches retains its established options and timeout behavior.
+            string pattern = regex.Trim();
+            RegexOptions options = caseInsensitive ? RegexOptions.IgnoreCase : RegexOptions.None;
+            matchRegex = new Regex(pattern, options, TimeSpan.FromSeconds(120));
+            captureRegex = new Regex(pattern, options);
+        }
+
+        internal static List<string> SearchContent(string text, string regex,
+            Regex matchRegex, Regex captureRegex)
+        {
+            List<string> foundMatches = new List<string>();
+            try
+            {
                 try
                 {
-                    // Escape backslashes in the regex string - I don't think this is needed anymore
-                    //string escapedRegex = regex_str.Trim().Replace(@"\", @"\\");
-                    string escapedRegex = regex_str.Trim();
-
-                    // Use "IsMatch" because it supports timeout, if exception is thrown exit the func to avoid ReDoS in "rgx.Matches"
-                    if (caseinsensitive)
-                    {
-                        is_re_match = Regex.IsMatch(text, escapedRegex, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(120));
-                        rgx = new Regex(escapedRegex, RegexOptions.IgnoreCase);
-                    }
-                    else
-                    {
-                        is_re_match = Regex.IsMatch(text, escapedRegex, RegexOptions.None, TimeSpan.FromSeconds(120));
-                        rgx = new Regex(escapedRegex);
-                    }
+                    if (!matchRegex.IsMatch(text)) return foundMatches;
                 }
-                catch (RegexMatchTimeoutException e)
+                catch (RegexMatchTimeoutException)
                 {
                     if (Checks.IsDebug)
                     {
-                        Beaprint.GrayPrint($"The regex {regex_str} had a timeout (ReDoS avoided but regex unchecked in a file)");
+                        Beaprint.GrayPrint($"The regex {regex} had a timeout (ReDoS avoided but regex unchecked in a file)");
                     }
-                    return foundMatches;
-                }
-
-                if (!is_re_match)
-                {
                     return foundMatches;
                 }
 
                 int cont = 0;
-                foreach (Match match in rgx.Matches(text))
+                foreach (Match match in captureRegex.Matches(text))
                 {
                     if (cont > 10) break;
 
@@ -223,7 +360,7 @@ namespace winPEAS.Checks
             }
             catch (Exception e)
             {
-                Beaprint.GrayPrint($"Error looking for regex {regex_str} inside files: {e}");
+                Beaprint.GrayPrint($"Error looking for regex {regex} inside files: {e}");
             }
 
             return foundMatches;
@@ -234,6 +371,19 @@ namespace winPEAS.Checks
             try
             {
                 var files = InitializeFileSearch();
+                // SQL setup media is often staged directly below the system drive.
+                // Probe only immediate SQL* directories and their immediate children.
+                SqlSetupCandidateInventory sqlSetup = SqlSetupConfigurationIndicator.ScanDriveRoot(
+                    SearchHelper.SystemDrive + "\\");
+                files.InsertRange(0, sqlSetup.Files);
+                if (sqlSetup.Partial)
+                    Beaprint.GrayPrint("SQL setup file probe was partial (directory or time limit).");
+                bool teamCityPartial;
+                files.InsertRange(0, ProbeTeamCityChanges(
+                    Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                    out teamCityPartial));
+                if (teamCityPartial)
+                    Beaprint.GrayPrint("TeamCity change patch probe was partial (directory-entry, file, or time limit).");
                 //var folders = files.Where(f => f.IsDirectory).ToList();
                 var config = Checks.YamlConfig;
                 var defaults = config.defaults;
@@ -270,7 +420,7 @@ namespace winPEAS.Checks
                     }, Checks.IsDebug);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
             }
         }
@@ -420,7 +570,7 @@ namespace winPEAS.Checks
                         {
                             num_threads = Environment.ProcessorCount;
                         }
-                        catch (Exception ex) { }
+                        catch (Exception) { }
 
                         Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = num_threads }, f =>
                         {
@@ -443,12 +593,28 @@ namespace winPEAS.Checks
 
                                     try
                                     {
+                                        Regex matchRegex = null;
+                                        Regex captureRegex = null;
+                                        try
+                                        {
+                                            CreateSearchRegexes(regex.regex, (bool)regex.caseinsensitive,
+                                                out matchRegex, out captureRegex);
+                                        }
+                                        catch (Exception)
+                                        {
+                                            // Preserve the established per-line error handling for malformed patterns.
+                                            matchRegex = null;
+                                            captureRegex = null;
+                                        }
+
                                         using (StreamReader sr = new StreamReader(f.FullPath))
                                         {
                                             string line;
                                             while ((line = sr.ReadLine()) != null)
                                             {
-                                                List<string> results = SearchContent(line, regex.regex, (bool)regex.caseinsensitive);
+                                                List<string> results = matchRegex == null
+                                                    ? SearchContent(line, regex.regex, (bool)regex.caseinsensitive)
+                                                    : SearchContent(line, regex.regex, matchRegex, captureRegex);
                                                 if (results.Count > 0)
                                                 {
                                                     if (!fileResults.ContainsKey(f.FullPath))
@@ -571,6 +737,25 @@ namespace winPEAS.Checks
                     { fileInfo.Filename, Beaprint.ansi_color_bad }
                 };
                 Beaprint.AnsiPrint($"File: {fileInfo.FullPath}", colors);
+
+                if (SqlSetupConfigurationIndicator.IsSetupConfigName(fileInfo.Filename))
+                {
+                    if (resultsCount <= SqlSetupConfigurationIndicator.MaxConfigReads)
+                    {
+                        SqlSetupMarkerAssessment assessment = SqlSetupConfigurationIndicator.Inspect(
+                            fileInfo.FullPath, fileInfo.Size);
+                        if (assessment.Markers.Count > 0)
+                            Beaprint.BadPrint("    Possible populated SQL setup credential fields: " +
+                                string.Join(", ", assessment.Markers) + " (values redacted; validity unknown)");
+                        else if (!assessment.Partial)
+                            Beaprint.GrayPrint("    No populated SQL setup credential fields found in bounded sample.");
+                        if (assessment.Partial)
+                            Beaprint.GrayPrint("    SQL setup file inspection partial: " + assessment.Reason);
+                    }
+                    else
+                        Beaprint.GrayPrint("    SQL setup file marker inspection capped; path only.");
+                    return true;
+                }
 
                 if (!(bool)fileSettings.just_list_file)
                 {

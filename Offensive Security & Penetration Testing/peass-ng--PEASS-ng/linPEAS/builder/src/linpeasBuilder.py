@@ -1,8 +1,11 @@
+import gzip
+import io
 import re
 import requests
 import base64
 import os
-from pathlib import Path
+import tarfile
+import zlib
 
 from .peasLoaded import PEASLoaded
 from .peassRecord import PEASRecord
@@ -16,8 +19,6 @@ from .yamlGlobals import (
     INT_HIDDEN_FILES_MARKUP,
     ROOT_FOLDER,
     STORAGE_TEMPLATE,
-    FIND_TEMPLATE,
-    FIND_LINE_MARKUP,
     STORAGE_LINE_MARKUP,
     STORAGE_LINE_EXTRA_MARKUP,
     EXTRASECTIONS_MARKUP,
@@ -52,8 +53,8 @@ class LinpeasBuilder:
         if len(re.findall(r"PSTORAGE_[a-zA-Z0-9_]+", self.linpeas_sh)) > 1: #Only add storages if there are storages (PSTORAGE_BACKUPS is always there so it doesn't count)
             print("[+] Building finds...")
             find_calls, find_custom_calls = self.__generate_finds()
-            self.__replace_mark(PEAS_FINDS_MARKUP, find_calls, "  ")
-            self.__replace_mark(PEAS_FINDS_CUSTOM_MARKUP, find_custom_calls, "  ")
+            self.__replace_mark(PEAS_FINDS_MARKUP, find_calls, "\n  ")
+            self.__replace_mark(PEAS_FINDS_CUSTOM_MARKUP, find_custom_calls, "\n  ")
 
             print("[+] Building storages...")
             storage_vars = self.__generate_storages()
@@ -175,31 +176,39 @@ class LinpeasBuilder:
                     
                     if type == "d": 
                         find_line += "-type d "
-                        bash_find_var = f"FIND_DIR_{r[1:].replace('.','').replace('-','_').replace('{ROOT_FOLDER}','').upper()}"
+                        bash_find_var = f"FIND_DIR_{r[1:].replace('.','').replace('-','_').replace('/','_').replace('{ROOT_FOLDER}','').upper()}"
                         self.bash_find_d_vars.add(bash_find_var)
                         all_folder_regexes += regexes
                     else:
-                        bash_find_var = f"FIND_{r[1:].replace('.','').replace('-','_').replace('{ROOT_FOLDER}','').upper()}"
+                        bash_find_var = f"FIND_{r[1:].replace('.','').replace('-','_').replace('/','_').replace('{ROOT_FOLDER}','').upper()}"
                         self.bash_find_f_vars.add(bash_find_var)
                         all_file_regexes += regexes
 
-                    find_line += '-name \\"' + '\\" -o -name \\"'.join(regexes) + '\\"'
-                    find_line = FIND_TEMPLATE.replace(FIND_LINE_MARKUP, find_line)
-                    find_line = f"{bash_find_var}={find_line}"
+                    find_line += '\\( -name "' + '" -o -name "'.join(regexes) + '" \\)'
+                    find_line = f"cache_find {bash_find_var} {find_line}"
                     finds.append(find_line)
         
         # Buid folder and files finds when searching in a custom folder
         all_folder_regexes = list(set(all_folder_regexes))
-        find_line = '$SEARCH_IN_FOLDER -type d -name \\"' + '\\" -o -name \\"'.join(all_folder_regexes) + '\\"'
-        find_line = FIND_TEMPLATE.replace(FIND_LINE_MARKUP, find_line)
-        find_line = f"FIND_DIR_CUSTOM={find_line}"
+        find_line = '"$SEARCH_IN_FOLDER" -type d \\( -name "' + '" -o -name "'.join(all_folder_regexes) + '" \\)'
+        find_line = f"cache_find FIND_DIR_CUSTOM {find_line}"
         finds_custom.append(find_line)
         
         all_file_regexes = list(set(all_file_regexes))
-        find_line = '$SEARCH_IN_FOLDER -name \\"' + '\\" -o -name \\"'.join(all_file_regexes) + '\\"'
-        find_line = FIND_TEMPLATE.replace(FIND_LINE_MARKUP, find_line)
-        find_line = f"FIND_CUSTOM={find_line}"
+        find_line = '"$SEARCH_IN_FOLDER" \\( -name "' + '" -o -name "'.join(all_file_regexes) + '" \\)'
+        find_line = f"cache_find FIND_CUSTOM {find_line}"
         finds_custom.append(find_line)
+
+        # Read the results only after every background find has finished.
+        # Command substitutions around background jobs wait for their output
+        # pipes and turn the apparent parallelism into serial traversals.
+        for calls, variables in (
+            (finds, sorted(self.bash_find_d_vars | self.bash_find_f_vars)),
+            (finds_custom, ["FIND_DIR_CUSTOM", "FIND_CUSTOM"]),
+        ):
+            calls.append("wait")
+            calls.extend(f'{var}=$(cat "$FIND_CACHE_DIR/{var}" 2>/dev/null)' for var in variables)
+            calls.append('rm -rf "$FIND_CACHE_DIR"')
             
         return finds, finds_custom
 
@@ -348,49 +357,87 @@ class LinpeasBuilder:
         return bin_b64
     
     def __get_gtfobins_lists(self) -> tuple:
-        bins = []
-        api_url = "https://api.github.com/repos/GTFOBins/GTFOBins.github.io/contents/_gtfobins?per_page=100"
-        while api_url:
-            r = requests.get(api_url, timeout=10)
-            if not r.ok:
-                break
-            data = r.json()
-            for entry in data:
-                if entry.get("type") == "file" and entry.get("name"):
-                    bins.append(entry["name"])
-            api_url = None
-            link = r.headers.get("Link", "")
-            for part in link.split(","):
-                if 'rel="next"' in part:
-                    api_url = part.split(";")[0].strip().strip("<>")
-                    break
-        if not bins:
-            r = requests.get("https://github.com/GTFOBins/GTFOBins.github.io/tree/master/_gtfobins", timeout=10)
-            bins = re.findall(r'_gtfobins/([a-zA-Z0-9_ \-]+)(?:\\.md)?', r.text)
-
-        sudoVB = []
-        suidVB = []
-        capsVB = []
-
-        for b in bins:
+        # One repository archive replaces a directory listing and hundreds of
+        # sequential raw-file requests. Every build uses the current archive.
+        archive_url = "https://codeload.github.com/GTFOBins/GTFOBins.github.io/tar.gz/refs/heads/master"
+        try:
+            response = requests.get(archive_url, timeout=(3, 8), stream=True)
             try:
-                rb = requests.get(f"https://raw.githubusercontent.com/GTFOBins/GTFOBins.github.io/master/_gtfobins/{b}", timeout=5)
-            except:
-                try:
-                    rb = requests.get(f"https://raw.githubusercontent.com/GTFOBins/GTFOBins.github.io/master/_gtfobins/{b}", timeout=5)
-                except:
-                    rb = requests.get(f"https://raw.githubusercontent.com/GTFOBins/GTFOBins.github.io/master/_gtfobins/{b}", timeout=5)
-            if "sudo:" in rb.text:
-                if len(b) <= 3:
-                    sudoVB.append("[^a-zA-Z0-9]"+b+"$") # Less false possitives applied to small names
-                else:
-                    sudoVB.append(b+"$")
-            if "suid:" in rb.text:
-                suidVB.append("/"+b+"$")
-            if "capabilities:" in rb.text:
-                capsVB.append(b)
-        
+                response.raise_for_status()
+                content = bytearray()
+                for chunk in response.iter_content(chunk_size=64 * 1024):
+                    if len(content) + len(chunk) > 2 * 1024 * 1024:
+                        raise ValueError("GTFOBins archive exceeds size limit")
+                    content.extend(chunk)
+            finally:
+                response.close()
+            categories = self.__gtfobins_archive_categories(content)
+            self.__validate_gtfobins_categories(categories)
+        except (requests.RequestException, tarfile.TarError, OSError, ValueError, EOFError, zlib.error) as exc:
+            raise RuntimeError(
+                "Cannot build GTFOBins lists: failed to download or validate the current archive"
+            ) from exc
+
+        # sudoers aliases and sudo -l may list several commands on one line.
+        sudo_command_boundary = "([[:space:]]*[,]|$)"
+        sudoVB = [
+            ("[^a-zA-Z0-9]" if len(name) <= 3 else "") + name + sudo_command_boundary
+            for name in categories["sudo"]
+        ]
+        suidVB = ["/" + name + "$" for name in categories["suid"]]
+        capsVB = categories["capabilities"]
         return (suidVB, sudoVB, capsVB)
+
+    @staticmethod
+    def __gtfobins_archive_categories(content: bytes) -> dict:
+        categories = {"sudo": [], "suid": [], "capabilities": []}
+        seen = set()
+        members = 0
+        total_bytes = 0
+        # Bound the whole tar stream before parsing: extension headers and
+        # padding are not included in the member sizes yielded by tarfile.
+        with gzip.GzipFile(fileobj=io.BytesIO(content)) as compressed:
+            expanded = compressed.read(16 * 1024 * 1024 + 1)
+        if len(expanded) > 16 * 1024 * 1024:
+            raise ValueError("GTFOBins archive exceeds expanded size limit")
+        with tarfile.open(fileobj=io.BytesIO(expanded), mode="r:") as archive:
+            for member in archive:
+                members += 1
+                if members > 2048:
+                    raise ValueError("GTFOBins archive has too many entries")
+                # Skipped members must also fit the expanded-size budget:
+                # tarfile traverses their payload to reach the next header.
+                total_bytes += member.size
+                if total_bytes > 16 * 1024 * 1024:
+                    raise ValueError("GTFOBins archive exceeds expanded size limit")
+                marker = "/_gtfobins/"
+                if not member.isfile() or marker not in member.name or member.size > 128 * 1024:
+                    continue
+                name = member.name.split(marker, 1)[1]
+                if not re.fullmatch(r"[A-Za-z0-9_ .+-]{1,80}", name) or name in seen:
+                    continue
+                member_file = archive.extractfile(member)
+                if member_file is None:
+                    continue
+                seen.add(name)
+                body = member_file.read().decode("utf-8", "replace")
+                for category in categories:
+                    if category + ":" in body:
+                        categories[category].append(name)
+        for category in categories:
+            categories[category].sort()
+        return categories
+
+    @staticmethod
+    def __validate_gtfobins_categories(categories: dict) -> None:
+        limits = {"suid": 185, "sudo": 250, "capabilities": 2}
+        for category, minimum in limits.items():
+            names = categories.get(category)
+            if not isinstance(names, list) or len(names) <= minimum or names != sorted(set(names)):
+                raise ValueError(f"Incomplete GTFOBins {category} list")
+            if not all(isinstance(name, str) and re.fullmatch(r"[A-Za-z0-9_ .+-]{1,80}", name)
+                       for name in names):
+                raise ValueError(f"Invalid GTFOBins {category} entry")
     
     def __generate_regexes_search(self) -> str:
         regexes = REGEXES_LOADED["regular_expresions"]

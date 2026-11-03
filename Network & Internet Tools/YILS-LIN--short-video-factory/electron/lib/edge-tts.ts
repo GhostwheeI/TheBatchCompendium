@@ -1,4 +1,4 @@
-import Crypto from 'crypto'
+import { generateSecMsGecV2 } from './edge-tts-gec'
 import axios from 'axios'
 import WebSocket from 'ws'
 import { writeFileSync } from 'node:fs'
@@ -17,7 +17,7 @@ export const VOICE_LIST_URL = `https://${BASE_URL}/voices/list?trustedclienttoke
 
 export const CHROMIUM_FULL_VERSION = '143.0.3650.75'
 export const CHROMIUM_MAJOR_VERSION = CHROMIUM_FULL_VERSION.split('.', 1)[0]
-export const SEC_MS_GEC_VERSION = `1-${CHROMIUM_FULL_VERSION}`
+export const SEC_MS_GEC_VERSION = `2-${CHROMIUM_FULL_VERSION}`
 
 export const WIN_EPOCH = 11644473600
 export const S_TO_NS = 1e9
@@ -138,6 +138,133 @@ export interface SynthesisResult {
    * Get Caption Srt String
    */
   getCaptionSrtString(): string
+
+  /**
+   * Get raw word boundaries for combining chunked synthesis results.
+   */
+  getWordList(): readonly WordBoundary[]
+}
+
+export type EdgeTTSErrorCode =
+  | 'WEBSOCKET_CONNECTION_FAILED'
+  | 'WEBSOCKET_503'
+  | 'WEBSOCKET_CLOSED_EARLY'
+  | 'NO_AUDIO_RECEIVED'
+  | 'INVALID_AUDIO_BUFFER'
+
+export interface EdgeTTSDiagnostics {
+  requestId: string
+  attempt: number
+  voice: string
+  textLength: number
+  startedAt: string
+  elapsedMs?: number
+  messageTypes: string[]
+  messageCounts: Record<string, number>
+  audioBytes: number
+  closeCode?: number
+  closeReason?: string
+  error?: string
+}
+
+export class EdgeTTSError extends Error {
+  constructor(
+    public readonly code: EdgeTTSErrorCode,
+    message: string,
+    public readonly diagnostics: EdgeTTSDiagnostics,
+    public readonly retryable: boolean,
+    public readonly cause?: unknown,
+  ) {
+    super(message)
+    this.name = 'EdgeTTSError'
+  }
+}
+
+const MAX_RETRIES = 3
+const RETRY_DELAYS_MS = [1000, 3000, 7000]
+const DIAGNOSTIC_MESSAGE_TYPES = new Set([
+  'turn.start',
+  'response',
+  'audio.metadata',
+  'audio',
+  'turn.end',
+])
+const MAX_MP3_HEADER_SCAN_BYTES = 16 * 1024
+const MIN_VALID_AUDIO_BYTES = 512
+const WEBSOCKET_HANDSHAKE_TIMEOUT_MS = 15_000
+const WEBSOCKET_IDLE_TIMEOUT_MS = 30_000
+const AUDIO_BITS_PER_SECOND = 48_000
+
+function getWebSocketMessagePath(data: Buffer): string | undefined {
+  const marker = Buffer.from('Path:')
+  const start = data.indexOf(marker)
+  if (start === -1) return undefined
+
+  const valueStart = start + marker.length
+  const end = data.indexOf(Buffer.from('\r\n'), valueStart)
+  if (end === -1) return undefined
+  return data.subarray(valueStart, end).toString('utf-8').trim()
+}
+
+/** Reject obvious non-MP3 responses before they can reach video rendering. */
+export function hasMp3FrameHeader(buffer: Buffer): boolean {
+  if (buffer.length < MIN_VALID_AUDIO_BYTES) return false
+
+  const scanLength = Math.min(buffer.length - 3, MAX_MP3_HEADER_SCAN_BYTES)
+  for (let index = 0; index < scanLength; index++) {
+    const first = buffer[index]
+    const second = buffer[index + 1]
+    const third = buffer[index + 2]
+    const mpegVersion = (second >> 3) & 0x03
+    if (
+      first === 0xff &&
+      (second & 0xe0) === 0xe0 &&
+      mpegVersion !== 0x01 &&
+      (second & 0x06) !== 0 &&
+      ((third >> 4) & 0x0f) !== 0 &&
+      ((third >> 4) & 0x0f) !== 0x0f
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
+function createAbortError(): Error {
+  const error = new Error('EdgeTTS synthesis cancelled')
+  error.name = 'AbortError'
+  return error
+}
+
+function getRetryDelayMs(retryIndex: number): number {
+  const baseDelay = RETRY_DELAYS_MS[retryIndex] ?? RETRY_DELAYS_MS[RETRY_DELAYS_MS.length - 1]
+  // Keep retries from forming a predictable request burst across clients.
+  const jitter = Math.round(Math.random() * 400 - 200)
+  return Math.max(0, baseDelay + jitter)
+}
+
+function wait(ms: number, abortSignal?: AbortSignal): Promise<void> {
+  if (abortSignal?.aborted) return Promise.reject(createAbortError())
+
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      cleanup()
+      resolve()
+    }, ms)
+    const onAbort = () => {
+      clearTimeout(timer)
+      cleanup()
+      reject(createAbortError())
+    }
+    const cleanup = () => abortSignal?.removeEventListener('abort', onAbort)
+
+    abortSignal?.addEventListener('abort', onAbort, { once: true })
+    if (abortSignal?.aborted) onAbort()
+  })
 }
 
 const INCOMPATIBLE_CODE_RANGES = [
@@ -292,21 +419,7 @@ export class DRM {
    * Generates the Sec-MS-GEC token.
    */
   static generateSecMsGec(): string {
-    let ticks = DRM.getUnixTimestamp()
-
-    // Convert to Windows file time
-    ticks += WIN_EPOCH
-
-    // Round down to nearest 5 minutes (300 seconds)
-    ticks -= ticks % 300
-
-    // Convert to 100-nanosecond intervals
-    ticks *= S_TO_NS / 100
-
-    const strToHash = `${Math.floor(ticks)}${Constants.TRUSTED_CLIENT_TOKEN}`
-    const hash = Crypto.createHash('sha256')
-    hash.update(strToHash, 'ascii')
-    return hash.digest('hex').toUpperCase()
+    return generateSecMsGecV2(DRM.getUnixTimestamp(), Constants.TRUSTED_CLIENT_TOKEN)
   }
 }
 
@@ -415,12 +528,18 @@ class SynthesisResultImpl implements SynthesisResult {
 
     return subtitleStringifySync(srtCaptionList, { format: 'SRT' })
   }
+
+  getWordList(): readonly WordBoundary[] {
+    return this.wordList
+  }
 }
 
 export class EdgeTTS {
+  private synthesisQueue: Promise<void> = Promise.resolve()
+
   async getVoices(): Promise<EdgeTTSVoice[]> {
     const response = await axios.get(
-      `${Constants.VOICES_URL}?trustedclienttoken=${Constants.TRUSTED_CLIENT_TOKEN}`,
+      `${VOICE_LIST_URL}&Sec-MS-GEC=${DRM.generateSecMsGec()}&Sec-MS-GEC-Version=${SEC_MS_GEC_VERSION}`,
       {
         headers: VOICE_HEADERS,
       },
@@ -478,40 +597,124 @@ export class EdgeTTS {
     text: string,
     voice: string = 'en-US-AnaNeural',
     options: SynthesisOptions = {},
+    abortSignal?: AbortSignal,
   ): Promise<SynthesisResult> {
+    if (abortSignal?.aborted) throw createAbortError()
+    return this.enqueue(() => {
+      if (abortSignal?.aborted) throw createAbortError()
+      return this.synthesizeQueued(text, voice, options, abortSignal)
+    })
+  }
+
+  private async enqueue<T>(operation: () => Promise<T>): Promise<T> {
+    const previous = this.synthesisQueue
+    let release: () => void = () => undefined
+    this.synthesisQueue = new Promise((resolve) => {
+      release = resolve
+    })
+
+    return previous.then(operation, operation).finally(release)
+  }
+
+  private async synthesizeQueued(
+    text: string,
+    voice: string,
+    options: SynthesisOptions,
+    abortSignal?: AbortSignal,
+  ): Promise<SynthesisResult> {
+    if (abortSignal?.aborted) throw createAbortError()
     const cleanedText = removeIncompatibleCharacters(text)
     const textChunks = splitTextByByteLength(cleanedText, 4096)
 
     if (textChunks.length === 1) {
-      return this.synthesizeSingle(text, voice, options)
+      return this.synthesizeSingleWithRetry(text, voice, options, abortSignal)
     }
 
     const allAudioData: Buffer[] = []
     const allWordList: WordBoundary[] = []
     let offsetCompensation = 0
-
     for (const chunk of textChunks) {
-      const result = await this.synthesizeSingle(chunk, voice, options)
+      if (abortSignal?.aborted) throw createAbortError()
+      const result = await this.synthesizeSingleWithRetry(chunk, voice, options, abortSignal)
       const audioData = result.getBuffer()
       if (audioData.length > 0) {
         allAudioData.push(audioData)
       }
-      allWordList.push(...allWordList)
-      offsetCompensation += 8_750_000
+      allWordList.push(
+        ...result.getWordList().map((word) => ({
+          ...word,
+          Offset: word.Offset + offsetCompensation,
+        })),
+      )
+      offsetCompensation += Math.round((audioData.length * 8 * 10 ** 7) / AUDIO_BITS_PER_SECOND)
     }
 
     return new SynthesisResultImpl(allWordList, allAudioData)
+  }
+
+  private async synthesizeSingleWithRetry(
+    text: string,
+    voice: string,
+    options: SynthesisOptions,
+    abortSignal?: AbortSignal,
+  ): Promise<SynthesisResult> {
+    let lastError: unknown
+    for (let attempt = 1; attempt <= MAX_RETRIES + 1; attempt++) {
+      try {
+        return await this.synthesizeSingle(text, voice, options, attempt, abortSignal)
+      } catch (error) {
+        lastError = error
+        if (abortSignal?.aborted || (error as { name?: string })?.name === 'AbortError') {
+          throw error
+        }
+        const retryable = error instanceof EdgeTTSError && error.retryable
+        if (!retryable || attempt > MAX_RETRIES) {
+          throw error
+        }
+
+        const delayMs = getRetryDelayMs(attempt - 1)
+        console.warn('[EdgeTTS] synthesis-retry-scheduled', {
+          code: error.code,
+          attempt,
+          nextAttempt: attempt + 1,
+          delayMs,
+          diagnostics: error.diagnostics,
+        })
+        await wait(delayMs, abortSignal)
+      }
+    }
+    throw lastError
   }
 
   private async synthesizeSingle(
     text: string,
     voice: string,
     options: SynthesisOptions,
+    attempt: number,
+    abortSignal?: AbortSignal,
   ): Promise<SynthesisResult> {
+    if (abortSignal?.aborted) throw createAbortError()
+    // Validate local SSML inputs before opening a network connection.
+    const ssmlText = this.getSSML(text, voice, options)
+
     return new Promise((resolve, reject) => {
       const audioStream: Buffer[] = []
       const wordList: WordBoundary[] = []
       const requestId = this.generateUUID()
+      const startedAt = Date.now()
+      const diagnostics: EdgeTTSDiagnostics = {
+        requestId,
+        attempt,
+        voice,
+        textLength: text.length,
+        startedAt: new Date(startedAt).toISOString(),
+        messageTypes: [],
+        messageCounts: {},
+        audioBytes: 0,
+      }
+      let settled = false
+      let receivedTurnEnd = false
+      let idleTimeout: NodeJS.Timeout | undefined
       const ws = new WebSocket(
         `${Constants.WSS_URL}?trustedclienttoken=${Constants.TRUSTED_CLIENT_TOKEN}` +
           `&Sec-MS-GEC=${DRM.generateSecMsGec()}` +
@@ -519,32 +722,165 @@ export class EdgeTTS {
           `&ConnectionId=${requestId}`,
         {
           headers: WSS_HEADERS,
+          handshakeTimeout: WEBSOCKET_HANDSHAKE_TIMEOUT_MS,
         },
       )
 
-      const ssmlText = this.getSSML(text, voice, options)
+      const clearIdleTimeout = () => {
+        if (idleTimeout) {
+          clearTimeout(idleTimeout)
+          idleTimeout = undefined
+        }
+      }
+
+      const cleanup = () => {
+        clearIdleTimeout()
+        abortSignal?.removeEventListener('abort', onAbort)
+      }
+
+      const onAbort = () => {
+        if (settled) return
+        settled = true
+        cleanup()
+        reject(createAbortError())
+        ws.terminate()
+      }
+
+      const resetIdleTimeout = () => {
+        if (settled) return
+        clearIdleTimeout()
+        idleTimeout = setTimeout(() => {
+          finishWithError('WEBSOCKET_CLOSED_EARLY', 'WebSocket 长时间未收到上游消息', true)
+          ws.terminate()
+        }, WEBSOCKET_IDLE_TIMEOUT_MS)
+      }
+
+      const recordMessage = (path: string | undefined) => {
+        if (!path) return
+        const messageType = DIAGNOSTIC_MESSAGE_TYPES.has(path) ? path : 'other'
+        if (!diagnostics.messageTypes.includes(messageType))
+          diagnostics.messageTypes.push(messageType)
+        diagnostics.messageCounts[messageType] = (diagnostics.messageCounts[messageType] ?? 0) + 1
+      }
+
+      const finishWithError = (
+        code: EdgeTTSErrorCode,
+        message: string,
+        retryable: boolean,
+        cause?: unknown,
+      ) => {
+        if (settled) return
+        settled = true
+        cleanup()
+        diagnostics.elapsedMs = Date.now() - startedAt
+        diagnostics.audioBytes = audioStream.reduce((total, chunk) => total + chunk.length, 0)
+        diagnostics.error = cause ? getErrorMessage(cause) : message
+        const detail = JSON.stringify({
+          attempt: diagnostics.attempt,
+          voice: diagnostics.voice,
+          textLength: diagnostics.textLength,
+          audioBytes: diagnostics.audioBytes,
+          closeCode: diagnostics.closeCode,
+          messageTypes: diagnostics.messageTypes,
+          messageCounts: diagnostics.messageCounts,
+          cause: diagnostics.error,
+        })
+        const error = new EdgeTTSError(
+          code,
+          `${message}；诊断：${detail}`,
+          diagnostics,
+          retryable,
+          cause,
+        )
+        console.error('[EdgeTTS] synthesis-attempt-failed', {
+          code,
+          retryable,
+          diagnostics,
+        })
+        reject(error)
+      }
 
       ws.on('open', () => {
-        const configMessage = this.buildTTSConfigMessage()
-        ws.send(configMessage)
-
-        const speechMessage = this.buildSpeechMessage(requestId, ssmlText)
-        ws.send(speechMessage)
+        try {
+          ws.send(this.buildTTSConfigMessage())
+          ws.send(this.buildSpeechMessage(requestId, ssmlText))
+          resetIdleTimeout()
+        } catch (error) {
+          finishWithError('WEBSOCKET_CONNECTION_FAILED', 'WebSocket 请求发送失败', true, error)
+          ws.terminate()
+        }
       })
 
       ws.on('message', (data: Buffer) => {
-        this.processCaptionData(data, wordList)
-        this.processAudioData(data, audioStream, ws)
+        resetIdleTimeout()
+        const messagePath = getWebSocketMessagePath(data)
+        recordMessage(messagePath)
+        try {
+          if (messagePath === 'turn.end') {
+            receivedTurnEnd = true
+          }
+          this.processCaptionData(data, wordList)
+          this.processAudioData(data, audioStream, ws)
+        } catch (error) {
+          finishWithError('WEBSOCKET_CLOSED_EARLY', 'WebSocket 消息解析失败', false, error)
+          ws.terminate()
+        }
       })
 
-      ws.on('close', () => {
+      ws.on('unexpected-response', (_request, response) => {
+        const statusCode = response.statusCode
+        finishWithError(
+          statusCode === 503 ? 'WEBSOCKET_503' : 'WEBSOCKET_CONNECTION_FAILED',
+          statusCode === 503
+            ? 'WebSocket 连接被 Microsoft 上游拒绝（503）'
+            : `WebSocket 连接失败（HTTP ${statusCode ?? 'unknown'}）`,
+          true,
+        )
+        ws.terminate()
+      })
+
+      ws.on('close', (code, reason) => {
+        diagnostics.closeCode = code
+        diagnostics.closeReason = reason.toString('utf-8') || undefined
+        if (settled) return
+        if (!receivedTurnEnd) {
+          finishWithError('WEBSOCKET_CLOSED_EARLY', 'WebSocket 在收到 turn.end 前关闭', true)
+          return
+        }
+
         const result = new SynthesisResultImpl(wordList, audioStream)
+        const buffer = result.getBuffer()
+        if (buffer.length === 0) {
+          const receivedAudioMessage = (diagnostics.messageCounts.audio ?? 0) > 0
+          finishWithError(
+            receivedAudioMessage ? 'INVALID_AUDIO_BUFFER' : 'NO_AUDIO_RECEIVED',
+            receivedAudioMessage ? '收到 audio 消息但 Buffer 为空' : '未收到 audio 消息',
+            true,
+          )
+          return
+        }
+        if (!hasMp3FrameHeader(buffer)) {
+          finishWithError(
+            'INVALID_AUDIO_BUFFER',
+            '已收到 audio 消息，但 Buffer 不包含有效 MP3 帧',
+            true,
+          )
+          return
+        }
+        settled = true
+        cleanup()
+        diagnostics.elapsedMs = Date.now() - startedAt
+        diagnostics.audioBytes = buffer.length
         resolve(result)
       })
 
       ws.on('error', (error: Error) => {
-        reject(error)
+        finishWithError('WEBSOCKET_CONNECTION_FAILED', 'WebSocket 连接异常', true, error)
+        ws.terminate()
       })
+
+      abortSignal?.addEventListener('abort', onAbort, { once: true })
+      if (abortSignal?.aborted) onAbort()
     })
   }
 

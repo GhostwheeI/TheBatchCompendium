@@ -1,15 +1,15 @@
 # Title: Processes & Cron & Services & Timers - List processes
 # ID: PR_List_processes
-# Author: Carlos Polop
-# Last Update: 2024-03-19
-# Description: List running processes and check for unusual configurations
+# Author: Carlos Polop, HT Bot
+# Last Update: 2026-10-19
+# Description: List running processes and check for unusual configurations, including exposed Jupyter authentication settings
 # License: GNU GPL
-# Version: 1.4
-# Mitre: T1057
-# Functions Used: print_2title, print_info, print_ps
-# Global Variables: $capsB, $knw_usrs, $nosh_usrs, $NOUSEPS, $processesB, $processesDump, $processesVB, $rootcommon, $SEARCH_IN_FOLDER, $sh_usrs, $USER, $Wfolders
+# Version: 1.5
+# Mitre: T1057,T1552.001
+# Functions Used: print_2title, print_info, print_ps, checkRootWritableProcessPaths
+# Global Variables: $capsB, $knw_usrs, $nosh_usrs, $NOUSEPS, $processesB, $processesDump, $processesVB, $rootcommon, $SEARCH_IN_FOLDER, $sh_usrs, $USER, $Wfolders, $MACPEAS
 # Initial Functions:
-# Generated Global Variables: $pslist, $cpid, $caphex, $psline, $pid, $selinux_ctx, $current_env_vars, $env_findings, $apparmor_profile, $mount, $mount_findings, $fd_findings, $proc_cmd, $proc_user, $mount_point, $current_mounts, $fd_target, $var, $findings, $sec_findings, $proc_env_vars, $fd_count, $proc_mounts, $$escaped_var
+# Generated Global Variables: $pslist, $cpid, $caphex, $psline, $pid, $selinux_ctx, $current_env_vars, $env_findings, $apparmor_profile, $mount, $mount_findings, $fd_findings, $proc_cmd, $proc_user, $mount_point, $current_mounts, $fd_target, $var, $findings, $sec_findings, $proc_env_vars, $fd_count, $proc_mounts, $office_uno_sockets, $spice_console_endpoints, $spice_exec_field, $jupyter_process_cues, $$escaped_var
 # Fat linpeas: 0
 # Small linpeas: 1
 
@@ -18,7 +18,7 @@ if ! [ "$SEARCH_IN_FOLDER" ]; then
   if [ "$NOUSEPS" ]; then
     printf ${BLUE}"[i]$GREEN Looks like ps is not finding processes, going to read from /proc/ and not going to monitor 1min of processes\n"$NC
   fi
-  print_info "Check weird & unexpected processes run by root: https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html#processes"
+  print_info "Check weird & unexpected processes run by root: https://book.hacktricks.wiki/en/linux-hardening/processes-crontab-systemd-dbus/process-enumeration-and-service-paths.html#map-processes-and-ownership"
 
   if [ -f "/etc/fstab" ] && cat /etc/fstab | grep -q "hidepid=2"; then
     echo "Looks like /etc/fstab has hidepid=2, so ps will not show processes of other users"
@@ -215,6 +215,74 @@ if ! [ "$SEARCH_IN_FOLDER" ]; then
     fi
   }
 
+  # Inspect the already collected process list; do not connect to UNO or probe ports.
+  check_privileged_office_uno_sockets() {
+    [ -n "$pslist" ] || return
+    printf '%s\n' "$pslist" | awk '
+      NR > 5000 { exit }
+      length($0) > 4096 { next }
+      $1 == "root" &&
+      /(^|[[:space:]\/])(soffice(\.bin)?|libreoffice|openoffice)([[:space:]]|$)/ &&
+      /--accept=/ {
+        if (!match($0, /--accept=[^[:space:]]+/)) next
+        accept = substr($0, RSTART, RLENGTH)
+        sub(/^--accept=/, "", accept)
+        sub(/^"/, "", accept)
+        sub(/"$/, "", accept)
+        if (accept !~ /^socket,host=/ || accept !~ /;urp(;|$)/) next
+        if (!match(accept, /host=[^,;[:space:]]+/)) next
+        host = substr(accept, RSTART + 5, RLENGTH - 5)
+        if (!match(accept, /port=[0-9]+/)) next
+        port = substr(accept, RSTART + 5, RLENGTH - 5)
+        if (port + 0 < 1 || port + 0 > 65535) next
+        endpoint = host ":" port
+        if (!seen[endpoint]++) {
+          print endpoint
+          if (++count >= 5) exit
+        }
+      }'
+  }
+
+  # Reuse the process snapshot; a loopback SPICE option is a guest-console
+  # lead, not evidence of a live listener or privilege on the host.
+  check_unauthenticated_spice_console() {
+    [ -n "$pslist" ] || return
+    # The two cached snapshots have different executable columns. Select the
+    # actual producer format so argument text cannot impersonate an executable.
+    if [ -n "$NOUSEPS" ]; then spice_exec_field=3; else spice_exec_field=11; fi
+    printf '%s\n' "$pslist" | awk -v exec_field="$spice_exec_field" '
+      NR > 5000 { exit }
+      length($0) > 8192 || NF <= exec_field { next }
+      {
+        if ($(exec_field) !~ /(^|\/)qemu-system-[A-Za-z0-9_]+$/) next
+        first_arg = exec_field + 1
+        for (i = first_arg; i < NF && i < first_arg + 116; i++) {
+          if ($i != "-spice") continue
+          spec = $(i + 1)
+          gsub(/^"|"$/, "", spec)
+          if (length(spec) > 512) continue
+          n = split(spec, fields, ",")
+          if (n > 32) continue
+          addr = port = ""
+          noauth = conflicting_auth = 0
+          for (j = 1; j <= n; j++) {
+            if (fields[j] == "disable-ticketing" || fields[j] == "disable-ticketing=on") noauth = 1
+            else if (fields[j] ~ /^disable-ticketing=/ || fields[j] == "sasl=on" ||
+                     fields[j] ~ /^password-secret=/ || fields[j] ~ /^x509-/) conflicting_auth = 1
+            else if (fields[j] ~ /^addr=/) addr = substr(fields[j], 6)
+            else if (fields[j] ~ /^port=/) port = substr(fields[j], 6)
+          }
+          if (!noauth || conflicting_auth || (addr != "127.0.0.1" && addr != "::1")) continue
+          if (port !~ /^[0-9]+$/ || port + 0 < 1 || port + 0 > 65535) continue
+          endpoint = (addr == "::1" ? "[::1]" : addr) ":" (port + 0)
+          if (!seen[endpoint]++) {
+            print endpoint
+            if (++count >= 5) exit
+          }
+        }
+      }'
+  }
+
   if [ "$NOUSEPS" ]; then
     print_ps | grep -v 'sed-Es' | sed -${E} "s,$Wfolders,${SED_RED},g" | sed -${E} "s,$sh_usrs,${SED_LIGHT_CYAN}," | sed -${E} "s,$nosh_usrs,${SED_BLUE}," | sed -${E} "s,$rootcommon,${SED_GREEN}," | sed -${E} "s,$knw_usrs,${SED_GREEN}," | sed "s,$USER,${SED_LIGHT_MAGENTA}," | sed "s,root,${SED_RED}," | sed -${E} "s,$processesVB,${SED_RED_YELLOW},g" | sed "s,$processesB,${SED_RED}," | sed -${E} "s,$processesDump,${SED_RED},"
     pslist=$(print_ps)
@@ -232,6 +300,48 @@ if ! [ "$SEARCH_IN_FOLDER" ]; then
     pslist=$(ps auxwww)
     echo ""
   fi
+
+  # Jupyter terminals and kernels run as the server account. Report only
+  # cross-user instances; do not print authentication values a second time.
+  if [ ! "$MACPEAS" ] && command -v ps >/dev/null 2>&1; then
+    jupyter_process_cues=$(ps -eww -o pid=,uid=,args= 2>/dev/null | awk -v my_uid="$(id -u 2>/dev/null)" '
+      {
+        pid = $1; uid = $2
+        if (pid !~ /^[0-9]+$/ || uid !~ /^[0-9]+$/ || uid == my_uid) next
+        cmd = $0
+        sub(/^[[:space:]]*[0-9]+[[:space:]]+[0-9]+[[:space:]]+/, "", cmd)
+        if (cmd !~ /(^|[[:space:]\/])jupyter(-lab|-notebook|-server)?([[:space:]]|$)/ &&
+            cmd !~ /-m[[:space:]]+jupyter(lab|_lab|_server|_notebook)?([[:space:]]|$)/) next
+        auth = (cmd ~ /--(ServerApp|NotebookApp)\.(token|password)[[:space:]]*=/ ||
+                cmd ~ /(^|[[:space:]])JUPYTER_TOKEN=/)
+        printf "PID %s (UID %s): Jupyter%s\n", pid, uid,
+               auth ? " - authentication setting visible in process arguments" : ""
+        if (++count >= 10) exit
+      }
+    ')
+    if [ -n "$jupyter_process_cues" ]; then
+      print_2title "Jupyter running as another user (review local access)" "T1552.001"
+      printf '%s\n' "$jupyter_process_cues"
+      printf '%s\n' 'Check readable systemd unit/environment files and local listeners; a usable token or disabled authentication can allow terminal/kernel execution as the service account.'
+      echo ""
+    fi
+  fi
+
+  office_uno_sockets=$(check_privileged_office_uno_sockets)
+  if [ -n "$office_uno_sockets" ]; then
+    print_2title "Privileged office automation sockets" "T1068"
+    printf 'Root-owned process command advertises a LibreOffice/OpenOffice UNO acceptor at:\n%s\n' "$office_uno_sockets"
+    print_info "Confirm the listener and local access; a reachable UNO API can act with the office process identity: https://book.hacktricks.wiki/en/linux-hardening/processes-crontab-systemd-dbus/process-enumeration-and-service-paths.html#privileged-office-automation-sockets"
+  fi
+
+  spice_console_endpoints=$(check_unauthenticated_spice_console)
+  if [ -n "$spice_console_endpoints" ]; then
+    print_2title "Loopback guest-console review candidates" "T1057"
+    printf 'QEMU command line advertises SPICE without ticket authentication at:\n%s\n' "$spice_console_endpoints"
+    print_info "Verify the live listener, local access, and guest login/boot policy. Guest-console control is not host-root access: https://book.hacktricks.wiki/en/linux-hardening/processes-crontab-systemd-dbus/process-enumeration-and-service-paths.html"
+  fi
+
+  checkRootWritableProcessPaths
 
   # Additional checks for each process
   print_2title "Processes with unusual configurations" "T1057"
