@@ -1,3 +1,5 @@
+import type { SubtitleAsset, SubtitleStyleConfig } from '../../src/effect-engine/shared/types'
+
 export interface AudioVolumeConfig {
   voiceVolume?: string // voice音量，如 "1.5"（倍数）或 "-3dB"（分贝）
   bgmVolume?: string // bgm音量，如 "0.5"（倍数）或 "-6dB"（分贝）
@@ -9,6 +11,11 @@ export interface RenderVideoParams {
   timeRanges: [string, string][]
   audioFiles?: { voice?: string; bgm?: string }
   subtitleFile?: string
+  subtitleText?: string
+  subtitleAsset?: SubtitleAsset
+  subtitleStyle?: Partial<SubtitleStyleConfig>
+  subtitlesEnabled?: boolean
+  exportSubtitles?: boolean
   outputSize: { width: number; height: number }
   outputPath: string
   outputDuration?: string
@@ -19,4 +26,6 @@ export interface ExecuteFFmpegResult {
   stdout: string
   stderr: string
   code: number
+  subtitleExportError?: string
+  outputPath?: string
 }
